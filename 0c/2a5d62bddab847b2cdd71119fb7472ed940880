@@ -1,0 +1,39 @@
+preview.html
+  h_e6f8e4b163f8a6 1-75
+.gitignore
+  s_dec6b507f097c9::t_8c0b6270fca214 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "0c2a5d62bddab847b2cdd71119fb7472ed940880",
+  "prompts": {},
+  "humans": {
+    "h_e6f8e4b163f8a6": {
+      "author": "xialu-pro <xialu948@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_dec6b507f097c9": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a901707b6108c0fd8866c52",
+        "model": "glm-5.2"
+      },
+      "human_author": "xialu-pro <xialu948@gmail.com>",
+      "custom_attributes": {
+        "runtime_client": "trae-tob-git-ai",
+        "external_session_id": "6a901707b6108c0fd8866c52",
+        "source_scene": "agent",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "operation_id": "6a91393bb6108c0fd8866e12",
+        "session_id": "6a901707b6108c0fd8866c52",
+        "tool_use_id": "6a91393bb6108c0fd8866e12",
+        "tool_type": "builtin",
+        "dedupe_key": "6a901707b6108c0fd8866c52:6a91393bb6108c0fd8866e12:afterEdit:36fdac0a",
+        "client_type": "ide",
+        "edit_kind": "file_edit"
+      }
+    }
+  }
+}
