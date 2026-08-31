@@ -1,0 +1,32 @@
+.trae/skills/design-draft-generator/templates/new-community-brief.md
+  s_dec6b507f097c9::t_02ed0c27f69f99 1-96
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "5546655abe63a60ee4f426edb2158b016a3d2608",
+  "prompts": {},
+  "sessions": {
+    "s_dec6b507f097c9": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a901707b6108c0fd8866c52",
+        "model": "glm-5.3__dev"
+      },
+      "human_author": "xialu-pro <xialu948@gmail.com>",
+      "custom_attributes": {
+        "dedupe_key": "6a901707b6108c0fd8866c52:6a954cb4f34b8d91d2bbab0c:afterEdit:3c5e2ae9",
+        "source_scene": "unknown",
+        "tool_use_id": "6a954cb4f34b8d91d2bbab0c",
+        "edit_kind": "file_edit",
+        "operation_id": "6a954cb4f34b8d91d2bbab0c",
+        "tool_type": "agent",
+        "runtime_client": "trae-tob-git-ai",
+        "session_id": "6a901707b6108c0fd8866c52",
+        "tool_id": "Edit",
+        "external_session_id": "6a901707b6108c0fd8866c52",
+        "client_type": "ide"
+      }
+    }
+  }
+}
