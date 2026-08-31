@@ -9,6 +9,31 @@ description: "Generates standardized PRDs for Huawei computing ecosystem teams (
 
 **业务背景**：鲲鹏、昇腾等计算生态产品，以及 openEuler（欧拉）、openGauss（高斯）、openUBMC 等开源项目。文档不涉及市场营销、盈利模式等内容，聚焦功能需求、用户体验与交付协作。文档默认使用中文撰写。
 
+## 安装方式
+
+本 skill 遵循 Agent Skills 开放标准（一个目录 + 一个 SKILL.md），支持 Claude Code、OpenCode、Codex 主流 AI 编程平台。`<SKILL_SOURCE>` 指本 skill 目录（含 SKILL.md 的 `requirement-doc-generator/` 文件夹）。
+
+**项目级安装（推荐，随仓库分发，团队共享）**
+
+```bash
+# 在项目根目录执行，按所用平台复制到对应目录
+cp -R <SKILL_SOURCE> .claude/skills/    # Claude Code
+cp -R <SKILL_SOURCE> .opencode/skills/  # OpenCode 原生
+cp -R <SKILL_SOURCE> .agents/skills/    # Codex（OpenCode 亦兼容此路径）
+```
+
+**全局安装（本机所有项目生效）**
+
+| 平台 | 全局路径 |
+|------|---------|
+| Claude Code | `~/.claude/skills/requirement-doc-generator/SKILL.md` |
+| OpenCode | `~/.config/opencode/skills/requirement-doc-generator/SKILL.md`（兼容 `~/.claude/skills/`、`~/.agents/skills/`） |
+| Codex | `~/.codex/skills/requirement-doc-generator/SKILL.md`（新版亦支持 `~/.agents/skills/`） |
+
+**验证安装**：Claude Code 会话输入 `/` 查看 skills 列表；OpenCode 由 agent 通过原生 skill 工具按需加载；Codex 用 `/skills` 查看，或提示词中 `$requirement-doc-generator` 显式调用。
+
+**注意**：目录名必须与 frontmatter `name` 一致（`requirement-doc-generator`）；修改后未生效时重启对应 CLI。
+
 ## 工作流程
 
 ### 第 1 步：交互式提问（必须执行）

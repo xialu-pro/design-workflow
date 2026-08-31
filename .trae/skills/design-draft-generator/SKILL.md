@@ -9,6 +9,33 @@ description: "Design draft generator for Huawei computing ecosystem designers. R
 
 **业务背景**：鲲鹏、昇腾等计算生态产品，以及 openEuler（欧拉）、openGauss（高斯）、openUBMC 等开源项目。
 
+## 安装方式
+
+本 skill 遵循 Agent Skills 开放标准（一个目录 + 一个 SKILL.md），支持 Claude Code、OpenCode、Codex 主流 AI 编程平台。`<SKILL_SOURCE>` 指本 skill 目录（含 SKILL.md 的 `design-draft-generator/` 文件夹）。
+
+**项目级安装（推荐，随仓库分发，团队共享）**
+
+```bash
+# 在项目根目录执行，按所用平台复制到对应目录
+cp -R <SKILL_SOURCE> .claude/skills/    # Claude Code
+cp -R <SKILL_SOURCE> .opencode/skills/  # OpenCode 原生
+cp -R <SKILL_SOURCE> .agents/skills/    # Codex（OpenCode 亦兼容此路径）
+```
+
+**全局安装（本机所有项目生效）**
+
+| 平台 | 全局路径 |
+|------|---------|
+| Claude Code | `~/.claude/skills/design-draft-generator/SKILL.md` |
+| OpenCode | `~/.config/opencode/skills/design-draft-generator/SKILL.md`（兼容 `~/.claude/skills/`、`~/.agents/skills/`） |
+| Codex | `~/.codex/skills/design-draft-generator/SKILL.md`（新版亦支持 `~/.agents/skills/`） |
+
+**验证安装**：Claude Code 会话输入 `/` 查看 skills 列表；OpenCode 由 agent 通过原生 skill 工具按需加载；Codex 用 `/skills` 查看，或提示词中 `$design-draft-generator` 显式调用。
+
+**路由 A 依赖**：使用设计系统看护流程（路由 A）需同时安装 `opendesign-design` skill，从 atomgit 获取：`https://atomgit.com/openeuler/opendesign-skills/tree/master/skills/opendesign-design`，按上述相同方式安装。
+
+**注意**：目录名必须与 frontmatter `name` 一致（`design-draft-generator`）；修改后未生效时重启对应 CLI。
+
 ## 两类设计需求
 
 | 类型 | 定义 | 典型场景 | 产出路径 |
