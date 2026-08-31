@@ -1,0 +1,49 @@
+.trae/skills/design-draft-generator/SKILL.md
+  s_dec6b507f097c9::t_e30745e92de341 72-74
+  s_dec6b507f097c9::t_41e1953ce6b350 16-17
+  s_dec6b507f097c9::t_94cfd4a42a0cec 104,111-117
+  s_dec6b507f097c9::t_16fabac0e705da 133
+  s_dec6b507f097c9::t_20a9de2eba2ea3 126
+  s_dec6b507f097c9::t_8c4b5a38095164 76
+  s_dec6b507f097c9::t_2c2399e3a5e3e2 39-44,46-49
+  s_dec6b507f097c9::t_565215ff046db5 45
+  s_dec6b507f097c9::t_e43d2db24a3c16 96
+  s_dec6b507f097c9::t_9466c1d0e8eee3 131-132
+  s_dec6b507f097c9::t_6b3c68491df134 88-91,94,100
+  s_dec6b507f097c9::t_2ba00f16e0354a 86
+  s_dec6b507f097c9::t_231c8ff0a61427 98-99
+  s_dec6b507f097c9::t_5d4c9c2ff2c9aa 19-38
+  s_dec6b507f097c9::t_ae732149a57dfc 1-15,18,50-63,65-71,75,77-81,84-85,87,92-93,95,97,101-103,105-110,118-120,123-125,127-130,134-139
+  s_dec6b507f097c9::t_6c0ca7183bef7e 121-122
+  s_dec6b507f097c9::t_e4203df3c29f34 82-83
+  s_dec6b507f097c9::t_058a4165733fac 64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "0881e460c60db9565b5f335065adfde52ca3df59",
+  "prompts": {},
+  "sessions": {
+    "s_dec6b507f097c9": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a901707b6108c0fd8866c52",
+        "model": "glm-5.3__dev"
+      },
+      "human_author": "xialu-pro <xialu948@gmail.com>",
+      "custom_attributes": {
+        "edit_kind": "file_edit",
+        "session_id": "6a901707b6108c0fd8866c52",
+        "source_scene": "unknown",
+        "tool_use_id": "6a9529d4f34b8d91d2bbaa95",
+        "runtime_client": "trae-tob-git-ai",
+        "client_type": "ide",
+        "tool_type": "agent",
+        "dedupe_key": "6a901707b6108c0fd8866c52:6a9529d4f34b8d91d2bbaa95:afterEdit:61241abc",
+        "operation_id": "6a9529d4f34b8d91d2bbaa95",
+        "external_session_id": "6a901707b6108c0fd8866c52",
+        "tool_id": "Write"
+      }
+    }
+  }
+}
