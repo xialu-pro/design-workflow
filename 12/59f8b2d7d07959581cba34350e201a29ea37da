@@ -1,0 +1,38 @@
+.trae/skills/design-draft-generator/SKILL.md
+  s_dec6b507f097c9::t_9c3739f83ceb58 185
+.trae/skills/requirement-doc-generator/SKILL.md
+  s_dec6b507f097c9::t_3f2364fa99ac89 137-141
+.trae/skills/design-workflow/SKILL.md
+  s_dec6b507f097c9::t_a2a92bc3f82fe1 1-148
+README.md
+  s_dec6b507f097c9::t_fd58ab260bf076 1-94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "1259f8b2d7d07959581cba34350e201a29ea37da",
+  "prompts": {},
+  "sessions": {
+    "s_dec6b507f097c9": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a901707b6108c0fd8866c52",
+        "model": "glm-5.3__dev"
+      },
+      "human_author": "xialu-pro <xialu948@gmail.com>",
+      "custom_attributes": {
+        "dedupe_key": "6a901707b6108c0fd8866c52:6a969949f34b8d91d2bbab7a:afterEdit:673c40f7",
+        "edit_kind": "file_edit",
+        "session_id": "6a901707b6108c0fd8866c52",
+        "tool_id": "Write",
+        "external_session_id": "6a901707b6108c0fd8866c52",
+        "tool_type": "agent",
+        "runtime_client": "trae-tob-git-ai",
+        "tool_use_id": "6a969949f34b8d91d2bbab7a",
+        "operation_id": "6a969949f34b8d91d2bbab7a",
+        "source_scene": "unknown",
+        "client_type": "ide"
+      }
+    }
+  }
+}
