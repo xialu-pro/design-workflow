@@ -134,3 +134,8 @@ flowchart TD
 ## 写作语气
 
 客观、简洁、主动语态；每句话只表达一个需求点；能用表格就不用长段落。
+
+## 与其他 skill 的关系
+
+- **design-draft-generator**：下游，读取本 skill 产出的 PRD 生成设计稿，并将原型路径回填到 PRD 第 4 章"交互与原型说明"
+- **design-workflow**：编排器，把本 skill（阶段 1）与 design-draft-generator（阶段 2-3）串成端到端流水线（PRD 生成 → 确认门 → 设计稿 → 对抗评审 → 回填闭环）；独立使用本 skill 时不经过该编排

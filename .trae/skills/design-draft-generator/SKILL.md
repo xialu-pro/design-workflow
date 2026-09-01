@@ -182,5 +182,6 @@ cp -R <SKILL_SOURCE> .agents/skills/    # Codex（OpenCode 亦兼容此路径）
 ## 与其他 skill 的关系
 
 - **requirement-doc-generator**：上游，产出 PRD；本 skill 消费 PRD 并回填原型路径
+- **design-workflow**：编排器，把 requirement-doc-generator（阶段 1）与本 skill（阶段 2-3）串成端到端流水线（PRD 生成 → 确认门 → 设计稿 → 对抗评审 → 回填闭环）；独立使用本 skill 时不经过该编排
 - **opendesign-design**：下游，路由 A 的执行者（Pixso 设计稿生产，含 Token 硬约束与逐楼层工作流）
 - **opendesign-tokens**：路由 B 不强制其 Token 约束，但涉及已有主题的产品时建议参考其品牌色保持一致性
