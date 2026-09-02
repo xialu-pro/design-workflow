@@ -30,20 +30,24 @@ flowchart TD
     D2 -- 通过 --> H[回填 PRD 第 4 章<br/>工作流完成]
 ```
 
-| 阶段 | 执行 skill | 核心动作 | 通过条件 |
-|------|-----------|---------|---------|
-| 0 输入判定 | design-workflow | 判定从哪进入，避免重复劳动 | 入口确定 |
-| 1 PRD 生成 | requirement-doc-generator | 提问 → 生成 `docs/PRD_[主题]_[YYYYMMDD].md` | 用户确认通过 |
-| 2 设计稿生成 | design-draft-generator | 路由判定 → 预消化/简报 → 生成 `design/prototype_*.html` | 设计稿产出 |
-| 3 对抗评审 + 闭环 | design-draft-generator（3B-5） | 7 项检查表 → 修复闭环 → 回填 PRD | 全部 ✅ + 回填完成 |
+| 阶段 | 执行角色 | 对应 skill | 核心动作 | 通过条件 |
+|------|---------|-----------|---------|---------|
+| 0 输入判定 | 项目主管 | design-workflow | 判定从哪进入，避免重复劳动 | 入口确定 |
+| 1 PRD 生成 | 产品经理 | requirement-doc-generator | 提问 → 生成 `docs/PRD_[主题]_[YYYYMMDD].md` | 用户确认通过 |
+| 2 设计稿生成 | 体验设计师 | design-draft-generator | 路由判定 → 预消化/简报 → 生成 `design/prototype_*.html` | 设计稿产出 |
+| 3 对抗评审 + 闭环 | 设计自检员 | design-draft-generator（3B-5） | 7 项检查表 → 修复闭环 → 回填 PRD | 全部 ✅ + 回填完成 |
 
-## 三个 Skill
+## 三个 Skill = 三种工作角色
 
-| Skill | 角色 | 说明 |
-|-------|------|------|
-| [requirement-doc-generator](.trae/skills/requirement-doc-generator/SKILL.md) | 阶段 1 执行者 | 交互式提问生成 7 章标准化 PRD，功能编号可溯、验收标准可测试 |
-| [design-draft-generator](.trae/skills/design-draft-generator/SKILL.md) | 阶段 2-3 执行者 | 读取 PRD 判定路由：已有社区走路由 A（委托 opendesign-design），新建社区走路由 B（HTML 交互原型）；生成后强制对抗评审 |
-| [design-workflow](.trae/skills/design-workflow/SKILL.md) | 编排器 | 阶段流转、确认门、交接物清单管理；不重复执行 skill 的内部规范 |
+流水线以团队协作方式运转，每个 skill 扮演一个贴近日常工作的角色：
+
+| Skill | 扮演角色 | 职责 |
+|-------|---------|------|
+| [requirement-doc-generator](.trae/skills/requirement-doc-generator/SKILL.md) | **产品经理** | 交互式提问收集需求，产出 7 章标准化 PRD——功能编号可溯、验收标准可测试、边界清晰（"本期不做"明确） |
+| [design-draft-generator](.trae/skills/design-draft-generator/SKILL.md) | **体验设计师**（阶段 2）+ **设计自检员**（阶段 3） | 体验设计师：读取 PRD 判定路由——已有社区委托 opendesign-design（路由 A），新建社区产出 HTML 交互原型（路由 B）；设计自检员：生成完成后切换为对抗视角，按 7 项检查表逐项审查自己的产出，❌ 项修复复检，全部通过才交付 |
+| [design-workflow](.trae/skills/design-workflow/SKILL.md) | **项目主管** | 编排整个流水线：阶段流转、确认门（PRD 未确认不放行设计）、交接物清单管理；不插手各角色的具体工作 |
+
+> 同一个 design-draft-generator 在阶段 2 和阶段 3 扮演两个角色：**体验设计师**负责创造，**设计自检员**负责挑刺——生成完成后立即切换视角，假设"这份 demo 一定有问题"，避免自己评审自己的确认偏差。
 
 三个 skill 均可独立使用；由 design-workflow 编排时形成端到端流水线。
 
