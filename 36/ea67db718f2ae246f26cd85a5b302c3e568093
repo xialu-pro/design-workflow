@@ -1,0 +1,32 @@
+README.md
+  s_dec6b507f097c9::t_4164ec298a460a 33-50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "36ea67db718f2ae246f26cd85a5b302c3e568093",
+  "prompts": {},
+  "sessions": {
+    "s_dec6b507f097c9": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a901707b6108c0fd8866c52",
+        "model": "glm-5.3__dev"
+      },
+      "human_author": "xialu-pro <xialu948@gmail.com>",
+      "custom_attributes": {
+        "dedupe_key": "6a901707b6108c0fd8866c52:6a97c67af34b8d91d2bbab8f:afterEdit:673c40f7",
+        "external_session_id": "6a901707b6108c0fd8866c52",
+        "runtime_client": "trae-tob-git-ai",
+        "session_id": "6a901707b6108c0fd8866c52",
+        "client_type": "ide",
+        "operation_id": "6a97c67af34b8d91d2bbab8f",
+        "tool_use_id": "6a97c67af34b8d91d2bbab8f",
+        "edit_kind": "file_edit",
+        "tool_type": "agent",
+        "source_scene": "unknown",
+        "tool_id": "Edit"
+      }
+    }
+  }
+}
