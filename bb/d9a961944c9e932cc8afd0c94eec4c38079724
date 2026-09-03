@@ -1,0 +1,41 @@
+reports/Review_Func_MockDevHub_20260902.md
+  s_594c65988b9b7e::t_8d70f7c573ed15 37-38
+  s_594c65988b9b7e::t_8f124e511d9457 15-16
+  s_594c65988b9b7e::t_2d0f537d752c00 50-51,53
+  s_594c65988b9b7e::t_f7fc12f16e4cd7 3-4,10-12,20-24,27-30,34,36,42,44,52
+  s_594c65988b9b7e::t_ae8198981ed3f1 1-2,5-9,14,17-19,31-33,35,39-41,43,45-49
+  s_594c65988b9b7e::t_11b78dcf20273f 25-26
+  s_594c65988b9b7e::t_61b11e40cd2d54 13
+reports/Review_Visual_MockDevHub_20260902.md
+  s_594c65988b9b7e::t_e9804435924a46 1-53,55-57,65-85
+  s_594c65988b9b7e::t_0f44617e61ae45 54,58-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "bbd9a961944c9e932cc8afd0c94eec4c38079724",
+  "prompts": {},
+  "sessions": {
+    "s_594c65988b9b7e": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a9138d0b6108c0fd8866df6",
+        "model": "glm-5.3__dev"
+      },
+      "human_author": "xialu-pro <xialu948@gmail.com>",
+      "custom_attributes": {
+        "session_id": "6a9138d0b6108c0fd8866df6",
+        "source_scene": "unknown",
+        "dedupe_key": "6a9138d0b6108c0fd8866df6:6a994223f34b8d91d2bbade4:afterEdit:73b805e0",
+        "edit_kind": "file_edit",
+        "tool_id": "Edit",
+        "external_session_id": "6a9138d0b6108c0fd8866df6",
+        "tool_use_id": "6a994223f34b8d91d2bbade4",
+        "runtime_client": "trae-tob-git-ai",
+        "client_type": "ide",
+        "tool_type": "agent",
+        "operation_id": "6a994223f34b8d91d2bbade4"
+      }
+    }
+  }
+}
