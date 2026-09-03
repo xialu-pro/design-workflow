@@ -1,0 +1,72 @@
+.trae/skills/design-workflow/SKILL.md
+  s_594c65988b9b7e::t_5c052b88e11a62 6,8
+  s_594c65988b9b7e::t_af146844e27f56 70-71
+  s_594c65988b9b7e::t_383b4c2aa7e4ed 82
+  s_594c65988b9b7e::t_18fdfcb79a63ec 137-138
+  s_594c65988b9b7e::t_48d8bb74f28253 133
+  s_594c65988b9b7e::t_43462aea8948cd 36-37
+  s_594c65988b9b7e::t_2145d492e8f5f0 62,66-69,72-73
+  s_594c65988b9b7e::t_0511a845d0ab67 128-132,134-136
+  s_594c65988b9b7e::t_fcb5cea7e4291d 3
+  s_594c65988b9b7e::t_05fda58a9019d0 92
+  s_594c65988b9b7e::t_951c8da2998dcf 157-159
+  s_594c65988b9b7e::t_55ca7fea6b12dd 169
+  s_594c65988b9b7e::t_811073103a1170 175-176
+  s_594c65988b9b7e::t_534beddc2654b0 179
+  s_594c65988b9b7e::t_5c8515dded0f98 139-142
+README.md
+  s_594c65988b9b7e::t_3a09ced3e7335b 71
+  s_594c65988b9b7e::t_06829e78c3e432 67
+  s_594c65988b9b7e::t_9ab8d863da8807 61
+  s_594c65988b9b7e::t_e41adebac7d5da 1,3
+  s_594c65988b9b7e::t_bc63efe68326b0 76,78,83-86
+  s_594c65988b9b7e::t_56b44eabafe964 33-34
+  s_594c65988b9b7e::t_7ccd47db57bdb1 56
+  s_594c65988b9b7e::t_4e77ee3027dfba 63
+  s_594c65988b9b7e::t_a787e5e5baa61c 45
+  s_594c65988b9b7e::t_6da5fd60b2ce82 55
+  s_594c65988b9b7e::t_0edac76bcc78d4 111-112
+  s_594c65988b9b7e::t_ae114845bef4e1 47,62
+  s_594c65988b9b7e::t_07c7a9b35b9e51 30-32,35-36
+  s_594c65988b9b7e::t_6bfa92e0a9b572 57
+  s_594c65988b9b7e::t_ada68c163071a0 91
+.trae/skills/functional-reviewer/SKILL.md
+  s_594c65988b9b7e::t_6a1c3d0fa7498c 95-96
+  s_594c65988b9b7e::t_870a6218f3f316 73-74
+  s_594c65988b9b7e::t_02ea367e1e87f0 92
+  s_594c65988b9b7e::t_9c74bc8e2d9fcc 138
+  s_594c65988b9b7e::t_c53c30ed0883e4 75-76
+  s_594c65988b9b7e::t_4856deec5ae439 1-61,64-72,77-91,93-94,97-127,129-134,136-137
+  s_594c65988b9b7e::t_65cc8fdfc8c0c1 62-63
+  s_594c65988b9b7e::t_c30e0615d60513 128
+  s_594c65988b9b7e::t_a09d54a7918608 135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "3b6e8037a2026df51c20785a5d8bde1caf9f2cd9",
+  "prompts": {},
+  "sessions": {
+    "s_594c65988b9b7e": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a9138d0b6108c0fd8866df6",
+        "model": "glm-5.3__dev"
+      },
+      "human_author": "xialu-pro <xialu948@gmail.com>",
+      "custom_attributes": {
+        "tool_id": "Edit",
+        "source_scene": "unknown",
+        "dedupe_key": "6a9138d0b6108c0fd8866df6:6a994223f34b8d91d2bbade4:afterEdit:73b805e0",
+        "session_id": "6a9138d0b6108c0fd8866df6",
+        "tool_use_id": "6a994223f34b8d91d2bbade4",
+        "operation_id": "6a994223f34b8d91d2bbade4",
+        "client_type": "ide",
+        "edit_kind": "file_edit",
+        "runtime_client": "trae-tob-git-ai",
+        "external_session_id": "6a9138d0b6108c0fd8866df6",
+        "tool_type": "agent"
+      }
+    }
+  }
+}
