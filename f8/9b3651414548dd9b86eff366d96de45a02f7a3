@@ -1,0 +1,32 @@
+.trae/skills/functional-reviewer/templates/functional-checklist.md
+  s_594c65988b9b7e::t_41a359955d7705 1-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "f89b3651414548dd9b86eff366d96de45a02f7a3",
+  "prompts": {},
+  "sessions": {
+    "s_594c65988b9b7e": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a9138d0b6108c0fd8866df6",
+        "model": "glm-5.3__dev"
+      },
+      "human_author": "xialu-pro <xialu948@gmail.com>",
+      "custom_attributes": {
+        "client_type": "ide",
+        "session_id": "6a9138d0b6108c0fd8866df6",
+        "tool_type": "agent",
+        "tool_use_id": "6a994223f34b8d91d2bbade4",
+        "tool_id": "Edit",
+        "source_scene": "unknown",
+        "runtime_client": "trae-tob-git-ai",
+        "external_session_id": "6a9138d0b6108c0fd8866df6",
+        "edit_kind": "file_edit",
+        "operation_id": "6a994223f34b8d91d2bbade4",
+        "dedupe_key": "6a9138d0b6108c0fd8866df6:6a994223f34b8d91d2bbade4:afterEdit:73b805e0"
+      }
+    }
+  }
+}
