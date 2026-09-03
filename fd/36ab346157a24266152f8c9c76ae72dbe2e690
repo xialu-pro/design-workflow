@@ -1,0 +1,36 @@
+.trae/skills/visual-reviewer/SKILL.md
+  s_594c65988b9b7e::t_5647f258e9f4c9 120
+  s_594c65988b9b7e::t_e3917ebb46712b 2
+  s_594c65988b9b7e::t_b16cdd4a111130 119
+  s_594c65988b9b7e::t_8a650239c62b6a 1,3-13,15-28,34-118
+  s_594c65988b9b7e::t_ffb3d5c8ef3605 14,29-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "fd36ab346157a24266152f8c9c76ae72dbe2e690",
+  "prompts": {},
+  "sessions": {
+    "s_594c65988b9b7e": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a9138d0b6108c0fd8866df6",
+        "model": "glm-5.3__dev"
+      },
+      "human_author": "xialu-pro <xialu948@gmail.com>",
+      "custom_attributes": {
+        "source_scene": "unknown",
+        "client_type": "ide",
+        "session_id": "6a9138d0b6108c0fd8866df6",
+        "dedupe_key": "6a9138d0b6108c0fd8866df6:6a994223f34b8d91d2bbade4:afterEdit:73b805e0",
+        "external_session_id": "6a9138d0b6108c0fd8866df6",
+        "operation_id": "6a994223f34b8d91d2bbade4",
+        "tool_id": "Edit",
+        "edit_kind": "file_edit",
+        "tool_use_id": "6a994223f34b8d91d2bbade4",
+        "tool_type": "agent",
+        "runtime_client": "trae-tob-git-ai"
+      }
+    }
+  }
+}
