@@ -1,0 +1,61 @@
+README.md
+  s_e69b92fe539812::t_26eb63a5ef6114 92
+  s_e69b92fe539812::t_dbe9dc921ce4c4 44
+  s_e69b92fe539812::t_770a7fd8aa5521 3
+  s_e69b92fe539812::t_2426e066031c73 33
+  s_e69b92fe539812::t_a473de5632aa58 47,54-58,60,64
+  s_e69b92fe539812::t_1fa3b6e4fc64e5 26
+.trae/skills/functional-reviewer/SKILL.md
+  s_e69b92fe539812::t_941058b1e588cc 26
+  s_e69b92fe539812::t_204f11f0517081 155
+  s_e69b92fe539812::t_4204e7ea4b2c21 78
+  s_e69b92fe539812::t_83f95d5fbaea75 12-25,27
+  s_e69b92fe539812::t_abccbfbd6abbcb 137-139
+.trae/skills/adversarial-reviewer/SKILL.md
+  s_e69b92fe539812::t_0a04cc488f3abd 93-94
+  s_e69b92fe539812::t_1df2cad97da5c8 1-92,95-109
+.trae/skills/design-draft-generator/SKILL.md
+  s_e69b92fe539812::t_f004a937d13a43 175
+  s_e69b92fe539812::t_5407805ba712b4 153,155-158
+.trae/skills/design-workflow/SKILL.md
+  s_e69b92fe539812::t_20521a93b8a40f 132,135-140
+  s_e69b92fe539812::t_bd23c5377fd2d1 8-17
+  s_e69b92fe539812::t_9ade55180a3cb6 144,147-151,155-168,171-172
+  s_e69b92fe539812::t_8be76c07a415b3 91
+  s_e69b92fe539812::t_2389ac6d89db59 72,74,80
+  s_e69b92fe539812::t_18252bfb5ab379 44-47
+  s_e69b92fe539812::t_2aaed2ab08776d 169-170,173-175
+  s_e69b92fe539812::t_64593cee58ae7a 188
+  s_e69b92fe539812::t_bfc7280849981c 198,201
+  s_e69b92fe539812::t_447d4264264b5a 206-210,213
+  s_e69b92fe539812::t_fda385dcb9663c 176
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "51f0e48f248f51b7fcb4f584100093ebe17722c3",
+  "prompts": {},
+  "sessions": {
+    "s_e69b92fe539812": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a9682acf34b8d91d2bbab49",
+        "model": "glm-5.3__dev"
+      },
+      "human_author": "xialu-pro <xialu948@gmail.com>",
+      "custom_attributes": {
+        "edit_kind": "file_edit",
+        "tool_id": "Edit",
+        "runtime_client": "trae-tob-git-ai",
+        "operation_id": "6a9bc3f1f34b8d91d2bbb367",
+        "source_scene": "unknown",
+        "dedupe_key": "6a9682acf34b8d91d2bbab49:6a9bc3f1f34b8d91d2bbb367:afterEdit:c234bcc3",
+        "external_session_id": "6a9682acf34b8d91d2bbab49",
+        "tool_type": "agent",
+        "tool_use_id": "6a9bc3f1f34b8d91d2bbb367",
+        "client_type": "ide",
+        "session_id": "6a9682acf34b8d91d2bbab49"
+      }
+    }
+  }
+}
