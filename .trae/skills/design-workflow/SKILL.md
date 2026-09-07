@@ -5,7 +5,16 @@ description: "End-to-end workflow orchestrator: PRD generation (requirement-doc-
 
 # 设计工作流（需求 → 设计稿 → 交付检视 端到端编排）
 
-串联 requirement-doc-generator、design-draft-generator、visual-reviewer、functional-reviewer 四个 skill，把"想法 → PRD → 设计稿 → 闭环回填 → 开发交付检视"跑成一条流水线。本 skill **只负责编排**（阶段流转、确认门、交接物管理），不重复各执行 skill 的内部规范——执行时严格按各 skill 自身的工作流走。
+串联 requirement-doc-generator、design-draft-generator、adversarial-reviewer、visual-reviewer、functional-reviewer 五个 skill，把"想法 → PRD → 设计稿 → 闭环回填 → 开发交付检视"跑成一条流水线。本 skill **只负责编排**（阶段流转、确认门、交接物管理），不重复各执行 skill 的内部规范——执行时严格按各 skill 自身的工作流走。
+
+**执行模式（阶段 1-2 与阶段 3-4 不同）**：
+
+| 阶段 | 执行方式 | 原因 |
+|------|---------|------|
+| 1 PRD 生成、2 设计稿生成 | 主对话直接切换到对应 skill 执行 | 需与用户多轮交互（提问、确认门） |
+| 3 对抗评审、4 交付检视 | **Task 派发独立评审 subagent**（类型 `general_purpose_task`，无预设人设，完全按 SKILL.md 指令执行） | 评审需要独立视角：生成者与评审者上下文物理隔离，消除确认偏误；三个评审均为非交互、基于证据产报告的任务 |
+
+派发规范见"评审 subagent 派发规范"一节。
 
 **业务背景**：鲲鹏、昇腾等计算生态产品，以及 openEuler（欧拉）、openGauss（高斯）、openUBMC 等开源项目。
 
@@ -32,9 +41,10 @@ cp -R <SKILL_SOURCE> .agents/skills/    # Codex（OpenCode 亦兼容此路径）
 
 **依赖**：本 skill 编排以下 skill，需一并安装（通常位于同一 skills 目录）：
 - `requirement-doc-generator`（阶段 1 执行者）
-- `design-draft-generator`（阶段 2-3 执行者；路由 A 另需 `opendesign-design`，从 atomgit 获取）
-- `visual-reviewer`（阶段 4 · 视觉一致性测试员）
-- `functional-reviewer`（阶段 4 · 功能测试员）
+- `design-draft-generator`（阶段 2 执行者；路由 A 另需 `opendesign-design`，从 atomgit 获取）
+- `adversarial-reviewer`（阶段 3 · 对抗评审 subagent）
+- `visual-reviewer`（阶段 4 · 视觉一致性测试员 subagent）
+- `functional-reviewer`（阶段 4 · 功能测试员 subagent）
 
 **注意**：目录名必须与 frontmatter `name` 一致（`design-workflow`）；修改后未生效时重启对应 CLI。
 
@@ -59,15 +69,15 @@ flowchart TD
     A --> G3
     B --> G3
 
-    subgate G3[阶段 3：对抗评审 + 闭环<br/>design-draft-generator 3B-5]
+    subgate G3[阶段 3：对抗评审<br/>adversarial-reviewer subagent]
     G3 --> D2{全部 ✅？}
-    D2 -- 有 ❌ --> F[修复 + 复检]
+    D2 -- 有 ❌ --> F[主对话修复<br/>+ subagent 复检]
     F --> D2
     D2 -- 通过 --> H[回填 PRD 第 4 章]
 
     H --> DEV[开发实现 · 部署测试环境<br/>（流水线外部环节）]
     DEV --> G4
-    subgate G4[阶段 4：交付检视<br/>先 visual-reviewer 后 functional-reviewer]
+    subgate G4[阶段 4：交付检视<br/>visual-reviewer subagent → functional-reviewer subagent]
     G4 --> D3{视觉 P0/P1 关闭？<br/>→ 功能 ❌ 关闭？}
     D3 -- 修复后复检 --> G4
     D3 -- 通过 --> DONE[交付上线<br/>工作流完成]
@@ -78,7 +88,7 @@ flowchart TD
 | 0 输入判定 | 本 skill | 判定从哪进入，避免重复劳动 | 入口确定 |
 | 1 PRD 生成 | requirement-doc-generator | 提问 → 生成 `docs/PRD_[主题]_[YYYYMMDD].md` | 用户确认通过 |
 | 2 设计稿生成 | design-draft-generator | 路由判定 → 预消化/简报 → 生成 `design/prototype_*.html` | 设计稿产出 |
-| 3 对抗评审 + 闭环 | design-draft-generator（3B-5）| 7 项检查表 → 修复闭环 → 回填 PRD | 全部 ✅ + 回填完成 |
+| 3 对抗评审 + 闭环 | adversarial-reviewer（subagent）| 7 项检查表 → 修复闭环（修复在主对话，复检再派发）→ 回填 PRD | 全部 ✅ + 回填完成 |
 | 4 交付检视 | visual-reviewer → functional-reviewer | 先视觉还原度比对（P0/P1/P2），P0/P1 关闭后再做设计师清单主基准的关键流程走查 | 视觉 P0/P1 先关闭，功能 ❌ 随后关闭（或有显式风险声明） |
 
 ## 阶段 0：输入判定（必先执行）
@@ -119,27 +129,50 @@ flowchart TD
 
 ## 阶段 3：对抗评审 + 闭环
 
-**执行**：design-draft-generator 的 3B-5 对抗评审（7 项检查表 → 评审报告 → 修复闭环）。
+**执行**：Task 派发 adversarial-reviewer subagent（生成者与评审者物理隔离，消除确认偏误）。
 
 **编排职责**：
-1. 监督评审报告完整输出（每项 ✅/❌ + 证据），不允许跳过直接宣告完成
-2. ❌ 项修复后监督复检（只复检修改影响范围）
-3. 全部通过后执行**闭环回填**：设计稿路径写入 PRD 第 4 章"交互与原型说明"，注明覆盖的验收标准
-4. 输出阶段交付摘要：PRD 路径 + 版本、设计稿路径清单、评审报告结论、回填位置——登记进交接物清单
-5. **阶段 3 完成即设计侧交付**；是否继续阶段 4 由用户决定（开发实现属流水线外部环节，时长不可控）——用户宣布开发完成、测试环境就绪时再进入阶段 4
+1. 按派发规范（见"评审 subagent 派发规范"）派发 adversarial-reviewer，任务描述含：PRD/简报路径、被评审物清单、方案数量 N、路由类型（A/B）
+2. subagent 返回后**验证 `reports/Review_Design_*.md` 已落盘**并读取内容——只信磁盘产物，不信任口头返回；报告缺失或检查表不完整（缺判定/证据）时重新派发
+3. ❌ 项修复在主对话执行（design-draft-generator，生成者上下文仍在）→ 修复后再派发 adversarial-reviewer，任务附上次 ❌ 清单（复检模式，只复检影响范围）
+4. 全部通过后执行**闭环回填**：设计稿路径写入 PRD 第 4 章"交互与原型说明"，注明覆盖的验收标准
+5. 输出阶段交付摘要：PRD 路径 + 版本、设计稿路径清单、评审报告结论、回填位置——登记进交接物清单
+6. **阶段 3 完成即设计侧交付**；是否继续阶段 4 由用户决定（开发实现属流水线外部环节，时长不可控）——用户宣布开发完成、测试环境就绪时再进入阶段 4
 
 ## 阶段 4：交付检视（开发完成、测试环境就绪后）
 
-**执行**：依次切换到 visual-reviewer（视觉一致性测试员）与 functional-reviewer（功能测试员）的工作流，本 skill 不修改其流程。
+**执行**：依次 Task 派发 visual-reviewer（视觉一致性测试员）与 functional-reviewer（功能测试员）subagent，本 skill 不修改其流程。两 subagent 互不可见——functional-reviewer 不预读视觉报告，避免"顺杆爬"。
 
 **编排职责**：
-1. 前置核对：DEMO 交付物路径（阶段 2 交接物）、测试环境访问方式；functional-reviewer 需确认设计师功能检视清单是否已填写（`docs/FuncChecklist_*.md`），未填写时引导先补清单
-2. **串行顺序**：先执行 visual-reviewer，P0/P1 全部关闭（实现与 DEMO 一致）后再执行 functional-reviewer——视觉未对齐前功能走查基准错位，易造成返工；用户明确要求跳过时须在检视报告中声明"视觉检视未通过即开始功能检视"的风险
-3. 两报告独立归档（`reports/Review_Visual_*` / `Review_Func_*`）、独立闭环
-4. 监督两份检视报告完整输出（判定 + 证据），不允许跳过直接宣告完成
-5. P0/P1 与 ❌ 项修复后监督复检（只复检影响范围），全部关闭才宣告检视完成
+1. 前置核对：DEMO 交付物路径（阶段 2 交接物）、测试环境访问方式；确认设计师功能检视清单是否已填写（`docs/FuncChecklist_*.md`），未填写时引导先补清单（主对话交互，subagent 无法向用户索取）
+2. **串行硬阻断**：派发 functional-reviewer 前，编排层**直接读取 `reports/Review_Visual_*.md`** 验证 P0/P1 全部关闭（或用户明确跳过 + 风险声明）——不依赖 skill 自觉前置检查；未关闭时不派发，先走视觉修复闭环
+3. 派发 visual-reviewer：检视计划中需用户确认的环节（检视页面清单），由编排层在主对话完成确认后写入派发任务
+4. subagent 返回后**验证报告已落盘**（`reports/Review_Visual_*` / `Review_Func_*`）并读取内容——只信磁盘产物；报告缺失或判定缺证据时重新派发
+5. 两报告独立归档、独立闭环；P0/P1 与 ❌ 项修复后监督复检（修复在主对话，复检再派发，只复检影响范围），全部关闭才宣告检视完成
 6. functional-reviewer 回传的 PRD 冲突/模糊项，引导用户修订 PRD 后登记变更
 7. 输出最终交付摘要：两份检视报告路径、问题终态、遗留风险清单——即交接物清单的最终态
+
+## 评审 subagent 派发规范
+
+三个评审环节（阶段 3 对抗评审、阶段 4 视觉/功能检视）统一按本规范派发。**subagent 是无状态的**：看不到用户消息与之前对话，所有输入必须自包含于任务描述；且无法向用户提问（无 AskUserQuestion），需用户决策的事项一律前置到主对话完成。
+
+**统一规则**：
+
+1. **任务描述三要素**：① 指令"读取 [skill 路径]/SKILL.md 并严格执行其完整流程"（subagent 类型 `general_purpose_task`）② 输入材料的完整路径清单 ③ 输出契约（报告路径 + 命名 + 返回格式）
+2. **只信磁盘产物**：subagent 返回后必须验证报告已落盘并读取内容；口头返回的结论仅作参考，以磁盘报告为准
+3. **缺失即终止**：subagent 遇输入缺失时会在报告中声明并终止——编排层读到"缺失终止"报告时，回主对话补齐材料后重新派发，禁止让 subagent 猜测
+4. **信息隔离**：派发 functional-reviewer 的任务描述中不附视觉报告内容；派发评审 subagent 不附生成过程对话——保持独立视角
+5. **复检模式**：任务附上次 ❌/P0/P1 清单时，subagent 只复检影响范围
+
+**三个环节的任务模板**：
+
+> skill 路径按实际安装目录书写（`.trae/skills/` / `.claude/skills/` / `.opencode/skills/` / `.agents/skills/` 等，本 skill 与各评审 skill 位于同一 skills 目录）；下表以"skills 目录"指代。
+
+| 环节 | 任务描述要点 |
+|------|------------|
+| 阶段 3 对抗评审 | 读 skills 目录下 `adversarial-reviewer/SKILL.md` 并严格执行；输入：PRD/简报路径、`design/prototype_*.html` 清单、方案数 N、路由 A/B、评审基准规范（skills 目录下 `design-draft-generator/SKILL.md`，供其读取"设计纲领"+"质量标准"两节）；输出：`reports/Review_Design_[主题]_[YYYYMMDD].md`；返回：报告路径 + 结论摘要 |
+| 阶段 4 视觉检视 | 读 skills 目录下 `visual-reviewer/SKILL.md` 并严格执行；输入：DEMO 路径、测试环境访问方式、已确认的检视页面清单、PRD 路径（适配范围核对时参考）；输出：`reports/Review_Visual_[主题]_[YYYYMMDD].md`；返回：报告路径 + P0/P1/P2 统计 |
+| 阶段 4 功能检视 | 读 skills 目录下 `functional-reviewer/SKILL.md` 并严格执行；输入：`docs/FuncChecklist_*.md` 路径、DEMO 路径、PRD 路径、测试环境访问方式、已确认的用例清单；输出：`reports/Review_Func_[主题]_[YYYYMMDD].md`；返回：报告路径 + 通过率 + ❌ 统计 |
 
 ## 交接物清单（全程维护）
 
@@ -152,7 +185,7 @@ flowchart TD
 | 路由判定记录 | 阶段 2 判定后 | 路由 A/B + 判定依据 |
 | 预消化材料 / 简报 | 阶段 2 确认后 | 楼层规划 + 组件清单（A）；设计简报（B） |
 | 设计稿路径 | 阶段 2 完成 | `design/prototype_*.html` 清单 |
-| 评审报告 | 阶段 3 完成 | 7 项检查结果 + 修复记录 |
+| 评审报告 | 阶段 3 完成 | `reports/Review_Design_[主题]_[YYYYMMDD].md` 路径 + 7 项检查结果 + 修复记录 |
 | 回填位置 | 阶段 3 完成 | PRD 章节 + 回填内容摘要 |
 | 测试环境信息 | 阶段 4 开始 | 访问方式（URL 实测 / 材料包）+ 覆盖范围 |
 | 检视报告 | 阶段 4 完成 | `reports/Review_Visual_*` + `Review_Func_*` 路径、问题终态、遗留风险 |
@@ -162,18 +195,19 @@ flowchart TD
 
 ## 中断恢复
 
-会话恢复时按序检查，从第一个未完成处继续：
+会话恢复时按序检查，从第一个未完成处继续（评审进度一律凭磁盘报告判断，subagent 的口头返回不作依据）：
 1. `docs/` 是否有对应 PRD 且用户已确认？（无 → 阶段 1）
 2. `design/` 是否有对应设计稿？（无 → 阶段 2）
-3. 对抗评审是否全部通过 + PRD 是否已回填？（否 → 阶段 3）
+3. `reports/Review_Design_*` 是否存在且 ❌ 全部关闭？PRD 是否已回填？（否 → 阶段 3；报告存在但有 ❌ → 主对话修复后派发复检）
 4. 用户是否宣布开发完成、测试环境就绪？`reports/Review_Visual_*` 是否存在且视觉 P0/P1 全部关闭？（否 → 阶段 4，从视觉检视开始）视觉已通过后，`Review_Func_*` 是否存在且 ❌ 全部关闭？（否 → 继续阶段 4 的功能检视）
 
 ## 与其他 skill 的关系
 
-- **requirement-doc-generator**：阶段 1 执行者，产出 PRD；也可独立使用（用户只要 PRD 时）
-- **design-draft-generator**：阶段 2-3 执行者，消费 PRD 并产出设计稿 + 评审报告；也可独立使用（用户已有 PRD 时）
-- **visual-reviewer**：阶段 4 · 视觉一致性测试员（测试环境 vs DEMO 还原度）；也可独立使用
-- **functional-reviewer**：阶段 4 · 功能测试员（设计师清单主基准的关键流程走查）；也可独立使用
+- **requirement-doc-generator**：阶段 1 执行者（主对话），产出 PRD；也可独立使用（用户只要 PRD 时）
+- **design-draft-generator**：阶段 2 执行者（主对话），消费 PRD 并产出设计稿；也可独立使用（用户已有 PRD 时）
+- **adversarial-reviewer**：阶段 3 执行者（subagent 派发），对设计稿做 7 项对抗评审；也可独立使用（用户已有设计稿只要评审时）
+- **visual-reviewer**：阶段 4 · 视觉一致性测试员（subagent 派发，测试环境 vs DEMO 还原度）；也可独立使用
+- **functional-reviewer**：阶段 4 · 功能测试员（subagent 派发，设计师清单主基准的关键流程走查）；也可独立使用
 - **opendesign-design**：路由 A 的最终执行者，由 design-draft-generator 委托，本 skill 不直接交互
 
-四个 skill 可独立调用，也可由本 skill 编排为端到端流水线；独立使用时不强制经过本工作流。
+五个 skill 可独立调用，也可由本 skill 编排为端到端流水线（阶段 1-2 主对话执行、阶段 3-4 subagent 派发）；独立使用时不强制经过本工作流。
