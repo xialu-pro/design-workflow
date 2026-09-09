@@ -1,0 +1,63 @@
+.trae/skills/design-draft-generator/SKILL.md
+  s_d28baf17ae2f0c::t_d79386aaf520fd 138
+  s_d28baf17ae2f0c::t_001e353d1ce331 171
+  s_d28baf17ae2f0c::t_71432b6fc9164b 108-111,113
+.trae/skills/adversarial-reviewer/SKILL.md
+  s_d28baf17ae2f0c::t_2f8a46a91aceea 71
+  s_d28baf17ae2f0c::t_759f381f99bf4a 103
+.trae/skills/visual-reviewer/SKILL.md
+  s_e69b92fe539812::t_e284e13e4fcb95 132
+  s_e69b92fe539812::t_36821731e85b7b 12-22
+  s_e69b92fe539812::t_0e1652b57fee1b 115-117
+  s_e69b92fe539812::t_75cc49712b376b 76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "f3fe40441b82a006b4067aee7f829312b4f0c7c0",
+  "prompts": {},
+  "sessions": {
+    "s_d28baf17ae2f0c": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a979d60f34b8d91d2bbab81",
+        "model": "glm-5.3__dev"
+      },
+      "human_author": "xialu-pro <xialu948@gmail.com>",
+      "custom_attributes": {
+        "dedupe_key": "6a979d60f34b8d91d2bbab81:6a9fbaecf34b8d91d2bbb736:afterEdit:46ec9416",
+        "client_type": "ide",
+        "edit_kind": "file_edit",
+        "tool_id": "Edit",
+        "tool_use_id": "6a9fbaecf34b8d91d2bbb736",
+        "operation_id": "6a9fbaecf34b8d91d2bbb736",
+        "runtime_client": "trae-tob-git-ai",
+        "external_session_id": "6a979d60f34b8d91d2bbab81",
+        "tool_type": "agent",
+        "session_id": "6a979d60f34b8d91d2bbab81",
+        "source_scene": "unknown"
+      }
+    },
+    "s_e69b92fe539812": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a9682acf34b8d91d2bbab49",
+        "model": "glm-5.3__dev"
+      },
+      "human_author": "xialu-pro <xialu948@gmail.com>",
+      "custom_attributes": {
+        "tool_type": "agent",
+        "client_type": "ide",
+        "external_session_id": "6a9682acf34b8d91d2bbab49",
+        "runtime_client": "trae-tob-git-ai",
+        "session_id": "6a9682acf34b8d91d2bbab49",
+        "edit_kind": "file_edit",
+        "tool_id": "Edit",
+        "tool_use_id": "6a9bc3f1f34b8d91d2bbb367",
+        "operation_id": "6a9bc3f1f34b8d91d2bbb367",
+        "source_scene": "unknown",
+        "dedupe_key": "6a9682acf34b8d91d2bbab49:6a9bc3f1f34b8d91d2bbb367:afterEdit:c234bcc3"
+      }
+    }
+  }
+}
