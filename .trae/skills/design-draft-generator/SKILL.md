@@ -105,10 +105,12 @@ cp -R <SKILL_SOURCE> .agents/skills/    # Codex（OpenCode 亦兼容此路径）
 本 skill 不重复设计系统规范，职责是把 PRD 预消化为 opendesign-design 的输入：
 
 1. 检查环境中是否已安装 opendesign-design skill；未安装时提示从 atomgit 获取：`https://atomgit.com/openeuler/opendesign-skills/tree/master/skills/opendesign-design`
-2. 从 PRD 提炼两项材料并输出，交由用户确认：
-   - **页面楼层规划**：导航 → [Banner] → 楼层 1..N → 页脚，每楼层标注来源功能编号（PRD-XXX）与内容摘要。楼层取舍遵守纲领"简洁"原则：拒绝纯装饰/营销楼层，信息密集型内容楼层优先
+2. 从 PRD 提炼以下材料并输出，交由用户确认：
+   - **目标社区与 Token 来源**：明确目标社区（openEuler / openGauss / openUBMC / 鲲鹏 / 昇腾…）及其主题 Token 文件。各社区主题色不同（如 openGauss 紫、openEuler 蓝），禁止默认 openEuler；无法从 PRD 判断时询问用户
+   - **站点框架基准**：路由 A 属于页面级增改、不动整站框架——导航与页脚必须按社区线上站点实际结构还原（抓取线上页面提取主导航项名称/顺序/链接与页脚分组/链接，导航为 JS 渲染时用 curl 拉原始 HTML），仅新增入口高亮；新增导航入口的位置作为待确认项输出；抓取不到时向用户索要，禁止编造
+   - **页面楼层规划**：[Banner] → 楼层 1..N（导航/页脚已由站点框架基准确定），每楼层标注来源功能编号（PRD-XXX）与内容摘要。楼层取舍遵守纲领"简洁"原则：拒绝纯装饰/营销楼层，信息密集型内容楼层优先
    - **组件清单**：每楼层涉及的 O 组件（OButton / OCard / ODataTable…）。组件选型遵守纲领"准确"原则：同类信息聚合优先选语义承载强的标准组件（列表用 ODataTable / OTag 而非纯文本堆砌，代码内容用规范代码块组件），禁止用纯视觉样式模拟结构化内容
-3. 确认后引导进入 opendesign-design 的标准工作流（硬约束 → 楼层确认 → 逐楼层生成 → 验证），不在本 skill 内执行
+3. 确认后引导进入 opendesign-design 的标准工作流（硬约束 → 社区识别与 Token → 站点框架基准 → 楼层确认 → 逐楼层生成 → 验证），不在本 skill 内执行
 
 ### 第 3 步 B：新建社区 → HTML 交互原型
 
@@ -133,7 +135,7 @@ cp -R <SKILL_SOURCE> .agents/skills/    # Codex（OpenCode 亦兼容此路径）
 - 按 PRD 3.2 适配范围实现响应式；未指明时默认 PC 优先，设计宽度 1440px
 - 字号阶梯 ≤ 4 级，间距取 4/8 的倍数，保持节奏一致
 - 文字对比度满足 WCAG AA（正文 ≥ 4.5:1）
-- 占位内容使用中文真实文案（禁止 lorem ipsum），图片用占位色块 + alt 说明
+- 占位内容使用中文真实文案（禁止 lorem ipsum）；**案例封面、Banner 图等位图素材禁止留占位色块**——用文生图 API 生成贴合内容语义的图片填充：`https://console.enterprise.trae.cn/api/ide/v1/text_to_image?prompt={prompt}&image_size={image_size}`（prompt 为 URL 编码的具体场景描述，`image_size` 按容器比例选 `landscape_16_9` / `landscape_4_3` / `square` 等；图片调性遵循开发者风格，贴合目标社区主题色）；以 `<img>` 填充并配 alt 说明，HTML 注释注明「文生图示意配图，上线前替换真实素材」；**生成后必须校验**：curl 检查响应重定向目标，落在 `default.jpeg` 属静默失败（prompt 可能触发内容审核），须换 prompt 重试直至返回真实生成图；API 请求本身失败时降级为占位色块 + alt 说明
 - 页面内以 HTML 注释标注关键交互说明（如 `<!-- 交互：点击展开筛选面板 -->`），便于评审对照
 
 纲领语义化落地（强制，保障人机双端可识别）：
@@ -166,7 +168,7 @@ cp -R <SKILL_SOURCE> .agents/skills/    # Codex（OpenCode 亦兼容此路径）
 5. **视觉基本盘**：层级清晰、间距有节奏、对比度达标，自由发挥也守住设计素养底线
 6. **纲领合规**：生成前对照"三大理念 + 五大原则"逐条自查；路由 B 额外检查语义化落地清单（语义地标 / 结构化内容 / aria-label / label 绑定 / 模块化成组）
 7. **路由正确**：设计系统看护类绝不走自由生成路径（会产生不合规视觉）
-8. **视觉细节对齐**：① 导航栏 Logo 与导航文字必须垂直居中——禁止 `align-items: flex-end` + 子项 `padding-bottom` + `align-self: center` 的组合模拟贴底对齐（`box-sizing: border-box` 下高度计算失真导致错位），正确做法是导航区 `align-items: center` 整体居中、导航项 `height: 100%` + `border-bottom: 2px` 实现选中下划线贴底；② 深色/品牌色背景上的图标必须与文字同色（白色）——SVG 图标原始填充为黑色且禁止修改文件本身，须在 CSS 中用 `filter: invert(1)` 反色（如 solid 按钮、深色代码块头部内的图标），禁止让黑色图标直接出现在深色背景上
+8. **视觉细节对齐**：① 导航栏 Logo 与导航文字必须垂直居中——禁止 `align-items: flex-end` + 子项 `padding-bottom` + `align-self: center` 的组合模拟贴底对齐（`box-sizing: border-box` 下高度计算失真导致错位），正确做法是导航区 `align-items: center` 整体居中、导航项 `height: 100%` + `border-bottom: 2px` 实现选中下划线贴底；② 深色/品牌色背景上的图标必须与文字同色（白色）——SVG 图标原始填充为黑色且禁止修改文件本身，须在 CSS 中用 `filter: invert(1)` 反色（如 solid 按钮、深色代码块头部内的图标），禁止让黑色图标直接出现在深色背景上；③ 承载文本的容器禁止固定尺寸卡死——固定 `width` 遇长文案会折行、固定 `height` 遇折行文案会溢出堆叠（如步骤条节点标题与数字圆圈叠压），承载动态文本的容器用 `min-width`/`min-height` 或不设尺寸，单行标题补 `white-space: nowrap`
 
 ## 与其他 skill 的关系
 
