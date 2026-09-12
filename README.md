@@ -17,9 +17,9 @@ flowchart TD
     D1 -- 通过 --> G2
 
     G2[阶段 2：生成设计稿<br/>design-draft-generator]
-    G2 --> R{路由判定}
-    R -- 已有社区增改 --> A[路由 A：opendesign-design<br/>楼层规划 + 组件清单]
-    R -- 新建社区 --> B[路由 B：HTML 交互原型<br/>简报 + 信息架构 + N 方案]
+    G2 --> R{路由判定：询问用户<br/>是否使用 OpenDesign 设计系统}
+    R -- 使用 --> A[路由 A：opendesign-design<br/>楼层规划 + 组件清单]
+    R -- 不使用 --> B[路由 B：HTML 交互原型<br/>简报 + 信息架构 + N 方案]
     A --> G3
     B --> G3
 
@@ -40,7 +40,7 @@ flowchart TD
 |------|---------|-----------|---------|---------|
 | 0 输入判定 | 项目主管 | design-workflow | 判定从哪进入，避免重复劳动 | 入口确定 |
 | 1 PRD 生成 | 产品经理 | requirement-doc-generator | 提问 → 生成 `docs/PRD_[主题]_[YYYYMMDD].md` | 用户确认通过 |
-| 2 设计稿生成 | 体验设计师 | design-draft-generator | 路由判定 → 预消化/简报 → 生成 `design/prototype_*.html` | 设计稿产出 |
+| 2 设计稿生成 | 体验设计师 | design-draft-generator | 路由判定（用户确认是否使用设计系统） → 预消化/简报 → 生成 `design/prototype_*.html` | 设计稿产出 |
 | 3 对抗评审 + 闭环 | 对抗评审员 | adversarial-reviewer（subagent 派发） | 7 项检查表 → 修复闭环 → 回填 PRD | 全部 ✅ + 回填完成 |
 | 4 交付检视 | 视觉一致性测试员 → 功能测试员 | visual-reviewer → functional-reviewer | 先测试环境 vs DEMO 还原度比对（P0/P1/P2 分级），P0/P1 关闭后再做设计师清单主基准的关键流程走查 | 视觉 P0/P1 先关闭，功能 ❌ 随后关闭（或有显式风险声明） |
 
@@ -51,7 +51,7 @@ flowchart TD
 | Skill | 扮演角色 | 职责 |
 |-------|---------|------|
 | [requirement-doc-generator](.trae/skills/requirement-doc-generator/SKILL.md) | **产品经理** | 交互式提问收集需求，产出 7 章标准化 PRD——功能编号可溯、验收标准可测试、边界清晰（"本期不做"明确） |
-| [design-draft-generator](.trae/skills/design-draft-generator/SKILL.md) | **体验设计师**（阶段 2） | 读取 PRD 判定路由——已有社区委托 opendesign-design（路由 A），新建社区产出 HTML 交互原型（路由 B）；生成完成后执行强制自查（导航对齐/图标颜色），交付以对抗评审通过为前置条件 |
+| [design-draft-generator](.trae/skills/design-draft-generator/SKILL.md) | **体验设计师**（阶段 2） | 读取 PRD 后**询问用户是否使用 OpenDesign 设计系统**——使用则委托 opendesign-design（路由 A），不使用则产出 HTML 交互原型（路由 B）；路由不靠 PRD 措辞推断，已有社区增改属路由 A、新建社区也可选择路由 A；生成完成后执行强制自查（导航对齐/图标颜色），交付以对抗评审通过为前置条件 |
 | [adversarial-reviewer](.trae/skills/adversarial-reviewer/SKILL.md) | **对抗评审员**（阶段 3，subagent 派发） | 以独立评审者视角对照 7 项检查表（需求可溯/纲领合规/五大原则/CRAP/视觉细节/多方案横向/真实可评审）审查设计稿，产出 `reports/Review_Design_*.md`；与生成者上下文物理隔离，假设"这份 demo 一定有问题" |
 | [design-workflow](.trae/skills/design-workflow/SKILL.md) | **项目主管** | 编排整个流水线（阶段 0-4）：阶段流转、确认门（PRD 未确认不放行设计）、评审 subagent 派发与硬阻断（视觉 P0/P1 未关闭不放行功能检视）、交接物清单管理；不插手各角色的具体工作 |
 | [visual-reviewer](.trae/skills/visual-reviewer/SKILL.md) | **视觉一致性测试员**（阶段 4，subagent 派发） | 开发部署测试环境后，逐页比对测试环境与 DEMO 交付物：7 维度（布局/组件/间距/字号/色彩/图标/细节）+ P0 阻断 / P1 偏差 / P2 容忍三级判定，产出证据化报告 `reports/Review_Visual_*.md`；深色背景图标、导航垂直居中、元素截断三类高频问题必查 |
@@ -65,7 +65,7 @@ flowchart TD
 
 ## 关键机制
 
-- **阶段 0 输入判定**：已有 PRD 直接进阶段 2；新建社区有简报走路由 B 快速通道；只有想法从头开始；只要评审直接进阶段 3；开发完成、测试环境就绪直接进阶段 4
+- **阶段 0 输入判定**：已有 PRD 直接进阶段 2；新建社区有简报直接进阶段 2（默认建议路由 B，仍需用户确认是否使用设计系统）；只有想法从头开始；只要评审直接进阶段 3；开发完成、测试环境就绪直接进阶段 4
 - **确认门**：PRD 未经用户确认，禁止生成设计稿
 - **交接物清单**：PRD 路径、功能编号索引、路由记录、设计稿路径、评审报告、回填位置——全程维护，兼作上下文压缩后的现场恢复依据
 - **对抗评审**：生成者切换为对抗评审者，按 7 项检查表（需求可溯 / 纲领合规 / 五大原则 / CRAP / 视觉细节 / 多方案横向 / 真实可评审）逐项给出 ✅/❌ 与证据，❌ 项修复后复检，全部通过才交付
