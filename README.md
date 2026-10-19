@@ -121,3 +121,7 @@ cp -R .trae/skills/<skill-name> .agents/skills/    # Codex（OpenCode 亦兼容�
 ## 设计纲领
 
 两条路由均强制遵守（提炼自《开发者调性》v0.3）：三大理念（Developers over sales / Simple over easy / Doable and searchable）+ 五大原则（简洁 / 准确 / 连贯 / 高效 / 闭环）+ 设计四原则（亲密 / 对比 / 重复 / 对齐）。详见 [design-draft-generator/SKILL.md](.trae/skills/design-draft-generator/SKILL.md)。
+
+## 修订记录
+
+每次工作流更新在 [CHANGELOG.md](CHANGELOG.md) 登记一条（日期 + 版本号 + 修改主题 + 改动内容 + 影响 skill + 提交号）——修改任何 SKILL.md / README / 模板时必须同步更新，无修订记录的更新视为未完成。
