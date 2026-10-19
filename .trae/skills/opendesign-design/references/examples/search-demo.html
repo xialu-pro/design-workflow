@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSearch 搜索框组件演示</title>
+    <style>
+        :root {
+            --o-color-fill2: rgb(255, 255, 255);
+            --o-color-control1: rgba(0, 0, 0, 0.25);
+            --o-color-control2: rgb(0, 47, 167);
+            --o-color-control3: rgb(0, 47, 167);
+            --o-color-control4: rgba(0, 0, 0, 0.15);
+            --o-color-control4-light: rgb(245, 245, 245);
+            --o-color-info1: rgb(0, 0, 0);
+            --o-color-info2: rgba(0, 0, 0, 0.8);
+            --o-color-info4: rgba(0, 0, 0, 0.4);
+            --o-color-primary1: rgb(0, 47, 167);
+            --o-color-control2-light: #E8F0FE;
+        }
+
+        [data-theme="dark"] {
+            --o-color-fill2: rgb(36, 36, 39);
+            --o-color-control1: rgba(255, 255, 255, 0.25);
+            --o-color-control2: rgb(110, 148, 243);
+            --o-color-control3: rgb(110, 148, 243);
+            --o-color-control4: rgba(255, 255, 255, 0.15);
+            --o-color-control4-light: rgb(60, 60, 63);
+            --o-color-info1: rgb(255, 255, 255);
+            --o-color-info2: rgba(255, 255, 255, 0.8);
+            --o-color-info4: rgba(255, 255, 255, 0.4);
+            --o-color-primary1: rgb(110, 148, 243);
+            --o-color-control2-light: rgba(110, 148, 243, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'HarmonyOS', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            padding: 40px 20px;
+            background: #f5f5f5;
+            transition: background 0.3s;
+        }
+
+        [data-theme="dark"] body {
+            background: rgb(20, 20, 22);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--o-color-info1);
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--o-color-info4);
+            margin-bottom: 32px;
+        }
+
+        .section {
+            background: var(--o-color-fill2);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="dark"] .section {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--o-color-info1);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--o-color-control1);
+        }
+
+        .demo-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .demo-label {
+            min-width: 80px;
+            font-size: 14px;
+            color: var(--o-color-info2);
+            font-weight: 500;
+        }
+
+        /* OSearch 基础样式 */
+        .osearch {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            background: var(--o-color-fill2);
+            border: 1px solid var(--o-color-control1);
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            cursor: text;
+        }
+
+        .osearch:hover:not(:focus-within):not(.disabled) {
+            border-color: var(--o-color-control2);
+        }
+
+        .osearch:focus-within:not(.disabled) {
+            border-color: var(--o-color-control3);
+            outline: none;
+        }
+
+        .osearch.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            border-color: var(--o-color-control4);
+            background: var(--o-color-control4-light);
+        }
+
+        /* 尺寸变体 */
+        .osearch.large {
+            height: 48px;
+            width: 320px;
+            padding: 0 12px;
+        }
+
+        .osearch.medium {
+            height: 40px;
+            width: 320px;
+            padding: 0 12px;
+        }
+
+        .osearch.small {
+            height: 32px;
+            width: 280px;
+            padding: 0 10px;
+        }
+
+        .osearch.mb {
+            height: 40px;
+            width: 312px;
+            padding: 0 12px;
+        }
+
+        /* 图标 */
+        .search-icon {
+            flex-shrink: 0;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .large .search-icon,
+        .medium .search-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+        }
+
+        .small .search-icon,
+        .mb .search-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 6px;
+        }
+
+        .disabled .search-icon {
+            opacity: 0.4;
+        }
+
+        /* 输入框 */
+        .osearch-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-family: inherit;
+            color: var(--o-color-info1);
+        }
+
+        .large .osearch-input,
+        .medium .osearch-input {
+            font-size: 16px;
+            line-height: 24px;
+        }
+
+        .small .osearch-input,
+        .mb .osearch-input {
+            font-size: 14px;
+            line-height: 22px;
+        }
+
+        .osearch-input::placeholder {
+            color: var(--o-color-info4);
+        }
+
+        .disabled .osearch-input {
+            cursor: not-allowed;
+            color: var(--o-color-info4);
+        }
+
+        /* 清除按钮 */
+        .clear-btn {
+            display: none;
+            flex-shrink: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .clear-btn:hover {
+            opacity: 1;
+        }
+
+        .large .clear-btn,
+        .medium .clear-btn,
+        .mb .clear-btn {
+            width: 24px;
+            height: 24px;
+            margin-left: 8px;
+        }
+
+        .small .clear-btn {
+            width: 16px;
+            height: 16px;
+            margin-left: 6px;
+        }
+
+        .osearch:focus-within:not(.disabled) .clear-btn.has-value {
+            display: block;
+        }
+
+        /* 光标动画 */
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .cursor {
+            display: none;
+            width: 1.5px;
+            background: var(--o-color-info1);
+            animation: blink 1s infinite;
+            margin-left: 1px;
+        }
+
+        .large .cursor,
+        .medium .cursor {
+            height: 24px;
+        }
+
+        .small .cursor,
+        .mb .cursor {
+            height: 22px;
+        }
+
+        .osearch:focus-within:not(.disabled) .cursor.no-value {
+            display: inline-block;
+        }
+
+        /* 下拉建议面板 */
+        .dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: var(--o-color-fill2);
+            border-radius: 4px;
+            box-shadow: 0 6px 24px rgba(18, 20, 23, 0.08);
+            padding: 4px;
+            z-index: 1000;
+            display: none;
+        }
+
+        [data-theme="dark"] .dropdown {
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .osearch:focus-within:not(.disabled) .dropdown.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            height: 40px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 2px;
+            font-size: 16px;
+            transition: background 0.15s;
+        }
+
+        .dropdown-item:hover {
+            background: var(--o-color-control2-light);
+        }
+
+        .dropdown-item .highlight {
+            color: var(--o-color-primary1);
+            font-weight: 600;
+        }
+
+        .dropdown-item .normal {
+            color: var(--o-color-info2);
+            font-weight: 400;
+        }
+
+        /* 主题切换按钮 */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            background: var(--o-color-primary1);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            z-index: 9999;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 47, 167, 0.3);
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 12px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .section {
+                padding: 16px;
+            }
+            
+            .demo-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .demo-label {
+                margin-bottom: 8px;
+            }
+        }
+
+        .info-text {
+            font-size: 13px;
+            color: var(--o-color-info4);
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">切换深色模式</button>
+    
+    <div class="container">
+        <h1>OSearch 搜索框组件</h1>
+        <p class="subtitle">完整交互状态演示 · 支持 Light/Dark 主题切换</p>
+
+        <!-- 尺寸变体 -->
+        <div class="section">
+            <h2 class="section-title">尺寸变体 (Size Variants)</h2>
+            
+            <div class="demo-row">
+                <span class="demo-label">Large (48px)</span>
+                <div class="osearch large">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10.8209 3.45424C6.72148 3.45424 3.39822 6.7775 3.39822 10.8769C3.39822 14.9764 6.72148 18.2996 10.8209 18.2996C14.9203 18.2996 18.2436 14.9764 18.2436 10.8769C18.2436 6.7775 14.9203 3.45424 10.8209 3.45424ZM10.8209 4.85424C14.1471 4.85424 16.8436 7.55068 16.8436 10.8769C16.8436 14.2032 14.1471 16.8996 10.8209 16.8996C7.49466 16.8996 4.79822 14.2032 4.79822 10.8769C4.79822 7.55068 7.49466 4.85424 10.8209 4.85424ZM17.5489 16.5227C17.2751 16.3263 16.8915 16.3513 16.6458 16.5977C16.3728 16.8714 16.3733 17.3146 16.647 17.5876L19.4074 20.3413L19.4943 20.415C19.7681 20.6115 20.1516 20.5865 20.3974 20.3401C20.6704 20.0664 20.6699 19.6232 20.3962 19.3502L17.6357 16.5965L17.5489 16.5227Z" fill="currentColor" fill-rule="evenodd"/>
+                    </svg>
+                    <input type="text" class="osearch-input" placeholder="搜索">
+                    <span class="cursor no-value"></span>
+                    <button class="clear-btn has-value" onclick="clearInput(this)">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+                            <path d="M18.5283 5.4717C18.2549 5.19834 17.8117 5.19834 17.5384 5.4717L11.9996 11.0105L6.46165 5.4717L6.37487 5.3979C6.10133 5.20108 5.71773 5.22568 5.47169 5.4717C5.22567 5.71774 5.20107 6.10134 5.39789 6.37488L5.47169 6.46166L11.0105 11.9996L5.47169 17.5384L5.39789 17.6251C5.20107 17.8987 5.22567 18.2823 5.47169 18.5283C5.74507 18.8017 6.18827 18.8017 6.46165 18.5283L12.0005 12.9895L12.0057 12.9947L12.9947 12.0057L12.9895 12.0005L18.5283 6.46166L18.6021 6.37488C18.7989 6.10134 18.7743 5.71774 18.5283 5.4717Z" fill="currentColor" fill-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="demo-row">
+                <span class="demo-label">Medium (40px)</span>
+                <div class="osearch medium">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10.8209 3.45424C6.72148 3.45424 3.39822 6.7775 3.39822 10.8769C3.39822 14.9764 6.72148 18.2996 10.8209 18.2996C14.9203 18.2996 18.2436 14.9764 18.2436 10.8769C18.2436 6.7775 14.9203 3.45424 10.8209 3.45424ZM10.8209 4.85424C14.1471 4.85424 16.8436 7.55068 16.8436 10.8769C16.8436 14.2032 14.1471 16.8996 10.8209 16.8996C7.49466 16.8996 4.79822 14.2032 4.79822 10.8769C4.79822 7.55068 7.49466 4.85424 10.8209 4.85424ZM17.5489 16.5227C17.2751 16.3263 16.8915 16.3513 16.6458 16.5977C16.3728 16.8714 16.3733 17.3146 16.647 17.5876L19.4074 20.3413L19.4943 20.415C19.7681 20.6115 20.1516 20.5865 20.3974 20.3401C20.6704 20.0664 20.6699 19.6232 20.3962 19.3502L17.6357 16.5965L17.5489 16.5227Z" fill="currentColor" fill-rule="evenodd"/>
+                    </svg>
+                    <input type="text" class="osearch-input" placeholder="搜索">
+                    <span class="cursor no-value"></span>
+                    <button class="clear-btn has-value" onclick="clearInput(this)">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+                            <path d="M18.5283 5.4717C18.2549 5.19834 17.8117 5.19834 17.5384 5.4717L11.9996 11.0105L6.46165 5.4717L6.37487 5.3979C6.10133 5.20108 5.71773 5.22568 5.47169 5.4717C5.22567 5.71774 5.20107 6.10134 5.39789 6.37488L5.47169 6.46166L11.0105 11.9996L5.47169 17.5384L5.39789 17.6251C5.20107 17.8987 5.22567 18.2823 5.47169 18.5283C5.74507 18.8017 6.18827 18.8017 6.46165 18.5283L12.0005 12.9895L12.0057 12.9947L12.9947 12.0057L12.9895 12.0005L18.5283 6.46166L18.6021 6.37488C18.7989 6.10134 18.7743 5.71774 18.5283 5.4717Z" fill="currentColor" fill-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="demo-row">
+                <span class="demo-label">Small (32px)</span>
+                <div class="osearch small">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10.8209 3.45424C6.72148 3.45424 3.39822 6.7775 3.39822 10.8769C3.39822 14.9764 6.72148 18.2996 10.8209 18.2996C14.9203 18.2996 18.2436 14.9764 18.2436 10.8769C18.2436 6.7775 14.9203 3.45424 10.8209 3.45424ZM10.8209 4.85424C14.1471 4.85424 16.8436 7.55068 16.8436 10.8769C16.8436 14.2032 14.1471 16.8996 10.8209 16.8996C7.49466 16.8996 4.79822 14.2032 4.79822 10.8769C4.79822 7.55068 7.49466 4.85424 10.8209 4.85424ZM17.5489 16.5227C17.2751 16.3263 16.8915 16.3513 16.6458 16.5977C16.3728 16.8714 16.3733 17.3146 16.647 17.5876L19.4074 20.3413L19.4943 20.415C19.7681 20.6115 20.1516 20.5865 20.3974 20.3401C20.6704 20.0664 20.6699 19.6232 20.3962 19.3502L17.6357 16.5965L17.5489 16.5227Z" fill="currentColor" fill-rule="evenodd"/>
+                    </svg>
+                    <input type="text" class="osearch-input" placeholder="搜索">
+                    <span class="cursor no-value"></span>
+                    <button class="clear-btn has-value" onclick="clearInput(this)">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+                            <path d="M18.5283 5.4717C18.2549 5.19834 17.8117 5.19834 17.5384 5.4717L11.9996 11.0105L6.46165 5.4717L6.37487 5.3979C6.10133 5.20108 5.71773 5.22568 5.47169 5.4717C5.22567 5.71774 5.20107 6.10134 5.39789 6.37488L5.47169 6.46166L11.0105 11.9996L5.47169 17.5384L5.39789 17.6251C5.20107 17.8987 5.22567 18.2823 5.47169 18.5283C5.74507 18.8017 6.18827 18.8017 6.46165 18.5283L12.0005 12.9895L12.0057 12.9947L12.9947 12.0057L12.9895 12.0005L18.5283 6.46166L18.6021 6.37488C18.7989 6.10134 18.7743 5.71774 18.5283 5.4717Z" fill="currentColor" fill-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="demo-row">
+                <span class="demo-label">Mb 移动端 (40px)</span>
+                <div class="osearch mb">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10.8209 3.45424C6.72148 3.45424 3.39822 6.7775 3.39822 10.8769C3.39822 14.9764 6.72148 18.2996 10.8209 18.2996C14.9203 18.2996 18.2436 14.9764 18.2436 10.8769C18.2436 6.7775 14.9203 3.45424 10.8209 3.45424ZM10.8209 4.85424C14.1471 4.85424 16.8436 7.55068 16.8436 10.8769C16.8436 14.2032 14.1471 16.8996 10.8209 16.8996C7.49466 16.8996 4.79822 14.2032 4.79822 10.8769C4.79822 7.55068 7.49466 4.85424 10.8209 4.85424ZM17.5489 16.5227C17.2751 16.3263 16.8915 16.3513 16.6458 16.5977C16.3728 16.8714 16.3733 17.3146 16.647 17.5876L19.4074 20.3413L19.4943 20.415C19.7681 20.6115 20.1516 20.5865 20.3974 20.3401C20.6704 20.0664 20.6699 19.6232 20.3962 19.3502L17.6357 16.5965L17.5489 16.5227Z" fill="currentColor" fill-rule="evenodd"/>
+                    </svg>
+                    <input type="text" class="osearch-input" placeholder="搜索">
+                    <span class="cursor no-value"></span>
+                    <button class="clear-btn has-value" onclick="clearInput(this)">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+                            <path d="M18.5283 5.4717C18.2549 5.19834 17.8117 5.19834 17.5384 5.4717L11.9996 11.0105L6.46165 5.4717L6.37487 5.3979C6.10133 5.20108 5.71773 5.22568 5.47169 5.4717C5.22567 5.71774 5.20107 6.10134 5.39789 6.37488L5.47169 6.46166L11.0105 11.9996L5.47169 17.5384L5.39789 17.6251C5.20107 17.8987 5.22567 18.2823 5.47169 18.5283C5.74507 18.8017 6.18827 18.8017 6.46165 18.5283L12.0005 12.9895L12.0057 12.9947L12.9947 12.0057L12.9895 12.0005L18.5283 6.46166L18.6021 6.37488C18.7989 6.10134 18.7743 5.71774 18.5283 5.4717Z" fill="currentColor" fill-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <p class="info-text">💡 尺寸说明：Large/Medium/Small 用于 PC 端，Mb 用于移动端。点击输入框查看激活状态。</p>
+        </div>
+
+        <!-- 交互状态演示 -->
+        <div class="section">
+            <h2 class="section-title">交互状态演示 (Interactive States)</h2>
+            
+            <div class="demo-row">
+                <span class="demo-label">默认状态 (Enabled)</span>
+                <div class="osearch medium">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10.8209 3.45424C6.72148 3.45424 3.39822 6.7775 3.39822 10.8769C3.39822 14.9764 6.72148 18.2996 10.8209 18.2996C14.9203 18.2996 18.2436 14.9764 18.2436 10.8769C18.2436 6.7775 14.9203 3.45424 10.8209 3.45424ZM10.8209 4.85424C14.1471 4.85424 16.8436 7.55068 16.8436 10.8769C16.8436 14.2032 14.1471 16.8996 10.8209 16.8996C7.49466 16.8996 4.79822 14.2032 4.79822 10.8769C4.79822 7.55068 7.49466 4.85424 10.8209 4.85424ZM17.5489 16.5227C17.2751 16.3263 16.8915 16.3513 16.6458 16.5977C16.3728 16.8714 16.3733 17.3146 16.647 17.5876L19.4074 20.3413L19.4943 20.415C19.7681 20.6115 20.1516 20.5865 20.3974 20.3401C20.6704 20.0664 20.6699 19.6232 20.3962 19.3502L17.6357 16.5965L17.5489 16.5227Z" fill="currentColor" fill-rule="evenodd"/>
+                    </svg>
+                    <input type="text" class="osearch-input" placeholder="搜索">
+                    <span class="cursor no-value"></span>
+                    <button class="clear-btn has-value" onclick="clearInput(this)">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+                            <path d="M18.5283 5.4717C18.2549 5.19834 17.8117 5.19834 17.5384 5.4717L11.9996 11.0105L6.46165 5.4717L6.37487 5.3979C6.10133 5.20108 5.71773 5.22568 5.47169 5.4717C5.22567 5.71774 5.20107 6.10134 5.39789 6.37488L5.47169 6.46166L11.0105 11.9996L5.47169 17.5384L5.39789 17.6251C5.20107 17.8987 5.22567 18.2823 5.47169 18.5283C5.74507 18.8017 6.18827 18.8017 6.46165 18.5283L12.0005 12.9895L12.0057 12.9947L12.9947 12.0057L12.9895 12.0005L18.5283 6.46166L18.6021 6.37488C18.7989 6.10134 18.7743 5.71774 18.5283 5.4717Z" fill="currentColor" fill-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="demo-row">
+                <span class="demo-label">激活状态 (Actived)</span>
+                <div class="osearch medium" style="border-color: var(--o-color-control3);">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10.8209 3.45424C6.72148 3.45424 3.39822 6.7775 3.39822 10.8769C3.39822 14.9764 6.72148 18.2996 10.8209 18.2996C14.9203 18.2996 18.2436 14.9764 18.2436 10.8769C18.2436 6.7775 14.9203 3.45424 10.8209 3.45424ZM10.8209 4.85424C14.1471 4.85424 16.8436 7.55068 16.8436 10.8769C16.8436 14.2032 14.1471 16.8996 10.8209 16.8996C7.49466 16.8996 4.79822 14.2032 4.79822 10.8769C4.79822 7.55068 7.49466 4.85424 10.8209 4.85424ZM17.5489 16.5227C17.2751 16.3263 16.8915 16.3513 16.6458 16.5977C16.3728 16.8714 16.3733 17.3146 16.647 17.5876L19.4074 20.3413L19.4943 20.415C19.7681 20.6115 20.1516 20.5865 20.3974 20.3401C20.6704 20.0664 20.6699 19.6232 20.3962 19.3502L17.6357 16.5965L17.5489 16.5227Z" fill="currentColor" fill-rule="evenodd"/>
+                    </svg>
+                    <input type="text" class="osearch-input" value="openEuler" oninput="toggleClearBtn(this)">
+                    <span class="cursor"></span>
+                    <button class="clear-btn" style="display: block;" onclick="clearInput(this)">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+                            <path d="M18.5283 5.4717C18.2549 5.19834 17.8117 5.19834 17.5384 5.4717L11.9996 11.0105L6.46165 5.4717L6.37487 5.3979C6.10133 5.20108 5.71773 5.22568 5.47169 5.4717C5.22567 5.71774 5.20107 6.10134 5.39789 6.37488L5.47169 6.46166L11.0105 11.9996L5.47169 17.5384L5.39789 17.6251C5.20107 17.8987 5.22567 18.2823 5.47169 18.5283C5.74507 18.8017 6.18827 18.8017 6.46165 18.5283L12.0005 12.9895L12.0057 12.9947L12.9947 12.0057L12.9895 12.0005L18.5283 6.46166L18.6021 6.37488C18.7989 6.10134 18.7743 5.71774 18.5283 5.4717Z" fill="currentColor" fill-rule="evenodd"/>
+                        </svg>
+                    </button>
+                    <div class="dropdown show">
+                        <div class="dropdown-item">
+                            <span class="highlight">openEuler</span><span class="normal">迁移</span>
+                        </div>
+                        <div class="dropdown-item" style="background: var(--o-color-control2-light);">
+                            <span class="highlight">openEuler</span><span class="normal">安装</span>
+                        </div>
+                        <div class="dropdown-item">
+                            <span class="highlight">openEuler</span><span class="normal">下载</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-row">
+                <span class="demo-label">禁用状态 (Disabled)</span>
+                <div class="osearch medium disabled">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10.8209 3.45424C6.72148 3.45424 3.39822 6.7775 3.39822 10.8769C3.39822 14.9764 6.72148 18.2996 10.8209 18.2996C14.9203 18.2996 18.2436 14.9764 18.2436 10.8769C18.2436 6.7775 14.9203 3.45424 10.8209 3.45424ZM10.8209 4.85424C14.1471 4.85424 16.8436 7.55068 16.8436 10.8769C16.8436 14.2032 14.1471 16.8996 10.8209 16.8996C7.49466 16.8996 4.79822 14.2032 4.79822 10.8769C4.79822 7.55068 7.49466 4.85424 10.8209 4.85424ZM17.5489 16.5227C17.2751 16.3263 16.8915 16.3513 16.6458 16.5977C16.3728 16.8714 16.3733 17.3146 16.647 17.5876L19.4074 20.3413L19.4943 20.415C19.7681 20.6115 20.1516 20.5865 20.3974 20.3401C20.6704 20.0664 20.6699 19.6232 20.3962 19.3502L17.6357 16.5965L17.5489 16.5227Z" fill="currentColor" fill-rule="evenodd"/>
+                    </svg>
+                    <input type="text" class="osearch-input" placeholder="搜索" disabled>
+                </div>
+            </div>
+
+            <p class="info-text">💡 交互提示：鼠标悬浮查看 Hover 效果，点击输入框查看 Focus 效果和下拉建议面板。</p>
+        </div>
+
+        <!-- 完整可交互示例 -->
+        <div class="section">
+            <h2 class="section-title">完整交互示例 (Full Interactive Demo)</h2>
+            
+            <div class="demo-row">
+                <span class="demo-label">带建议列表</span>
+                <div class="osearch large" id="interactiveSearch">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10.8209 3.45424C6.72148 3.45424 3.39822 6.7775 3.39822 10.8769C3.39822 14.9764 6.72148 18.2996 10.8209 18.2996C14.9203 18.2996 18.2436 14.9764 18.2436 10.8769C18.2436 6.7775 14.9203 3.45424 10.8209 3.45424ZM10.8209 4.85424C14.1471 4.85424 16.8436 7.55068 16.8436 10.8769C16.8436 14.2032 14.1471 16.8996 10.8209 16.8996C7.49466 16.8996 4.79822 14.2032 4.79822 10.8769C4.79822 7.55068 7.49466 4.85424 10.8209 4.85424ZM17.5489 16.5227C17.2751 16.3263 16.8915 16.3513 16.6458 16.5977C16.3728 16.8714 16.3733 17.3146 16.647 17.5876L19.4074 20.3413L19.4943 20.415C19.7681 20.6115 20.1516 20.5865 20.3974 20.3401C20.6704 20.0664 20.6699 19.6232 20.3962 19.3502L17.6357 16.5965L17.5489 16.5227Z" fill="currentColor" fill-rule="evenodd"/>
+                    </svg>
+                    <input type="text" class="osearch-input" placeholder="输入关键词搜索..." id="searchInput" oninput="handleSearchInput(this)" onfocus="showDropdown()" onblur="hideDropdown()">
+                    <span class="cursor no-value" id="cursor"></span>
+                    <button class="clear-btn has-value" id="clearBtn" onclick="clearInteractiveInput()">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+                            <path d="M18.5283 5.4717C18.2549 5.19834 17.8117 5.19834 17.5384 5.4717L11.9996 11.0105L6.46165 5.4717L6.37487 5.3979C6.10133 5.20108 5.71773 5.22568 5.47169 5.4717C5.22567 5.71774 5.20107 6.10134 5.39789 6.37488L5.47169 6.46166L11.0105 11.9996L5.47169 17.5384L5.39789 17.6251C5.20107 17.8987 5.22567 18.2823 5.47169 18.5283C5.74507 18.8017 6.18827 18.8017 6.46165 18.5283L12.0005 12.9895L12.0057 12.9947L12.9947 12.0057L12.9895 12.0005L18.5283 6.46166L18.6021 6.37488C18.7989 6.10134 18.7743 5.71774 18.5283 5.4717Z" fill="currentColor" fill-rule="evenodd"/>
+                        </svg>
+                    </button>
+                    <div class="dropdown" id="dropdown">
+                        <div class="dropdown-item" onclick="selectSuggestion('openEuler迁移')">
+                            <span class="highlight">openEuler</span><span class="normal">迁移</span>
+                        </div>
+                        <div class="dropdown-item" onclick="selectSuggestion('openEuler安装')">
+                            <span class="highlight">openEuler</span><span class="normal">安装</span>
+                        </div>
+                        <div class="dropdown-item" onclick="selectSuggestion('openEuler下载')">
+                            <span class="highlight">openEuler</span><span class="normal">下载</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="info-text">🎯 完整功能演示：输入 "openEuler" 查看带高亮的建议列表，支持清除按钮、光标闪烁、悬浮高亮等全部交互特性。</p>
+        </div>
+
+        <!-- 规格说明 -->
+        <div class="section">
+            <h2 class="section-title">设计规格速查 (Design Specs)</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; font-size: 14px; color: var(--o-color-info2);">
+                <div>
+                    <strong style="color: var(--o-color-info1);">尺寸规格：</strong><br>
+                    • Large: 48px 高度<br>
+                    • Medium: 40px 高度<br>
+                    • Small: 32px 高度<br>
+                    • Mb (移动端): 40px 高度
+                </div>
+                <div>
+                    <strong style="color: var(--o-color-info1);">圆角与描边：</strong><br>
+                    • 圆角: 4px<br>
+                    • 描边宽度: 1px (INSIDE)<br>
+                    • Enabled 描边: grey-14@0.25<br>
+                    • Actived 描边: brand-6
+                </div>
+                <div>
+                    <strong style="color: var(--o-color-info1);">图标规格：</strong><br>
+                    • 搜索图标: Large/Medium=24px, Small/Mb=16px<br>
+                    • 清除图标: Large/Medium/Mb=24px, Small=16px<br>
+                    • 图标透明度: 正常态 0.8, 禁用态 0.4
+                </div>
+                <div>
+                    <strong style="color: var(--o-color-info1);">文字规格：</strong><br>
+                    • Large/Medium 字号: 16px, 行高 24px<br>
+                    • Small/Mb 字号: 14px, 行高 22px<br>
+                    • 占位符颜色: grey-14@0.4<br>
+                    • 输入文字颜色: grey-14
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                html.removeAttribute('data-theme');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+            }
+        }
+
+        function clearInput(btn) {
+            const osearch = btn.closest('.osearch');
+            const input = osearch.querySelector('.osearch-input');
+            input.value = '';
+            input.focus();
+            btn.style.display = 'none';
+            const cursor = osearch.querySelector('.cursor');
+            if (cursor) {
+                cursor.classList.add('no-value');
+            }
+        }
+
+        function toggleClearBtn(input) {
+            const osearch = input.closest('.osearch');
+            const clearBtn = osearch.querySelector('.clear-btn');
+            const cursor = osearch.querySelector('.cursor');
+            
+            if (input.value.length > 0) {
+                if (clearBtn) clearBtn.style.display = 'block';
+                if (cursor) cursor.classList.remove('no-value');
+            } else {
+                if (clearBtn) clearBtn.style.display = 'none';
+                if (cursor) cursor.classList.add('no-value');
+            }
+        }
+
+        function handleSearchInput(input) {
+            toggleClearBtn(input);
+            const dropdown = document.getElementById('dropdown');
+            if (input.value.length > 0) {
+                dropdown.classList.add('show');
+            } else {
+                dropdown.classList.remove('show');
+            }
+        }
+
+        function showDropdown() {
+            const input = document.getElementById('searchInput');
+            const dropdown = document.getElementById('dropdown');
+            const cursor = document.getElementById('cursor');
+            
+            if (input.value.length > 0) {
+                dropdown.classList.add('show');
+            } else {
+                cursor.classList.add('no-value');
+            }
+        }
+
+        function hideDropdown() {
+            setTimeout(() => {
+                const dropdown = document.getElementById('dropdown');
+                dropdown.classList.remove('show');
+            }, 200);
+        }
+
+        function clearInteractiveInput() {
+            const input = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('clearBtn');
+            const dropdown = document.getElementById('dropdown');
+            const cursor = document.getElementById('cursor');
+            
+            input.value = '';
+            clearBtn.style.display = 'none';
+            dropdown.classList.remove('show');
+            cursor.classList.add('no-value');
+            input.focus();
+        }
+
+        function selectSuggestion(text) {
+            const input = document.getElementById('searchInput');
+            input.value = text;
+            toggleClearBtn(input);
+            document.getElementById('dropdown').classList.remove('show');
+        }
+
+        document.querySelectorAll('.osearch-input').forEach(input => {
+            input.addEventListener('input', function() {
+                toggleClearBtn(this);
+            });
+        });
+    </script>
+</body>
+</html>

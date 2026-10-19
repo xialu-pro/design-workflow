@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-o-theme="e.light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skills 列表 - openEuler 社区</title>
+    <style>
+        :root {
+            --o-color-primary1: rgb(0, 47, 167);
+            --o-color-primary2: rgb(0, 71, 201);
+            --o-color-primary3: rgb(0, 95, 235);
+            --o-color-primary4: rgb(132, 161, 220);
+            --o-color-success1: rgb(11, 177, 81);
+            --o-color-warning1: rgb(250, 115, 5);
+            --o-color-danger1: rgb(230, 0, 18);
+            --o-color-info1: rgb(0, 0, 0);
+            --o-color-info2: rgba(0, 0, 0, 0.75);
+            --o-color-info3: rgba(0, 0, 0, 0.6);
+            --o-color-info4: rgba(0, 0, 0, 0.4);
+            --o-color-link1: var(--o-color-primary1);
+            --o-color-fill1: rgb(255, 255, 255);
+            --o-color-fill2: rgb(255, 255, 255);
+            --o-color-control1: rgba(0, 0, 0, 0.25);
+            --o-color-control2: rgba(0, 47, 167, 0.25);
+            --o-color-control3: rgba(0, 47, 167, 1);
+            --o-color-control4: rgba(0, 0, 0, 0.15);
+            --o-color-white: rgb(255, 255, 255);
+            
+            --o-font_weight-regular: 400;
+            --o-font_weight-semibold: 600;
+            --o-font_weight-bold: 600;
+            
+            --o-r-font_size-h1: 32px;
+            --o-r-line_height-h1: 44px;
+            --o-r-font_size-h2: 24px;
+            --o-r-line_height-h2: 32px;
+            --o-r-font_size-h3: 22px;
+            --o-r-line_height-h3: 30px;
+            --o-r-font_size-text1: 16px;
+            --o-r-line_height-text1: 24px;
+            --o-r-font_size-tip1: 14px;
+            --o-r-line_height-tip1: 22px;
+            --o-r-font_size-tip2: 12px;
+            --o-r-line_height-tip2: 18px;
+            
+            --o-r-gap-1: 4px;
+            --o-r-gap-2: 8px;
+            --o-r-gap-3: 12px;
+            --o-r-gap-4: 16px;
+            --o-r-gap-5: 24px;
+            --o-r-gap-6: 32px;
+            --o-r-gap-7: 40px;
+            --o-r-gap-8: 48px;
+            --o-r-gap-9: 64px;
+            --o-r-gap-10: 72px;
+            
+            --o-radius-m: 4px;
+            --o-radius-l: 16px;
+            --o-radius-pill: 100px;
+            
+            --o-shadow-1: 0px 3px 9px rgba(0, 18, 85, 0.078);
+            --o-shadow-2: 0 2px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'HarmonyOS Sans', 'HarmonyHeiTi', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--o-color-fill2);
+            color: var(--o-color-info1);
+            line-height: 1.5;
+            font-size: var(--o-r-font_size-text1);
+            line-height: var(--o-r-line_height-text1);
+        }
+
+        .page-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ========== ONavigation PC 顶导 (完全符合规范) ========== */
+        .header {
+            width: 100%;
+            height: 72px;
+            background: var(--o-color-fill2);
+            box-shadow: var(--o-shadow-1);
+            backdrop-filter: blur(4.53px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 216px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: flex-end;
+            gap: 40px;
+        }
+
+        .logo {
+            height: 32px;
+            padding: 20px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 32px;
+            width: auto;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+            align-items: flex-end;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--o-color-info1);
+            font-size: 16px;
+            line-height: 24px;
+            font-weight: 400;
+            padding-bottom: 24px;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+            display: inline-block;
+        }
+
+        .nav-menu a:hover {
+            color: var(--o-color-primary1);
+        }
+
+        .nav-menu a.active {
+            color: var(--o-color-primary1);
+            border-bottom-color: var(--o-color-primary1);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .search-box {
+            width: 160px;
+            height: 32px;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-box svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .source-dropdown {
+            width: 48px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: var(--o-color-info1);
+            font-size: 14px;
+            line-height: 24px;
+            font-weight: 400;
+        }
+
+        .icon-btn {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* ========== 主内容区 ========== */
+        .main-content {
+            flex: 1;
+            padding: 40px 216px;
+            max-width: 1488px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* 页面标题 */
+        .page-title {
+            font-size: var(--o-r-font_size-h1);
+            line-height: var(--o-r-line_height-h1);
+            font-weight: 600;
+            color: var(--o-color-info1);
+            margin-bottom: var(--o-r-gap-6);
+        }
+
+        /* ========== 筛选区域 (OInput + OSelect + OButton) ========== */
+        .filter-section {
+            background: var(--o-color-fill2);
+            border-radius: var(--o-radius-m);
+            padding: var(--o-r-gap-5);
+            box-shadow: var(--o-shadow-1);
+            margin-bottom: var(--o-r-gap-6);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: var(--o-r-gap-4);
+        }
+
+        .filter-field {
+            display: flex;
+            flex-direction: column;
+            gap: var(--o-r-gap-2);
+        }
+
+        .filter-field label {
+            font-size: var(--o-r-font_size-tip2);
+            line-height: var(--o-r-line_height-tip2);
+            color: var(--o-color-info3);
+            font-weight: 400;
+        }
+
+        /* OInput 样式 (large: 40px高度, 16px字号) */
+        .o-input {
+            height: 40px;
+            padding: 0 16px;
+            border: 1px solid var(--o-color-control1);
+            border-radius: var(--o-radius-m);
+            background: var(--o-color-fill2);
+            font-size: 16px;
+            line-height: 24px;
+            color: var(--o-color-info1);
+            outline: none;
+            transition: border-color 0.2s;
+            width: 240px;
+        }
+
+        .o-input:focus {
+            border-color: var(--o-color-primary1);
+        }
+
+        .o-input::placeholder {
+            color: var(--o-color-info4);
+        }
+
+        /* OSelect 样式 (medium: 32px高度, 14px字号) */
+        .o-select-wrapper {
+            position: relative;
+            width: 200px;
+        }
+
+        .o-select {
+            height: 32px;
+            padding: 0 32px 0 12px;
+            border: 1px solid var(--o-color-control1);
+            border-radius: var(--o-radius-m);
+            background: var(--o-color-fill2);
+            font-size: 14px;
+            line-height: 22px;
+            color: var(--o-color-info1);
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+
+        .o-select:focus {
+            border-color: var(--o-color-primary1);
+        }
+
+        .select-arrow {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            pointer-events: none;
+        }
+
+        .select-arrow svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: var(--o-r-gap-3);
+            margin-left: auto;
+        }
+
+        /* OButton 样式 (solid medium: 32px高度, outline medium) */
+        .o-button {
+            height: 32px;
+            padding: 0 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 22px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            outline: none;
+        }
+
+        .o-button-solid {
+            background: var(--o-color-primary1);
+            color: var(--o-color-white);
+            border: 1px solid var(--o-color-primary1);
+        }
+
+        .o-button-solid:hover {
+            background: var(--o-color-primary2);
+            border-color: var(--o-color-primary2);
+        }
+
+        .o-button-outline {
+            background: transparent;
+            color: var(--o-color-primary1);
+            border: 1px solid var(--o-color-primary1);
+        }
+
+        .o-button-outline:hover {
+            background: var(--o-color-control2);
+        }
+
+        /* ========== ODataTable 表格样式 (完全符合规范) ========== */
+        .table-container {
+            background: var(--o-color-fill2);
+            border-radius: 12px;
+            box-shadow: var(--o-shadow-1);
+            overflow: hidden;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        /* 表头 (48px高度, 16px SemiBold字重) */
+        .data-table thead {
+            background: var(--o-color-fill2);
+        }
+
+        .data-table th {
+            height: 48px;
+            padding: 12px 32px;
+            text-align: left;
+            font-size: 16px;
+            line-height: 24px;
+            font-weight: 600;
+            color: var(--o-color-info2);
+            border-bottom: 1px solid var(--o-color-primary1);
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .data-table th[colspan="action"] {
+            width: 120px;
+        }
+
+        .data-table th:first-child {
+            border-top-left-radius: 12px;
+        }
+
+        .data-table th:last-child {
+            border-top-right-radius: 12px;
+        }
+
+        /* 排序图标容器 */
+        .sort-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .sort-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* 数据行 (48px高度, 16px Regular字重) */
+        .data-table tbody tr {
+            height: 48px;
+            border-bottom: 1px solid var(--o-color-control4);
+            transition: background-color 0.2s;
+        }
+
+        /* 表格行Hover效果 - 交互态浅蓝色背景（OpenDesign规范中表格组件内置样式） */
+        .data-table tbody tr:hover {
+            background: rgb(235, 241, 250);
+        }
+
+        .data-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .data-table td {
+            height: 48px;
+            padding: 12px 32px;
+            font-size: 16px;
+            line-height: 24px;
+            font-weight: 400;
+            color: var(--o-color-info1);
+            white-space: nowrap;
+        }
+
+        /* OLink 样式 (操作列链接) */
+        .o-link {
+            color: var(--o-color-link1);
+            text-decoration: none;
+            font-size: 16px;
+            line-height: 24px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: color 0.2s;
+            display: inline-block;
+        }
+
+        .o-link:hover {
+            color: var(--o-color-primary2);
+            text-decoration: underline;
+        }
+
+        /* OTag 标签样式 (small: 20px高度, 12px字号) */
+        .o-tag {
+            display: inline-flex;
+            align-items: center;
+            height: 20px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 18px;
+            font-weight: 400;
+            white-space: nowrap;
+        }
+
+        .o-tag-fill-success {
+            background: var(--o-color-success1);
+            color: var(--o-color-white);
+        }
+
+        .o-tag-fill-warning {
+            background: var(--o-color-warning1);
+            color: var(--o-color-white);
+        }
+
+        .o-tag-fill-danger {
+            background: var(--o-color-danger1);
+            color: var(--o-color-white);
+        }
+
+        .o-tag-fill-info {
+            background: var(--o-color-control4);
+            color: var(--o-color-info1);
+        }
+
+        /* ========== OPagination 分页器 (完全符合规范) ========== */
+        .pagination-section {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: var(--o-r-gap-5);
+            gap: 24px;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 32px;
+        }
+
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--o-color-control1);
+            border-radius: 4px;
+            background: transparent;
+            color: var(--o-color-info1);
+            font-size: 14px;
+            line-height: 22px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: var(--o-color-primary2);
+            color: var(--o-color-primary1);
+        }
+
+        .page-btn.active {
+            background: var(--o-color-primary1);
+            border-color: var(--o-color-primary1);
+            color: var(--o-color-white);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            line-height: 22px;
+            color: var(--o-color-info1);
+        }
+
+        /* 空状态提示 */
+        .empty-state {
+            text-align: center;
+            padding: var(--o-r-gap-7) 0;
+            color: var(--o-color-info3);
+            font-size: var(--o-r-font_size-text1);
+            line-height: var(--o-r-line_height-text1);
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- ========== ONavigation PC 顶导 (Light模式) ========== -->
+        <header class="header">
+            <div class="header-left">
+                <!-- Logo (136px × 32px) -->
+                <div class="logo">
+                    <img src="../assets/navigation/header-pc-light logo.svg" alt="OpenEuler Logo">
+                </div>
+
+                <!-- 主导航菜单 (gap: 32px) -->
+                <ul class="nav-menu">
+                    <li><a href="#">下载</a></li>
+                    <li><a href="#">开发</a></li>
+                    <li><a href="#">文档</a></li>
+                    <li><a href="#">学习</a></li>
+                    <li><a href="#">支持</a></li>
+                    <li><a href="#" class="active">社区</a></li>
+                    <li><a href="#">动态</a></li>
+                </ul>
+            </div>
+
+            <!-- 右侧操作区 (gap: 20px) -->
+            <div class="header-right">
+                <!-- 搜索框 (160px × 32px) -->
+                <div class="search-box">
+                    <svg viewBox="0 0 160 32" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="160" height="32" fill="white" rx="4"/>
+                        <text x="16" y="21" font-family="HarmonyOS Sans" font-size="14" fill="rgba(0,0,0,0.4)">搜索...</text>
+                        <g transform="translate(132, 4)">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+                                <path d="M10.8209 3.45424C6.72148 3.45424 3.39822 6.7775 3.39822 10.8769C3.39822 14.9764 6.72148 18.2996 10.8209 18.2996C14.9203 18.2996 18.2436 14.9764 18.2436 10.8769C18.2436 6.7775 14.9203 3.45424 10.8209 3.45424ZM10.8209 4.85424C14.1471 4.85424 16.8436 7.55068 16.8436 10.8769C16.8436 14.2032 14.1471 16.8996 10.8209 16.8996C7.49466 16.8996 4.79822 14.2032 4.79822 10.8769C4.79822 7.55068 7.49466 4.85424 10.8209 4.85424ZM17.5489 16.5227C17.2751 16.3263 16.8915 16.3513 16.6458 16.5977C16.3728 16.8714 16.3733 17.3146 16.647 17.5876L19.4074 20.3413L19.4943 20.415C19.7681 20.6115 20.1516 20.5865 20.3974 20.3401C20.6704 20.0664 20.6699 19.6232 20.3962 19.3502L17.6357 16.5965L17.5489 16.5227Z" fill="rgba(0,0,0,0.4)" fill-rule="evenodd"/>
+                            </svg>
+                        </g>
+                    </svg>
+                </div>
+
+                <!-- 源码下拉 (48px × 24px) -->
+                <div class="source-dropdown">
+                    <span>源码</span>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                        <path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="rgba(0,0,0,0.8)" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)"/>
+                    </svg>
+                </div>
+
+                <!-- 国际化图标 (24×24) -->
+                <div class="icon-btn">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <rect width="24" height="24" fill="#E5E5E5" rx="4"/>
+                        <text x="12" y="16" text-anchor="middle" font-size="12" fill="#333">中</text>
+                    </svg>
+                </div>
+
+                <!-- 主题切换图标 (24×24) -->
+                <div class="icon-btn">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="5" fill="#FFD700"/>
+                        <line x1="12" y1="1" x2="12" y2="3" stroke="#FFD700" stroke-width="2"/>
+                        <line x1="12" y1="21" x2="12" y2="23" stroke="#FFD700" stroke-width="2"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="#FFD700" stroke-width="2"/>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="#FFD700" stroke-width="2"/>
+                        <line x1="1" y1="12" x2="3" y2="12" stroke="#FFD700" stroke-width="2"/>
+                        <line x1="21" y1="12" x2="23" y2="12" stroke="#FFD700" stroke-width="2"/>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="#FFD700" stroke-width="2"/>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="#FFD700" stroke-width="2"/>
+                    </svg>
+                </div>
+
+                <!-- 用户头像 (24×24) -->
+                <div class="icon-btn">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="8" r="4" fill="#666"/>
+                        <path d="M4 20c0-4.4183 3.58172-8 8-8 4.4183 0 8 3.5817 8 8" fill="#666"/>
+                    </svg>
+                </div>
+            </div>
+        </header>
+
+        <!-- ========== 主内容区 ========== -->
+        <main class="main-content">
+            <!-- 页面标题 (一级标题: 32px/44px, Bold 600) -->
+            <h1 class="page-title">Skills 列表</h1>
+
+            <!-- ========== 筛选区域 ========== -->
+            <section class="filter-section">
+                <!-- OInput 关键词搜索 (large: 40px高度) -->
+                <div class="filter-field">
+                    <label>关键词</label>
+                    <input type="text" class="o-input" placeholder="请输入Skill名称或描述">
+                </div>
+
+                <!-- OSelect 维护者筛选 (medium: 32px高度) -->
+                <div class="filter-field">
+                    <label>维护者</label>
+                    <div class="o-select-wrapper">
+                        <select class="o-select">
+                            <option value="">全部维护者</option>
+                            <option value="official">社区官方</option>
+                            <option value="enterprise">企业组织</option>
+                            <option value="personal">个人</option>
+                        </select>
+                        <div class="select-arrow">
+                            <svg viewBox="0 0 24 24" fill="none" style="width: 24px; height: 24px;">
+                                <path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="rgba(0,0,0,0.8)" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OSelect 分类筛选 -->
+                <div class="filter-field">
+                    <label>分类</label>
+                    <div class="o-select-wrapper">
+                        <select class="o-select">
+                            <option value="">全部分类</option>
+                            <option value="research">调研设计</option>
+                            <option value="develop">开发构建</option>
+                            <option value="compile">工程编译</option>
+                            <option value="quality">质量验证</option>
+                            <option value="deploy">发布部署</option>
+                            <option value="monitor">监测运维</option>
+                            <option value="performance">性能调优</option>
+                            <option value="security">安全加固</option>
+                        </select>
+                        <div class="select-arrow">
+                            <svg viewBox="0 0 24 24" fill="none" style="width: 24px; height: 24px;">
+                                <path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="rgba(0,0,0,0.8)" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OSelect 安全等级筛选 -->
+                <div class="filter-field">
+                    <label>安全等级</label>
+                    <div class="o-select-wrapper">
+                        <select class="o-select">
+                            <option value="">全部等级</option>
+                            <option value="safe">安全</option>
+                            <option value="low-risk">低风险</option>
+                            <option value="mid-risk">中风险</option>
+                            <option value="high-risk">高风险</option>
+                        </select>
+                        <div class="select-arrow">
+                            <svg viewBox="0 0 24 24" fill="none" style="width: 24px; height: 24px;">
+                                <path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="rgba(0,0,0,0.8)" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OButton 操作按钮组 (solid + outline) -->
+                <div class="filter-actions">
+                    <button class="o-button o-button-solid">查询</button>
+                    <button class="o-button o-button-outline">重置</button>
+                </div>
+            </section>
+
+            <!-- ========== ODataTable 数据表格 (完全符合规范) ========== -->
+            <section class="table-container">
+                <table class="data-table">
+                    <!-- 表头 (48px高度, 16px SemiBold, 底部品牌色描边) -->
+                    <thead>
+                        <tr>
+                            <th>
+                                Skill名称
+                                <span class="sort-icon">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M16.3167 10.1801L12.3842 5.46116C12.1843 5.22128 11.8159 5.22128 11.616 5.46116L7.6835 10.1801C7.41211 10.5058 7.64369 11.0002 8.06761 11.0002L15.9326 11.0002C16.3565 11.0002 16.5881 10.5058 16.3167 10.1801ZM16.3167 13.8203L12.3842 18.5393C12.1843 18.7792 11.8159 18.7792 11.616 18.5393L7.6835 13.8203C7.41211 13.4947 7.64369 13.0002 8.06761 13.0002L15.9326 13.0002C16.3565 13.0002 16.5881 13.4947 16.3167 13.8203Z" fill="rgba(0,0,0,0.8)" fill-rule="evenodd"/>
+                                    </svg>
+                                </span>
+                            </th>
+                            <th>维护者</th>
+                            <th>分类</th>
+                            <th>安全等级</th>
+                            <th>下载量</th>
+                            <th>更新时间</th>
+                            <th style="width: 120px;">操作</th>
+                        </tr>
+                    </thead>
+
+                    <!-- 数据行 (48px高度, 16px Regular, 内阴影分隔线) -->
+                    <tbody>
+                        <tr>
+                            <td>代码质量检测</td>
+                            <td>社区官方</td>
+                            <td>质量验证</td>
+                            <td><span class="o-tag o-tag-fill-success">安全</span></td>
+                            <td>1,234</td>
+                            <td>2026-01-15</td>
+                            <td><a href="javascript:void(0)" class="o-link">查看详情</a></td>
+                        </tr>
+                        <tr>
+                            <td>自动化部署工具</td>
+                            <td>企业组织</td>
+                            <td>发布部署</td>
+                            <td><span class="o-tag o-tag-fill-success">安全</span></td>
+                            <td>987</td>
+                            <td>2026-01-14</td>
+                            <td><a href="javascript:void(0)" class="o-link">查看详情</a></td>
+                        </tr>
+                        <tr>
+                            <td>性能监控分析</td>
+                            <td>社区官方</td>
+                            <td>性能调优</td>
+                            <td><span class="o-tag o-tag-fill-warning">低风险</span></td>
+                            <td>2,567</td>
+                            <td>2026-01-13</td>
+                            <td><a href="javascript:void(0)" class="o-link">查看详情</a></td>
+                        </tr>
+                        <tr>
+                            <td>安全漏洞扫描</td>
+                            <td>个人</td>
+                            <td>安全加固</td>
+                            <td><span class="o-tag o-tag-fill-danger">中风险</span></td>
+                            <td>654</td>
+                            <td>2026-01-12</td>
+                            <td><a href="javascript:void(0)" class="o-link">查看详情</a></td>
+                        </tr>
+                        <tr>
+                            <td>编译优化助手</td>
+                            <td>企业组织</td>
+                            <td>工程编译</td>
+                            <td><span class="o-tag o-tag-fill-success">安全</span></td>
+                            <td>1,890</td>
+                            <td>2026-01-11</td>
+                            <td><a href="javascript:void(0)" class="o-link">查看详情</a></td>
+                        </tr>
+                        <tr>
+                            <td>用户调研模板</td>
+                            <td>个人</td>
+                            <td>调研设计</td>
+                            <td><span class="o-tag o-tag-fill-info">低风险</span></td>
+                            <td>432</td>
+                            <td>2026-01-10</td>
+                            <td><a href="javascript:void(0)" class="o-link">查看详情</a></td>
+                        </tr>
+                        <tr>
+                            <td>日志分析平台</td>
+                            <td>社区官方</td>
+                            <td>监测运维</td>
+                            <td><span class="o-tag o-tag-fill-warning">低风险</span></td>
+                            <td>3,210</td>
+                            <td>2026-01-09</td>
+                            <td><a href="javascript:void(0)" class="o-link">查看详情</a></td>
+                        </tr>
+                        <tr>
+                            <td>接口测试框架</td>
+                            <td>企业组织</td>
+                            <td>开发构建</td>
+                            <td><span class="o-tag o-tag-fill-success">安全</span></td>
+                            <td>1,567</td>
+                            <td>2026-01-08</td>
+                            <td><a href="javascript:void(0)" class="o-link">查看详情</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- ========== OPagination 分页器 (All模式, 完全符合规范) ========== -->
+            <section class="pagination-section">
+                <div class="pagination">
+                    <!-- 左箭头按钮 (32×32) -->
+                    <button class="page-btn" disabled>
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-rule="evenodd" transform="rotate(180 6 6.444)"/>
+                        </svg>
+                    </button>
+
+                    <!-- 页码按钮 (32×32, 当前页激活态) -->
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">4</button>
+                    <button class="page-btn">5</button>
+
+                    <!-- 右箭头按钮 (32×32) -->
+                    <button class="page-btn">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- 数据统计文字 -->
+                <span class="pagination-info">共 128 条</span>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

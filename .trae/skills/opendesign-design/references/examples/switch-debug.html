@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Switch 交互诊断</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 50px;
+            background: #f0f0f0;
+        }
+        
+        .test-button {
+            width: 60px;
+            height: 30px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        .test-button:hover {
+            background: #0056b3;
+        }
+        
+        .debug-info {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        
+        h1 {
+            color: #333;
+        }
+        
+        h2 {
+            color: #666;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Switch 交互功能诊断工具</h1>
+
+    <h2>测试1：基础按钮（最简单）</h2>
+    <button class="test-button" onclick="testBasic()">点我</button>
+    
+    <h2>测试2：自定义开关样式</h2>
+    <div id="mySwitch" style="
+        width: 44px; 
+        height: 24px; 
+        background: #dededf; 
+        border-radius: 12px; 
+        position: relative; 
+        cursor: pointer;
+        display: inline-block;
+    " onclick="testSwitch()">
+        <div style="
+            width: 16px; 
+            height: 16px; 
+            background: white; 
+            border-radius: 50%; 
+            position: absolute; 
+            top: 4px; 
+            left: 4px;
+            transition: all 0.3s ease;
+        "></div>
+    </div>
+
+    <h2>测试3：多个状态开关</h2>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <!-- 未选中 -->
+        <div onclick="testState('未选中-默认')" style="
+            width: 44px; 
+            height: 24px; 
+            background: #dededf; 
+            border-radius: 12px; 
+            position: relative; 
+            cursor: pointer;
+        ">
+            <div style="
+                width: 16px; 
+                height: 16px; 
+                background: white; 
+                border-radius: 50%; 
+                position: absolute; 
+                top: 4px; 
+                left: 4px;
+            "></div>
+        </div>
+
+        <!-- 已选中 -->
+        <div onclick="testState('已选中-默认')" style="
+            width: 44px; 
+            height: 24px; 
+            background: #002fa7; 
+            border-radius: 12px; 
+            position: relative; 
+            cursor: pointer;
+        ">
+            <div style="
+                width: 16px; 
+                height: 16px; 
+                background: white; 
+                border-radius: 50%; 
+                position: absolute; 
+                top: 4px; 
+                left: 24px;
+            "></div>
+        </div>
+
+        <!-- 禁用 -->
+        <div onclick="testDisabled()" style="
+            width: 44px; 
+            height: 24px; 
+            background: #e8e8ea; 
+            border-radius: 12px; 
+            position: relative; 
+            opacity: 0.6;
+        ">
+            <div style="
+                width: 16px; 
+                height: 16px; 
+                background: white; 
+                border-radius: 50%; 
+                position: absolute; 
+                top: 4px; 
+                left: 4px;
+            "></div>
+        </div>
+    </div>
+
+    <div class="debug-info" id="debugInfo">
+        <strong>📊 调试信息：</strong><br>
+        <span id="logText">等待操作...</span>
+    </div>
+
+    <script>
+        // 调试日志函数
+        function log(message) {
+            const now = new Date().toLocaleTimeString();
+            const logText = document.getElementById('logText');
+            logText.innerHTML = `[${now}] ${message}<br>` + logText.innerHTML;
+            console.log(message);
+        }
+
+        // 测试1：基础按钮
+        function testBasic() {
+            alert('✅ 基础按钮点击成功！\n\n如果你能看到这个弹窗，说明JavaScript正常工作！');
+            log('✅ 基础按钮被点击');
+        }
+
+        // 测试2：自定义开关
+        function testSwitch() {
+            alert('✅ 自定义开关点击成功！\n\n这个开关使用了自定义样式，但依然可以点击。');
+            log('✅ 自定义开关被点击');
+            
+            // 切换状态演示
+            const switchEl = document.getElementById('mySwitch');
+            const thumb = switchEl.querySelector('div');
+            
+            if (thumb.style.left === '4px' || thumb.style.left === '') {
+                thumb.style.left = '24px';
+                switchEl.style.background = '#002fa7';
+            } else {
+                thumb.style.left = '4px';
+                switchEl.style.background = '#dededf';
+            }
+        }
+
+        // 测试3：状态开关
+        function testState(stateName) {
+            alert(`✅ 成功点击：${stateName}\n\n这是一个${stateName}的开关！`);
+            log(`✅ 点击了状态：${stateName}`);
+        }
+
+        // 测试禁用
+        function testDisabled() {
+            alert('🔒 这个开关是禁用状态！\n\n虽然你点击了它，但应该显示禁用提示。');
+            log('🔒 尝试点击禁用开关');
+        }
+
+        // 页面加载完成
+        window.onload = function() {
+            log('🎉 页面加载完成！JavaScript正常运行！');
+            log('📍 请依次点击上方的三个测试项...');
+            
+            console.log('%c=== Switch 交互诊断 ===', 'font-size: 20px; color: blue;');
+            console.log('%c如果看到这条消息，说明JS正常加载', 'color: green;');
+        };
+
+        // 额外的事件监听器用于调试
+        document.addEventListener('DOMContentLoaded', function() {
+            log('✅ DOM内容加载完成');
+            
+            // 监听所有点击事件
+            document.addEventListener('click', function(e) {
+                log(`🖱️ 全局点击事件触发 - 目标: ${e.target.tagName}`);
+            });
+        });
+    </script>
+</body>
+</html>

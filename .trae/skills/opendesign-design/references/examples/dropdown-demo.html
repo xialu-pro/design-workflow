@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ODropdown 组件演示 - OpenEuler Design System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 60px 40px;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #002FA7;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 14px;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+
+        .demo-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .demo-row {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .demo-label {
+            min-width: 140px;
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* ========== OpenEuler Design Tokens ========== */
+        :root {
+            --o-color-primary1: #002FA7;
+            --o-color-primary2: #0047D9;
+            --o-color-primary3: #1A5FE5;
+            --o-color-primary4: #B3CFFF;
+
+            --o-color-info1: #000000;
+            --o-color-info2: #333333;
+            --o-color-info4: #999999;
+
+            --o-color-fill2: #FFFFFF;
+            --o-color-fill3: #F5F6F7;
+
+            --o-color-control2-light: #F0F5FF;
+            --o-color-control3-light: #E6EDFF;
+        }
+
+        /* ========== ODropdown Component Styles ========== */
+        
+        .odropdown {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-weight: 400;
+            outline: none;
+            border: none;
+        }
+
+        .odropdown-text {
+            pointer-events: none;
+        }
+
+        .odropdown-icon {
+            width: 24px;
+            height: 24px;
+            margin-left: 4px;
+            pointer-events: none;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .odropdown-icon svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .odropdown.open .odropdown-icon {
+            transform: rotate(180deg);
+        }
+
+        /* ===== Solid Variant ===== */
+        .odropdown.solid {
+            background: var(--o-color-primary1);
+            color: white;
+            border-radius: 100px;
+        }
+
+        .odropdown.solid:hover:not(.disabled) {
+            background: var(--o-color-primary2);
+        }
+
+        .odropdown.solid:active:not(.disabled),
+        .odropdown.solid.pressed:not(.disabled) {
+            background: var(--o-color-primary3);
+        }
+
+        .odropdown.solid.disabled {
+            background: var(--o-color-primary4);
+            cursor: not-allowed;
+        }
+
+        /* ===== Outline Variant ===== */
+        .odropdown.outline {
+            background: transparent;
+            color: var(--o-color-primary1);
+            border: 1px solid var(--o-color-primary1);
+            border-radius: 100px;
+        }
+
+        .odropdown.outline:hover:not(.disabled) {
+            background: transparent;
+            border-color: var(--o-color-primary2);
+            color: var(--o-color-primary2);  /* 保持蓝色系，不变成白色 */
+        }
+
+        .odropdown.outline:active:not(.disabled),
+        .odropdown.outline.pressed:not(.disabled) {
+            background: transparent;
+            border-color: var(--o-color-primary3);
+            color: var(--o-color-primary3);  /* 保持蓝色系，不变成白色 */
+        }
+
+        .odropdown.outline.selected:not(.disabled) {
+            background: transparent;
+            color: var(--o-color-primary1);
+            border-color: var(--o-color-primary1);
+        }
+
+        .odropdown.outline.disabled {
+            border-color: var(--o-color-primary4);
+            color: var(--o-color-primary4);
+            cursor: not-allowed;
+        }
+
+        /* ===== Text Variant ===== */
+        .odropdown.text {
+            background: transparent;
+            color: var(--o-color-info1);
+            border-radius: 100px;
+        }
+
+        .odropdown.text:hover:not(.disabled) {
+            color: var(--o-color-primary2);
+        }
+
+        .odropdown.text:active:not(.disabled),
+        .odropdown.text.pressed:not(.disabled) {
+            color: var(--o-color-primary3);
+        }
+
+        .odropdown.text.selected:not(.disabled) {
+            color: var(--o-color-primary1);
+        }
+
+        .odropdown.text.disabled {
+            color: var(--o-color-info4);
+            cursor: not-allowed;
+        }
+
+        /* ===== Size Variants ===== */
+        .odropdown.large {
+            height: 40px;
+            padding-left: 24px;
+            padding-right: 16px;
+            font-size: 16px;
+            line-height: 24px;
+            padding-top: 8px;
+            padding-bottom: 8px;
+        }
+
+        .odropdown.medium {
+            height: 32px;
+            padding-left: 16px;
+            padding-right: 12px;
+            font-size: 14px;
+            line-height: 22px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        .odropdown.small {
+            height: 28px;
+            padding-left: 16px;
+            padding-right: 12px;
+            font-size: 14px;
+            line-height: 22px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        .odropdown.text.large,
+        .odropdown.text.medium,
+        .odropdown.text.small {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* ===== Dropdown Panel ===== */
+        .odropdown-panel {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            min-width: 100%;
+            background: var(--o-color-fill2);
+            border-radius: 4px;
+            box-shadow: 0 6px 24px rgba(18, 20, 23, 0.08);
+            padding: 4px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: all 0.2s ease;
+        }
+
+        .odropdown.open .odropdown-panel {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .odropdown-panel-item {
+            padding: 8px 12px;
+            font-size: 14px;
+            color: var(--o-color-info2);
+            cursor: pointer;
+            border-radius: 2px;
+            transition: background 0.15s ease;
+            text-align: left;
+        }
+
+        .odropdown-panel-item:hover:not(.disabled) {
+            background: var(--o-color-control2-light);
+        }
+
+        .odropdown-panel-item:active:not(.disabled),
+        .odropdown-panel-item.pressed:not(.disabled) {
+            background: var(--o-color-control3-light);
+        }
+
+        .odropdown-panel-item.disabled {
+            color: var(--o-color-info4);
+            cursor: not-allowed;
+        }
+
+        .odropdown-panel-item.disabled:hover {
+            background: transparent;
+        }
+
+        .odropdown-panel-item.size-l {
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .odropdown-panel-item.size-m {
+            height: 32px;
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+<h1>ODropdown 下拉菜单组件</h1>
+<p class="subtitle">OpenEuler Design System · 基于 dropdown.md 设计规范 · 完整交互状态验证 ✅</p>
+
+<!-- 第一部分：Solid 变体 -->
+<div class="demo-section">
+    <h2>一、Solid 强调下拉按钮（实心填充）</h2>
+
+    <div class="demo-row">
+        <div class="demo-label">默认 Default:</div>
+        <button class="odropdown solid large interactive">
+            <span class="odropdown-text">强调下拉</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+    </div>
+
+    <div class="demo-row">
+        <div class="demo-label">悬浮 Hover:</div>
+        <button class="odropdown solid large" style="background: #0047D9;">
+            <span class="odropdown-text">强调下拉</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+    </div>
+
+    <div class="demo-row">
+        <div class="demo-label">按下 Press:</div>
+        <button class="odropdown solid large pressed" style="background: #1A5FE5;">
+            <span class="odropdown-text">强调下拉</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+    </div>
+
+    <div class="demo-row">
+        <div class="demo-label">禁用 Disabled:</div>
+        <button class="odropdown solid large disabled">
+            <span class="odropdown-text">强调下拉</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+    </div>
+</div>
+
+<!-- 第二部分：Outline 变体（修正：保持可见的颜色） -->
+<div class="demo-section">
+    <h2>二、Outline 普通下拉按钮（描边样式）✅ 已修正</h2>
+    <p style="color:#666;font-size:13px;margin-bottom:16px;">Hover/Press 状态：保持透明背景 + 蓝色描边 + 蓝色文字（不使用白色）</p>
+
+    <div class="demo-row">
+        <div class="demo-label">默认 Default:</div>
+        <button class="odropdown outline large interactive">
+            <span class="odropdown-text">普通下拉</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+    </div>
+
+    <div class="demo-row">
+        <div class="demo-label">悬浮 Hover:<br><small style="color:#999;font-size:12px;">透明背景 + primary2 描边 + primary2 文字</small></div>
+        <button class="odropdown outline large" style="border-color: #0047D9; color: #0047D9; background: transparent;">
+            <span class="odropdown-text">普通下拉</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+    </div>
+
+    <div class="demo-row">
+        <div class="demo-label">按下 Press:<br><small style="color:#999;font-size:12px;">透明背景 + primary3 描边 + primary3 文字</small></div>
+        <button class="odropdown outline large pressed" style="border-color: #1A5FE5; color: #1A5FE5; background: transparent;">
+            <span class="odropdown-text">普通下拉</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+    </div>
+
+    <div class="demo-row">
+        <div class="demo-label">禁用 Disabled:</div>
+        <button class="odropdown outline large disabled">
+            <span class="odropdown-text">普通下拉</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+    </div>
+</div>
+
+<!-- 第三部分：Text 变体 -->
+<div class="demo-section">
+    <h2>三、Text 文本按钮（无背景无描边）</h2>
+
+    <div class="demo-row">
+        <div class="demo-label">默认 Default:</div>
+        <button class="odropdown text large interactive">
+            <span class="odropdown-text">文本下拉</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+    </div>
+
+    <div class="demo-row">
+        <div class="demo-label">悬浮 Hover:</div>
+        <button class="odropdown text large" style="color: #0047D9;">
+            <span class="odropdown-text">文本下拉</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+    </div>
+
+    <div class="demo-row">
+        <div class="demo-label">按下 Press:</div>
+        <button class="odropdown text large pressed" style="color: #1A5FE5;">
+            <span class="odropdown-text">文本下拉</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+    </div>
+
+    <div class="demo-row">
+        <div class="demo-label">禁用 Disabled:</div>
+        <button class="odropdown text large disabled">
+            <span class="odropdown-text">文本下拉</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+    </div>
+</div>
+
+<!-- 第四部分：尺寸对比 -->
+<div class="demo-section">
+    <h2>四、尺寸对比（Large / Medium / Small）</h2>
+
+    <div class="demo-row">
+        <div class="demo-label">Solid:</div>
+        <button class="odropdown solid large">
+            <span class="odropdown-text">Large 40px</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+        <button class="odropdown solid medium">
+            <span class="odropdown-text">Medium 32px</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+        <button class="odropdown solid small">
+            <span class="odropdown-text">Small 28px</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+    </div>
+
+    <div class="demo-row">
+        <div class="demo-label">Outline:</div>
+        <button class="odropdown outline large">
+            <span class="odropdown-text">Large 40px</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+        <button class="odropdown outline medium">
+            <span class="odropdown-text">Medium 32px</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+        <button class="odropdown outline small">
+            <span class="odropdown-text">Small 28px</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+    </div>
+
+    <div class="demo-row">
+        <div class="demo-label">Text:</div>
+        <button class="odropdown text large">
+            <span class="odropdown-text">Large 40px</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+        <button class="odropdown text medium">
+            <span class="odropdown-text">Medium 32px</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+        <button class="odropdown text small">
+            <span class="odropdown-text">Small 28px</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+        </button>
+    </div>
+</div>
+
+<!-- 第五部分：可交互演示 -->
+<div class="demo-section">
+    <h2>五、可交互演示（点击测试真实效果）✅ 可点击</h2>
+    <p style="color:#666;font-size:13px;margin-bottom:16px;">点击下方任意按钮测试真实的下拉面板交互效果</p>
+
+    <div class="demo-row">
+        <div class="demo-label">Solid Large:</div>
+        <div class="odropdown solid large interactive-dropdown" data-size="large">
+            <span class="odropdown-text">请选择选项</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+            <div class="odropdown-panel">
+                <div class="odropdown-panel-item size-l" data-value="1">默认选项一</div>
+                <div class="odropdown-panel-item size-l" data-value="2">默认选项二</div>
+                <div class="odropdown-panel-item size-l" data-value="3">默认选项三</div>
+                <div class="odropdown-panel-item size-l" data-value="4">默认选项四</div>
+                <div class="odropdown-panel-item size-l" data-value="5">默认选项五</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-row">
+        <div class="demo-label">Outline Medium:</div>
+        <div class="odropdown outline medium interactive-dropdown" data-size="medium">
+            <span class="odropdown-text">筛选条件</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+            <div class="odropdown-panel">
+                <div class="odropdown-panel-item size-m" data-value="all">全部</div>
+                <div class="odropdown-panel-item size-m" data-value="pending">待处理</div>
+                <div class="odropdown-panel-item size-m" data-value="processing">处理中</div>
+                <div class="odropdown-panel-item size-m" data-value="completed">已完成</div>
+                <div class="odropdown-panel-item size-m disabled" data-value="disabled">已禁用项</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-row">
+        <div class="demo-label">Text Small:</div>
+        <div class="odropdown text small interactive-dropdown" data-size="small">
+            <span class="odropdown-text">更多操作</span>
+            <span class="odropdown-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-opacity="0.8" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" /></svg>
+            </span>
+            <div class="odropdown-panel">
+                <div class="odropdown-panel-item size-m" data-value="edit">编辑</div>
+                <div class="odropdown-panel-item size-m" data-value="copy">复制</div>
+                <div class="odropdown-panel-item size-m" data-value="export">导出</div>
+                <div class="odropdown-panel-item size-m" data-value="delete">删除</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 修复后的交互功能
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, initializing dropdowns...');
+        
+        const interactiveDropdowns = document.querySelectorAll('.interactive-dropdown');
+        
+        console.log('Found', interactiveDropdowns.length, 'dropdowns');
+
+        interactiveDropdowns.forEach((dropdown, index) => {
+            const panel = dropdown.querySelector('.odropdown-panel');
+            const items = panel.querySelectorAll('.odropdown-panel-item:not(.disabled)');
+            const textEl = dropdown.querySelector('.odropdown-text');
+
+            console.log('Initializing dropdown', index + 1);
+
+            // 点击切换
+            dropdown.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log('Dropdown clicked:', index + 1);
+
+                // 关闭其他
+                interactiveDropdowns.forEach(other => {
+                    if (other !== dropdown && other.classList.contains('open')) {
+                        other.classList.remove('open');
+                    }
+                });
+
+                // 切换当前
+                dropdown.classList.toggle('open');
+                console.log('Panel open state:', dropdown.classList.contains('open'));
+            });
+
+            // 选择选项
+            items.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    console.log('Item selected:', this.textContent);
+                    
+                    textEl.textContent = this.textContent;
+                    dropdown.classList.add('selected');
+                    
+                    setTimeout(() => {
+                        dropdown.classList.remove('open');
+                    }, 150);
+                });
+            });
+        });
+
+        // 点击外部关闭
+        document.addEventListener('click', function() {
+            console.log('Document clicked, closing all dropdowns');
+            interactiveDropdowns.forEach(dropdown => {
+                dropdown.classList.remove('open');
+            });
+        });
+        
+        console.log('All dropdowns initialized successfully!');
+    });
+</script>
+
+</body>
+</html>

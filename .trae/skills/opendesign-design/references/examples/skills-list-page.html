@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-o-theme="e.light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skills 列表 - openEuler 社区</title>
+    <style>
+        :root {
+            --o-color-primary1: rgb(0, 47, 167);
+            --o-color-primary2: rgb(0, 71, 201);
+            --o-color-primary3: rgb(0, 95, 235);
+            --o-color-primary4: rgb(132, 161, 220);
+            --o-color-success1: rgb(11, 177, 81);
+            --o-color-warning1: rgb(250, 115, 5);
+            --o-color-danger1: rgb(230, 0, 18);
+            --o-color-info1: rgb(0, 0, 0);
+            --o-color-info2: rgba(0, 0, 0, 0.75);
+            --o-color-info3: rgba(0, 0, 0, 0.6);
+            --o-color-info4: rgba(0, 0, 0, 0.4);
+            --o-color-link1: var(--o-color-primary1);
+            --o-color-fill1: rgb(255, 255, 255);
+            --o-color-fill2: rgb(255, 255, 255);
+            --o-color-control1: rgba(0, 0, 0, 0.25);
+            --o-color-control2: rgba(0, 47, 167, 0.25);
+            --o-color-control3: rgba(0, 47, 167, 1);
+            --o-color-control4: rgba(0, 0, 0, 0.15);
+            --o-color-white: rgb(255, 255, 255);
+            
+            --o-font_weight-regular: 400;
+            --o-font_weight-semibold: 600;
+            --o-font_weight-bold: 600;
+            
+            --o-r-font_size-h1: 32px;
+            --o-r-line_height-h1: 44px;
+            --o-r-font_size-h2: 24px;
+            --o-r-line_height-h2: 32px;
+            --o-r-font_size-h3: 22px;
+            --o-r-line_height-h3: 30px;
+            --o-r-font_size-text1: 16px;
+            --o-r-line_height-text1: 24px;
+            --o-r-font_size-tip1: 14px;
+            --o-r-line_height-tip1: 22px;
+            --o-r-font_size-tip2: 12px;
+            --o-r-line_height-tip2: 18px;
+            
+            --o-r-gap-1: 4px;
+            --o-r-gap-2: 8px;
+            --o-r-gap-3: 12px;
+            --o-r-gap-4: 16px;
+            --o-r-gap-5: 24px;
+            --o-r-gap-6: 32px;
+            --o-r-gap-7: 40px;
+            --o-r-gap-8: 48px;
+            --o-r-gap-9: 64px;
+            --o-r-gap-10: 72px;
+            
+            --o-radius-m: 4px;
+            --o-radius-l: 16px;
+            --o-radius-pill: 100px;
+            
+            --o-shadow-1: 0px 3px 9px rgba(0, 18, 85, 0.078);
+            --o-shadow-2: 0 2px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'HarmonyOS Sans', 'HarmonyHeiTi', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #f5f5f5;
+            color: var(--o-color-info1);
+            line-height: 1.5;
+            font-size: var(--o-r-font_size-text1);
+            line-height: var(--o-r-line_height-text1);
+        }
+
+        .page-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ========== ONavigation PC 顶导 (完全符合规范) ========== */
+        .header {
+            width: 100%;
+            height: 72px;
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0px 3px 9px 0px rgba(0, 18, 85, 0.078);
+            backdrop-filter: blur(4.53px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 216px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: flex-end;
+            gap: 40px;
+        }
+
+        /* Logo 区域 (136px × 32px) */
+        .logo {
+            height: 32px;
+            padding: 20px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 32px;
+            width: auto;
+        }
+
+        /* 主导航菜单 (gap: 32px, 菜单项 32×48px, padding-bottom: 24px) */
+        .nav-menu {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+            align-items: flex-end;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: rgba(0, 0, 0, 1);
+            font-size: 16px;
+            line-height: 24px;
+            font-weight: 400;
+            padding-bottom: 24px;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+            display: inline-block;
+        }
+
+        .nav-menu a:hover {
+            color: var(--o-color-primary1);
+        }
+
+        .nav-menu a.active {
+            color: var(--o-color-primary1);
+            border-bottom-color: var(--o-color-primary1);
+        }
+
+        /* 右侧操作区 (gap: 20px) */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* 搜索框 (160px × 32px, Light模式) */
+        .search-box {
+            width: 160px;
+            height: 32px;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* 源码下拉 (48px × 24px) */
+        .source-dropdown {
+            width: 48px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: rgba(0, 0, 0, 1);
+            font-size: 14px;
+            line-height: 24px;
+            font-weight: 400;
+        }
+
+        .source-dropdown svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* 操作图标按钮 (24px × 24px) */
+        .icon-btn {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        /* ========== 主内容区 ========== */
+        .main-content {
+            flex: 1;
+            width: 1488px;
+            margin: 0 auto;
+            padding: 40px 0 72px;
+        }
+
+        /* ========== OBreadcrumb 面包屑 ========== */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 24px;
+            font-size: var(--o-r-font_size-tip1);
+            line-height: var(--o-r-line_height-tip1);
+        }
+
+        .breadcrumb-item {
+            color: var(--o-color-info3);
+            text-decoration: none;
+            font-weight: 400;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb-item:hover {
+            color: var(--o-color-primary1);
+            text-decoration: underline;
+        }
+
+        .breadcrumb-separator {
+            width: 24px;
+            height: 24px;
+            color: var(--o-color-info3);
+        }
+
+        .breadcrumb-current {
+            color: var(--o-color-primary1);
+            font-weight: 600;
+        }
+
+        /* ========== 页面标题 ========== */
+        .page-title {
+            font-size: var(--o-r-font_size-h1);
+            line-height: var(--o-r-line_height-h1);
+            font-weight: 600;
+            color: var(--o-color-info1);
+            margin-bottom: 12px;
+        }
+
+        .page-subtitle {
+            font-size: var(--o-r-font_size-text1);
+            line-height: var(--o-r-line_height-text1);
+            color: var(--o-color-info3);
+            margin-bottom: 40px;
+        }
+
+        /* ========== 筛选区域 ========== */
+        .filter-section {
+            background: var(--o-color-fill2);
+            border-radius: var(--o-radius-m);
+            box-shadow: var(--o-shadow-1);
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 16px;
+        }
+
+        .filter-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 200px;
+        }
+
+        .filter-field label {
+            font-size: var(--o-r-font_size-tip1);
+            line-height: var(--o-r-line_height-tip1);
+            color: var(--o-color-info2);
+            font-weight: 400;
+        }
+
+        /* OInput 输入框 */
+        .o-input {
+            height: 40px;
+            border: 1px solid var(--o-color-control1);
+            border-radius: var(--o-radius-m);
+            padding: 0 12px;
+            font-size: 16px;
+            line-height: 24px;
+            color: var(--o-color-info1);
+            background: var(--o-color-fill2);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .o-input::placeholder {
+            color: var(--o-color-info4);
+        }
+
+        .o-input:hover,
+        .o-input:focus {
+            border-color: var(--o-color-control3);
+        }
+
+        /* OSelect 选择器 */
+        .o-select {
+            height: 40px;
+            border: 1px solid var(--o-color-control1);
+            border-radius: var(--o-radius-m);
+            padding: 0 32px 0 12px;
+            font-size: 16px;
+            line-height: 24px;
+            color: var(--o-color-info1);
+            background: var(--o-color-fill2);
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2'%3E%3Cpath d='M7 10l5 5 5-5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .o-select:hover,
+        .o-select:focus {
+            border-color: var(--o-color-control3);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        /* OButton 按钮 */
+        .o-btn {
+            height: 40px;
+            padding: 0 24px;
+            border: none;
+            border-radius: 100px;
+            font-size: 16px;
+            line-height: 24px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .o-btn-solid {
+            background: var(--o-color-primary1);
+            color: var(--o-color-white);
+        }
+
+        .o-btn-solid:hover {
+            background: var(--o-color-primary2);
+        }
+
+        .o-btn-outline {
+            background: transparent;
+            color: var(--o-color-primary1);
+            border: 1px solid var(--o-color-primary1);
+        }
+
+        .o-btn-outline:hover {
+            background: rgba(0, 47, 167, 0.04);
+        }
+
+        /* ========== 卡片列表区域 ========== */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        /* OCard 卡片 */
+        .skill-card {
+            background: var(--o-color-fill2);
+            border-radius: var(--o-radius-m);
+            box-shadow: var(--o-shadow-1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--o-shadow-2);
+        }
+
+        .card-cover {
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.2s;
+        }
+
+        .skill-card:hover .card-cover img {
+            transform: scale(1.05);
+        }
+
+        .card-body {
+            padding: 24px 16px 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-size: 22px;
+            line-height: 30px;
+            font-weight: 600;
+            color: var(--o-color-info1);
+            margin-bottom: 8px;
+            transition: color 0.2s;
+        }
+
+        .skill-card:hover .card-title {
+            color: var(--o-color-primary1);
+        }
+
+        .card-description {
+            font-size: 16px;
+            line-height: 24px;
+            color: var(--o-color-info3);
+            margin-bottom: 16px;
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        /* OTag 标签 */
+        .o-tag {
+            display: inline-flex;
+            align-items: center;
+            height: 24px;
+            padding: 2px 8px;
+            border-radius: var(--o-radius-m);
+            font-size: 12px;
+            line-height: 18px;
+            font-weight: 400;
+            white-space: nowrap;
+        }
+
+        .o-tag-fill-primary {
+            background: var(--o-color-primary1);
+            color: var(--o-color-white);
+        }
+
+        .o-tag-fill-success {
+            background: var(--o-color-success1);
+            color: var(--o-color-white);
+        }
+
+        .o-tag-fill-warning {
+            background: var(--o-color-warning1);
+            color: var(--o-color-white);
+        }
+
+        .o-tag-fill-danger {
+            background: var(--o-color-danger1);
+            color: var(--o-color-white);
+        }
+
+        .o-tag-stroke-primary {
+            background: transparent;
+            color: var(--o-color-primary1);
+            border: 1px solid var(--o-color-primary1);
+        }
+
+        .o-tag-stroke-info {
+            background: transparent;
+            color: var(--o-color-info1);
+            border: 1px solid var(--o-color-control1);
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        /* OLink 链接 */
+        .o-link {
+            color: var(--o-color-primary1);
+            text-decoration: none;
+            font-size: 14px;
+            line-height: 22px;
+            font-weight: 400;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .o-link:hover {
+            color: var(--o-color-primary2);
+            text-decoration: underline;
+        }
+
+        .o-link svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .card-meta {
+            font-size: 12px;
+            line-height: 18px;
+            color: var(--o-color-info3);
+        }
+
+        /* ========== OPagination 分页 ========== */
+        .pagination-wrapper {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--o-color-control1);
+            border-radius: var(--o-radius-m);
+            background: transparent;
+            color: var(--o-color-info1);
+            font-size: 14px;
+            line-height: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: var(--o-color-control2);
+            color: var(--o-color-primary1);
+        }
+
+        .page-btn.active {
+            background: var(--o-color-primary1);
+            border-color: var(--o-color-primary1);
+            color: var(--o-color-white);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .page-info {
+            font-size: 14px;
+            line-height: 22px;
+            color: var(--o-color-info1);
+        }
+
+        .page-jumper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-input {
+            width: 48px;
+            height: 32px;
+            border: 1px solid var(--o-color-control1);
+            border-radius: var(--o-radius-m);
+            text-align: center;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .page-input:focus {
+            border-color: var(--o-color-control3);
+        }
+
+        /* ========== ONavigation PC 页脚 (完全符合规范) ========== */
+        .footer {
+            width: 100%;
+            background: rgba(18, 18, 20, 1);
+            color: var(--o-color-white);
+            padding: 24px 216px 34px;
+            margin-top: auto;
+        }
+
+        /* 顶部说明区 (居中, column, gap 12px, 外层 gap 16px) */
+        .footer-top {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .footer-desc {
+            font-size: 20px;
+            line-height: 28px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 1);
+            margin-bottom: 12px;
+        }
+
+        .footer-logo-foundation {
+            height: 32px;
+            width: auto;
+        }
+
+        /* 导航列 GROUP (6列绝对定位布局) */
+        .footer-nav {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0;
+            margin-bottom: 24px;
+        }
+
+        .footer-nav-column h4 {
+            font-size: 20px;
+            line-height: 28px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 1);
+            margin-bottom: 16px;
+        }
+
+        .footer-nav-column ul {
+            list-style: none;
+        }
+
+        .footer-nav-column li {
+            margin-bottom: 8px;
+        }
+
+        .footer-nav-column a {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 14px;
+            line-height: 22px;
+            font-weight: 400;
+            transition: color 0.2s;
+        }
+
+        .footer-nav-column a:hover {
+            color: rgba(255, 255, 255, 1);
+        }
+
+        /* 友情链接区 (897px × 24px) */
+        .footer-friends {
+            margin-bottom: 24px;
+            padding: 12px 0;
+        }
+
+        .footer-friends-title {
+            font-size: 12px;
+            line-height: 24px;
+            font-weight: 200;
+            color: rgba(255, 255, 255, 1);
+            margin-right: 16px;
+            display: inline-block;
+        }
+
+        .footer-friends-links {
+            display: inline;
+            font-size: 12px;
+            line-height: 18px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .footer-friends-links a {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            margin-right: 12px;
+            transition: color 0.2s;
+        }
+
+        .footer-friends-links a:hover {
+            color: rgba(255, 255, 255, 1);
+        }
+
+        /* 分隔线 (1487.91px × 2px, opacity 0.12) */
+        .footer-divider {
+            height: 2px;
+            background: rgba(229, 229, 229, 1);
+            opacity: 0.12;
+            margin-bottom: 24px;
+        }
+
+        /* 底部信息行 (三列布局: Logo | 版权 | 社交媒体) */
+        .footer-bottom {
+            display: grid;
+            grid-template-columns: 150px 1fr 354px;
+            gap: 0;
+            align-items: start;
+        }
+
+        /* Logo区 (150px × 68px, left: 0) */
+        .footer-logo-area img {
+            height: 24px;
+            width: auto;
+            margin-bottom: 8px;
+        }
+
+        .footer-contact {
+            font-size: 14px;
+            line-height: 22px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 1);
+        }
+
+        /* 版权信息区 (居中偏右) */
+        .footer-copyright-area {
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+            line-height: 22px;
+            margin-bottom: 8px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 1);
+            text-decoration: none;
+            font-weight: 400;
+        }
+
+        .footer-links span {
+            color: rgba(255, 255, 255, 1);
+        }
+
+        .footer-copyright-text {
+            font-size: 14px;
+            line-height: 22px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 4px;
+        }
+
+        /* 社交媒体区 (353.91px × 52px, left: 1134px) */
+        .footer-social {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .social-qrcode-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .social-qrcode-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            line-height: 18px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .social-platform-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .social-icon {
+            width: 30px;
+            height: 30px;
+            background: rgba(43, 43, 47, 1);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .social-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* ========== 响应式适配 ========== */
+        @media (max-width: 1680px) {
+            .main-content {
+                width: calc(100% - 96px);
+            }
+            .header {
+                padding: 0 48px;
+            }
+            .footer {
+                padding: 24px 48px 34px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .skills-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .footer-nav {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .footer-bottom {
+                grid-template-columns: 1fr;
+                gap: 24px;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 24px;
+            }
+            .main-content {
+                width: calc(100% - 48px);
+                padding: 24px 0 32px;
+            }
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+            .filter-form {
+                flex-direction: column;
+            }
+            .filter-field {
+                width: 100%;
+            }
+            .filter-actions {
+                margin-left: 0;
+                width: 100%;
+            }
+            .filter-actions .o-btn {
+                flex: 1;
+            }
+            .footer {
+                padding: 24px;
+            }
+            .footer-nav {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .footer-bottom {
+                grid-template-columns: 1fr;
+            }
+            .header-left .nav-menu {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- ========== ONavigation PC 顶导 (1920×72px, 完全符合规范) ========== -->
+        <header class="header">
+            <!-- 左侧区域 (gap: 40px) -->
+            <div class="header-left">
+                <!-- Logo (136×32px, 可替换插槽) -->
+                <div class="logo">
+                    <img src="../assets/navigation/header-pc-light logo.svg" alt="openEuler Logo">
+                </div>
+
+                <!-- 主导航菜单 (7项, gap: 32px) -->
+                <nav>
+                    <ul class="nav-menu">
+                        <li><a href="#">下载</a></li>
+                        <li><a href="#">开发</a></li>
+                        <li><a href="#">文档</a></li>
+                        <li><a href="#">学习</a></li>
+                        <li><a href="#">支持</a></li>
+                        <li><a href="#" class="active">社区</a></li>
+                        <li><a href="#">动态</a></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- 右侧操作区 (gap: 20px) -->
+            <div class="header-right">
+                <!-- 搜索框 (160×32px, Light模式使用vector背景图片) -->
+                <div class="search-box">
+                    <img src="../assets/navigation/header-pc-search icon.svg" alt="搜索">
+                </div>
+
+                <!-- 源码下拉 (48×24px) [新增] -->
+                <div class="source-dropdown">
+                    <span>源码</span>
+                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+
+                <!-- 国际化图标 (24×24px) -->
+                <button class="icon-btn" aria-label="语言切换">
+                    <img src="../assets/navigation/header-pc-语言切换 icon.svg" alt="语言切换">
+                </button>
+
+                <!-- 主题切换图标 (24×24px) -->
+                <button class="icon-btn" aria-label="主题切换">
+                    <img src="../assets/navigation/header-pc-深浅模式.svg" alt="深浅模式切换">
+                </button>
+
+                <!-- 用户头像图标 (24×24px) -->
+                <button class="icon-btn" aria-label="用户中心">
+                    <img src="../assets/navigation/header-pc-头像.svg" alt="用户头像">
+                </button>
+            </div>
+        </header>
+
+        <!-- ========== 主内容区 ========== -->
+        <main class="main-content">
+            <!-- OBreadcrumb 面包屑 -->
+            <nav class="breadcrumb">
+                <a href="#" class="breadcrumb-item">首页</a>
+                <svg class="breadcrumb-separator" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+                <a href="#" class="breadcrumb-item">社区</a>
+                <svg class="breadcrumb-separator" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+                <span class="breadcrumb-current">Skills 列表</span>
+            </nav>
+
+            <!-- 页面标题 -->
+            <h1 class="page-title">Skills 列表</h1>
+            <p class="page-subtitle">浏览全量 Skills，按不同维度组合过滤或排序查看您需要的内容</p>
+
+            <!-- 筛选区域 -->
+            <section class="filter-section">
+                <form class="filter-form" onsubmit="event.preventDefault();">
+                    <div class="filter-field">
+                        <label>关键词</label>
+                        <input type="text" class="o-input" placeholder="请输入关键词搜索">
+                    </div>
+                    
+                    <div class="filter-field">
+                        <label>维护者</label>
+                        <select class="o-select">
+                            <option value="">全部</option>
+                            <option value="official">社区官方</option>
+                            <option value="enterprise">企业组织</option>
+                            <option value="personal">个人</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-field">
+                        <label>分类</label>
+                        <select class="o-select">
+                            <option value="">全部分类</option>
+                            <option value="research">调研设计</option>
+                            <option value="develop">开发构建</option>
+                            <option value="compile">工程编译</option>
+                            <option value="quality">质量验证</option>
+                            <option value="release">发布部署</option>
+                            <option value="monitor">监测运维</option>
+                            <option value="performance">性能调优</option>
+                            <option value="security">安全加固</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-field">
+                        <label>安全等级</label>
+                        <select class="o-select">
+                            <option value="">全部等级</option>
+                            <option value="safe">安全</option>
+                            <option value="low">低风险</option>
+                            <option value="medium">中风险</option>
+                            <option value="high">高风险</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-field">
+                        <label>排序方式</label>
+                        <select class="o-select">
+                            <option value="downloads">按下载量</option>
+                            <option value="time">按时间</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-field">
+                        <label>时间范围</label>
+                        <select class="o-select">
+                            <option value="all">全部时间</option>
+                            <option value="week">本周</option>
+                            <option value="month">本月</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button type="submit" class="o-btn o-btn-solid">查询</button>
+                        <button type="reset" class="o-btn o-btn-outline">重置</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Skills 卡片列表 -->
+            <section class="skills-grid">
+                <!-- Card 1 -->
+                <article class="skill-card">
+                    <div class="card-cover">
+                        <img src="data:image/svg+xml,%3Csvg width='400' height='160' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23667eea;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23764ba2;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='160' fill='url(%23grad1)'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='white'%3ESkill Icon%3C/text%3E%3C/svg%3E" alt="Kernel 调优工具">
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">Kernel 调优工具</h3>
+                        <p class="card-description">提供内核参数自动调优功能，帮助用户快速优化系统性能，支持多种场景配置。</p>
+                        
+                        <div class="card-tags">
+                            <span class="o-tag o-tag-fill-primary">社区官方</span>
+                            <span class="o-tag o-tag-stroke-primary">性能调优</span>
+                            <span class="o-tag o-tag-fill-success">安全</span>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="#" class="o-link">
+                                查看详情
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                            <span class="card-meta">下载量: 12,345</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 2 -->
+                <article class="skill-card">
+                    <div class="card-cover">
+                        <img src="data:image/svg+xml,%3Csvg width='400' height='160' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23f093fb;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23f5576c;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='160' fill='url(%23grad2)'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='white'%3ESkill Icon%3C/text%3E%3C/svg%3E" alt="容器编排助手">
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">容器编排助手</h3>
+                        <p class="card-description">简化 Kubernetes 应用部署流程，提供可视化界面管理容器化应用。</p>
+                        
+                        <div class="card-tags">
+                            <span class="o-tag o-tag-fill-primary">企业组织</span>
+                            <span class="o-tag o-tag-stroke-primary">发布部署</span>
+                            <span class="o-tag o-tag-fill-success">安全</span>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="#" class="o-link">
+                                查看详情
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                            <span class="card-meta">下载量: 9,876</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 3 -->
+                <article class="skill-card">
+                    <div class="card-cover">
+                        <img src="data:image/svg+xml,%3Csvg width='400' height='160' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad3' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%234facfe;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%2300f2fe;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='160' fill='url(%23grad3)'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='white'%3ESkill Icon%3C/text%3E%3C/svg%3E" alt="代码质量扫描">
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">代码质量扫描</h3>
+                        <p class="card-description">自动化代码静态分析工具，检测潜在 bug 和代码异味，提升代码质量。</p>
+                        
+                        <div class="card-tags">
+                            <span class="o-tag o-tag-fill-primary">社区官方</span>
+                            <span class="o-tag o-tag-stroke-primary">质量验证</span>
+                            <span class="o-tag o-tag-fill-warning">低风险</span>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="#" class="o-link">
+                                查看详情
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                            <span class="card-meta">下载量: 8,543</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 4 -->
+                <article class="skill-card">
+                    <div class="card-cover">
+                        <img src="data:image/svg+xml,%3Csvg width='400' height='160' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad4' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%235ee7df;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23b490ca;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='160' fill='url(%23grad4)'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='white'%3ESkill Icon%3C/text%3E%3C/svg%3E" alt="安全审计框架">
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">安全审计框架</h3>
+                        <p class="card-description">全面的安全漏洞扫描与合规检查工具，保障系统安全性。</p>
+                        
+                        <div class="card-tags">
+                            <span class="o-tag o-tag-fill-primary">个人</span>
+                            <span class="o-tag o-tag-stroke-primary">安全加固</span>
+                            <span class="o-tag o-tag-fill-danger">中风险</span>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="#" class="o-link">
+                                查看详情
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                            <span class="card-meta">下载量: 6,789</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 5 -->
+                <article class="skill-card">
+                    <div class="card-cover">
+                        <img src="data:image/svg+xml,%3Csvg width='400' height='160' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad5' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23fa709a;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23fee140;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='160' fill='url(%23grad5)'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='white'%3ESkill Icon%3C/text%3E%3C/svg%3E" alt="编译优化套件">
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">编译优化套件</h3>
+                        <p class="card-description">智能编译参数配置工具，针对不同硬件平台自动优化编译选项。</p>
+                        
+                        <div class="card-tags">
+                            <span class="o-tag o-tag-fill-primary">社区官方</span>
+                            <span class="o-tag o-tag-stroke-primary">工程编译</span>
+                            <span class="o-tag o-tag-fill-success">安全</span>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="#" class="o-link">
+                                查看详情
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                            <span class="card-meta">下载量: 5,678</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 6 -->
+                <article class="skill-card">
+                    <div class="card-cover">
+                        <img src="data:image/svg+xml,%3Csvg width='400' height='160' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad6' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2330cfd0;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23330863;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='160' fill='url(%23grad6)'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='white'%3ESkill Icon%3C/text%3E%3C/svg%3E" alt="监控告警中心">
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">监控告警中心</h3>
+                        <p class="card-description">实时监控系统运行状态，提供多维度指标展示和智能告警通知。</p>
+                        
+                        <div class="card-tags">
+                            <span class="o-tag o-tag-fill-primary">企业组织</span>
+                            <span class="o-tag o-tag-stroke-primary">监测运维</span>
+                            <span class="o-tag o-tag-fill-success">安全</span>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="#" class="o-link">
+                                查看详情
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                            <span class="card-meta">下载量: 4,567</span>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <!-- OPagination 分页 -->
+            <div class="pagination-wrapper">
+                <div class="pagination">
+                    <button class="page-btn" disabled aria-label="上一页">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                    </button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">4</button>
+                    <button class="page-btn">5</button>
+                    <button class="page-btn" aria-label="下一页">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="page-jumper">
+                    <span class="page-info">跳至</span>
+                    <input type="number" class="page-input" value="1" min="1" max="10">
+                    <span class="page-info">页</span>
+                </div>
+
+                <span class="page-info">共 48 条</span>
+            </div>
+        </main>
+
+        <!-- ========== ONavigation PC 页脚 (1920×460px, 完全符合规范) ========== -->
+        <footer class="footer">
+            <!-- 顶部说明区 (居中, gap 12px + 外层 16px) -->
+            <div class="footer-top">
+                <p class="footer-desc">openEuler 是由开放原子开源基金会（OpenAtom Foundation）孵化及运营的开源项目</p>
+                <img src="../assets/navigation/footer-pc-基金会logo.svg" alt="开放原子开源基金会" class="footer-logo-foundation">
+            </div>
+
+            <!-- 导航列 (6列, 1122.5px × 180px) -->
+            <div class="footer-nav">
+                <div class="footer-nav-column">
+                    <h4>关于 openEuler</h4>
+                    <ul>
+                        <li><a href="#">成员单位</a></li>
+                        <li><a href="#">组织架构</a></li>
+                        <li><a href="#">社区章程</a></li>
+                        <li><a href="#">贡献看板</a></li>
+                        <li><a href="#">社区介绍</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-nav-column">
+                    <h4>新闻与资讯</h4>
+                    <ul>
+                        <li><a href="#">新闻</a></li>
+                        <li><a href="#">博客</a></li>
+                        <li><a href="#">白皮书</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-nav-column">
+                    <h4>获取与下载</h4>
+                    <ul>
+                        <li><a href="#">获取 openEuler 操作系统</a></li>
+                        <li><a href="#">最新社区发行版</a></li>
+                        <li><a href="#">商业发行版</a></li>
+                        <li><a href="#">软件中心</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-nav-column">
+                    <h4>支持与服务</h4>
+                    <ul>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">联系我们</a></li>
+                        <li><a href="#">反馈问题</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-nav-column">
+                    <h4>互动与交流</h4>
+                    <ul>
+                        <li><a href="#">邮件列表</a></li>
+                        <li><a href="#">活动</a></li>
+                        <li><a href="#">论坛</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-nav-column">
+                    <h4>贡献与成长</h4>
+                    <ul>
+                        <li><a href="#">SIG 中心</a></li>
+                        <li><a href="#">贡献攻略</a></li>
+                        <li><a href="#">课程中心</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 友情链接区 (897px × 24px) [新增] -->
+            <div class="footer-friends">
+                <span class="footer-friends-title">友情链接</span>
+                <div class="footer-friends-links">
+                    <a href="#">木兰开源社区</a>
+                    <a href="#">鲲鹏社区</a>
+                    <a href="#">鲲鹏小智</a>
+                    <a href="#">鹏城实验室</a>
+                    <a href="#">InfoQ</a>
+                    <a href="#">开源社</a>
+                    <a href="#">中科微澜</a>
+                    <a href="#">Authing</a>
+                    <a href="#">openGauss</a>
+                    <a href="#">昇思MindSpore</a>
+                    <a href="#">Ebaina</a>
+                </div>
+            </div>
+
+            <!-- 分隔线 (1487.91px × 2px, opacity 0.12) -->
+            <div class="footer-divider"></div>
+
+            <!-- 底部信息行 (三列: Logo | 版权 | 社交媒体) -->
+            <div class="footer-bottom">
+                <!-- Logo区 (150px × 68px, left: 0) -->
+                <div class="footer-logo-area">
+                    <img src="../assets/navigation/footer-pc-底部logo.svg" alt="openEuler">
+                    <p class="footer-contact">contact@openeuler.org</p>
+                </div>
+
+                <!-- 版权信息区 (266px × 78px, 居中偏右) -->
+                <div class="footer-copyright-area">
+                    <div class="footer-links">
+                        <a href="#">品牌</a>
+                        <span>|</span>
+                        <a href="#">隐私政策</a>
+                        <span>|</span>
+                        <a href="#">法律声明</a>
+                    </div>
+                    <p class="footer-copyright-text">版权所有 © 2024 openEuler 保留一切权利</p>
+                    <p class="footer-copyright-text">遵循 木兰宽松许可证第2版（MulanPSL2）</p>
+                </div>
+
+                <!-- 社交媒体区 (353.91px × 52px, left: 1134px) -->
+                <div class="footer-social">
+                    <!-- 二维码行 (top: 0) [新增] -->
+                    <div class="social-qrcode-row">
+                        <div class="social-qrcode-item">
+                            <img src="../assets/navigation/footer-mb-二维码1.svg" alt="openEuler公众号" style="width: 80px; height: 80px;">
+                            <span>openEuler公众号</span>
+                        </div>
+                        <div class="social-qrcode-item">
+                            <img src="../assets/navigation/footer-mb-二维码2.svg" alt="openEuler小助手" style="width: 80px; height: 80px;">
+                            <span>openEuler小助手</span>
+                        </div>
+                    </div>
+
+                    <!-- 平台Logo行 (top: 32px) -->
+                    <div class="social-platform-row">
+                        <div class="social-icon">
+                            <img src="../assets/navigation/footer-pc-社交媒体logo.svg" alt="OSCHINA">
+                        </div>
+                        <div class="social-icon">
+                            <img src="../assets/navigation/footer-pc-社交媒体logo.svg" alt="CSDN">
+                        </div>
+                        <div class="social-icon">
+                            <img src="../assets/navigation/footer-pc-社交媒体logo.svg" alt="新土提金">
+                        </div>
+                        <div class="social-icon">
+                            <img src="../assets/navigation/footer-pc-社交媒体logo.svg" alt="bilibili">
+                        </div>
+                        <div class="social-icon">
+                            <img src="../assets/navigation/footer-pc-社交媒体logo.svg" alt="头条">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

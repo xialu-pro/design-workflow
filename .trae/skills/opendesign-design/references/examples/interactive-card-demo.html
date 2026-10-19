@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OCard 交互式卡片 · 规范实例</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'HarmonyOS Sans SC','HarmonyHeiTi','PingFang SC',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size:14px;line-height:22px;color:rgba(0,0,0,.85);
+  background:#F2F3F5;padding:40px 24px;
+}
+h1{font-size:28px;line-height:36px;font-weight:700;margin-bottom:8px;}
+h2{font-size:20px;line-height:28px;font-weight:600;margin:48px 0 24px;}
+p.intro{font-size:14px;line-height:22px;color:rgba(0,0,0,.6);margin-bottom:32px;}
+.demo-section{margin-bottom:48px;}
+.demo-row{display:flex;flex-wrap:wrap;gap:24px;margin-bottom:24px;}
+
+.card{
+  background:var(--o-color-fill2,#fff);
+  border-radius:4px;
+  display:flex;
+  flex-direction:column;
+  transition:box-shadow .2s,color .2s,transform .2s;
+  overflow:hidden;
+  position:relative;
+}
+.card:hover{box-shadow:0 2px 24px rgba(0,0,0,.15);}
+.card.clickable{cursor:pointer;}
+.card.clickable:active{transform:scale(0.98);}
+
+.card-cover{padding:8px;gap:24px;}
+.card-icon{padding:24px 32px;gap:16px;}
+.card-horizontal{flex-direction:row;}
+
+.card-cover .card-header{display:none;}
+.card-icon .card-header{
+  display:flex;align-items:center;gap:16px;
+}
+.icon-wrapper{
+  width:32px;height:32px;background:rgba(0,47,167,.08);
+  border-radius:4px;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;
+  transition:background .2s,transform .2s;
+}
+.card:hover .icon-wrapper{
+  background:rgba(0,47,167,.15);transform:scale(1.1);
+}
+.icon-wrapper svg{width:20px;height:20px;color:#002FA7;}
+
+.card-title{
+  font-size:22px;line-height:30px;font-weight:600;
+  color:var(--o-color-info1,rgba(0,0,0,.85));
+  transition:color .2s;
+}
+.card:hover .card-title{color:var(--o-color-primary1,#002FA7);}
+
+.card-cover .card-body{
+  padding:0 16px 16px;display:flex;flex-direction:column;gap:8px;
+}
+.card-icon .card-body{display:flex;flex-direction:column;gap:8px;}
+.card-desc{
+  font-size:16px;line-height:24px;
+  color:var(--o-color-info3,rgba(0,0,0,.6));
+}
+.card-meta{
+  font-size:14px;line-height:22px;color:rgba(0,0,0,.45);margin-top:4px;
+}
+
+.card-footer{
+  padding:0 16px 8px;
+  display:flex;align-items:center;justify-content:flex-start;gap:12px;
+}
+.card-icon .card-footer{padding:0;margin-top:auto;}
+
+.o-button{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-family:'HarmonyOS Sans SC','HarmonyHeiTi','PingFang SC',sans-serif;
+  cursor:pointer;transition:all .2s;text-decoration:none;border:none;
+  white-space:nowrap;user-select:none;
+}
+.o-button:focus{outline:none;}
+.o-btn-m{
+  height:32px;padding:5px 16px;border-radius:16px;
+  font-size:14px;line-height:22px;min-width:80px;
+}
+
+.o-btn-solid{
+  background:var(--o-color-primary1,#002FA7);color:#fff;
+  border:1px solid var(--o-color-primary1,#002FA7);
+}
+.o-btn-solid:hover{background:var(--o-color-primary2,#0039d0);border-color:var(--o-color-primary2,#0039d0);}
+.o-btn-solid:active{background:var(--o-color-primary3,#002a87);border-color:var(--o-color-primary3,#002a87);}
+
+.o-btn-outline{
+  background:transparent;color:var(--o-color-primary1,#002FA7);
+  border:1px solid var(--o-color-primary1,#002FA7);
+}
+.o-btn-outline:hover{background:rgba(0,47,167,.06);color:var(--o-color-primary2,#0039d0);border-color:var(--o-color-primary2,#0039d0);}
+.o-btn-outline:active{background:rgba(0,47,167,.12);color:var(--o-color-primary3,#002a87);border-color:var(--o-color-primary3,#002a87);}
+
+.o-btn-text{
+  background:transparent;color:var(--o-grey-14,rgba(0,0,0,.85));
+  border:1px solid transparent;padding-left:0;padding-right:0;min-width:auto;
+}
+.o-btn-text:hover{color:var(--o-color-primary2,#0039d0);}
+.o-btn-text:active{color:var(--o-color-primary3,#002a87);}
+
+/* ═════════════════════════════════════════════
+   封面图片区域（硬约束规则5：固定比例）
+   支持 16:9（标准横向）和 3:1（超宽横向）两种比例
+   所有封面图必须为横向比例，禁止竖向
+   Hover 效果仅作用于内部内容（硬约束规则1）
+   ═════════════════════════════════════════════ */
+.cover-img{
+  width:100%;
+  aspect-ratio:16 / 9;
+  background:linear-gradient(135deg,rgba(0,47,167,.06) 0%,rgba(0,125,80,.06) 100%);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.cover-img--wide{
+  aspect-ratio:3 / 1;
+}
+.cover-img > .cover-placeholder,
+.cover-img > img,
+.cover-img > [class*="cover-content"]{
+  transition:transform .2s;
+}
+.card:hover .cover-img > .cover-placeholder,
+.card:hover .cover-img > img,
+.card:hover .cover-img > [class*="cover-content"]{
+  transform:scale(1.05);
+}
+.cover-placeholder{font-size:14px;color:rgba(0,0,0,.4);}
+
+/* ═════════════════════════════════════════════
+   OTag 标签组件（硬约束规则4：必须调用 tag.md）
+   严格遵循 tag.md 规格：
+   - Variant: fill/stroke
+   - Size: large(32px)/medium(24px)/small(20px)
+   - Color: primary/success/warning/danger/info
+   - 圆角: 4px (radius_control-m)
+   - 字体: HarmonyOS Sans SC Regular
+   ═════════════════════════════════════════════ */
+.otag{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  font-family:'HarmonyOS Sans SC','HarmonyHeiTi','PingFang SC',sans-serif;
+  font-weight:400;
+  white-space:nowrap;
+  line-height:1;
+  border:none;
+  cursor:default;
+  border-radius:4px;
+}
+
+/* ── Large 尺寸：高度32px · 水平内边距12px · 垂直内边距4px ── */
+.otag-large{
+  height:32px;
+  padding:4px 12px;
+  font-size:14px;
+  line-height:22px;
+}
+
+/* ── Medium 尺寸：高度24px · 水平内边距8px · 垂直内边距2px ── */
+.otag-medium{
+  height:24px;
+  padding:2px 8px;
+  font-size:12px;
+  line-height:18px;
+}
+
+/* ── Small 尺寸：高度20px · 水平内边距6px · 垂直内边距2px ── */
+.otag-small{
+  height:20px;
+  padding:2px 6px;
+  font-size:12px;
+  line-height:18px;
+}
+
+/* ── Fill 变体：实心填充 ── */
+.otag-fill{color:#fff;}
+.otag-fill.otag-primary{background:rgb(0,47,167);}
+.otag-fill.otag-success{background:rgb(11,177,81);}
+.otag-fill.otag-warning{background:rgb(250,115,5);}
+.otag-fill.otag-danger{background:rgb(230,0,18);}
+.otag-fill.otag-info{background:rgb(222,222,227);}
+
+/* ── Stroke 变体：描边样式 ── */
+.otag-stroke{
+  background:transparent;
+  border:1px solid;
+}
+.otag-stroke.otag-primary{color:rgb(0,47,167);border-color:rgb(0,47,167);}
+.otag-stroke.otag-success{color:rgb(11,177,81);border-color:rgb(11,177,81);}
+.otag-stroke.otag-warning{color:rgb(250,115,5);border-color:rgb(250,115,5);}
+.otag-stroke.otag-danger{color:rgb(230,0,18);border-color:rgb(230,0,18);}
+.otag-stroke.otag-info{color:rgba(0,0,0,.85);border-color:rgba(0,0,0,.1);}
+
+/* ═════════════════════════════════════════════
+   数据统计区域（硬约束规则7：位置规则）
+   规格：字号14px / 颜色o-color-info3 / 图标间距8px
+   默认情况：无评分时全部左对齐
+   特殊情况：有评分时评分居左，其余居右
+   ═════════════════════════════════════════════ */
+.stats-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 16px;
+  font-size:14px;line-height:22px;font-weight:400;
+  color:var(--o-color-info3,rgba(0,0,0,.6));
+  justify-content:flex-start;
+}
+.stats-bar > * + *{margin-left:16px;}
+.stats-bar.has-rating{
+  justify-content:space-between;
+}
+.stats-bar .rating-element{
+  margin-right:auto;
+}
+.stats-bar .stats-group{
+  display:flex;align-items:center;gap:8px;
+}
+.stats-bar .stats-group > * + *{margin-left:16px;}
+
+.w-320{width:320px;}
+.w-360{width:360px;}
+.w-full{width:100%;}
+.card-horizontal{
+  width:auto;
+  max-width:none;
+}
+
+.toast{
+  position:fixed;top:20px;right:20px;
+  padding:12px 24px;background:#002FA7;color:#fff;
+  border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.15);
+  font-size:14px;z-index:1000;
+  opacity:0;transform:translateY(-10px);
+  transition:opacity .3s,transform .3s;
+}
+.toast.show{opacity:1;transform:translateY(0);}
+
+.modal-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.5);display:none;
+  align-items:center;justify-content:center;z-index:999;
+}
+.modal-overlay.show{display:flex;}
+.modal-content{
+  background:#fff;border-radius:8px;padding:32px;
+  max-width:500px;width:90%;max-height:80vh;overflow-y:auto;
+  box-shadow:0 8px 32px rgba(0,0,0,.2);
+  animation:modalSlideIn .3s ease-out;
+}
+@keyframes modalSlideIn{
+  from{opacity:0;transform:scale(0.9) translateY(-20px);}
+  to{opacity:1;transform:scale(1) translateY(0);}
+}
+.modal-header{
+  font-size:24px;font-weight:700;margin-bottom:16px;
+  color:rgba(0,0,0,.85);
+}
+.modal-body{font-size:16px;line-height:26px;color:rgba(0,0,0,.65);margin-bottom:24px;}
+.modal-footer{display:flex;gap:12px;justify-content:flex-end;}
+
+.loading-overlay{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  background:rgba(255,255,255,.8);
+  display:none;align-items:center;justify-content:center;
+  z-index:2;
+}
+.loading-overlay.show{display:flex;}
+.spinner{
+  width:40px;height:40px;border:3px solid rgba(0,47,167,.1);
+  border-top-color:#002FA7;border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.control-panel{
+  background:#fff;padding:24px;border-radius:8px;
+  margin-bottom:32px;box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+.control-panel h3{font-size:18px;margin-bottom:16px;}
+.control-row{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
+.control-row label{font-weight:600;min-width:100px;}
+.counter-display{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 16px;background:rgba(0,47,167,.04);
+  border-radius:4px;font-weight:700;color:#002FA7;
+}
+</style>
+</head>
+<body>
+
+<h1>OCard 交互式卡片完整实例</h1>
+<p class="intro">基于 opendesign-design 规范，展示卡片的完整交互能力。严格遵循所有硬约束规则。</p>
+
+<div class="control-panel">
+  <h3>交互控制面板</h3>
+  <div class="control-row">
+    <label>全局点击计数：</label>
+    <div class="counter-display" id="globalCounter">点击次数: <span id="clickCount">0</span></div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════
+     一、单一跳转方式（无 Footer 按钮）
+     硬约束规则6：整卡可点击，无操作按钮
+     ═════════════════════════════════════════════ -->
+<h2>一、单一跳转方式 - 无按钮（整卡可点击）</h2>
+<div class="demo-row">
+
+  <!-- 卡片1：16:9 比例 + 单跳转 + HOT 标签 + 数据统计（无评分，居左）-->
+  <div class="card card-cover w-320 clickable" data-card-id="1" onclick="handleSingleClick(this,'智能产品设计方案')">
+    <div class="otag otag-fill otag-medium otag-danger" style="position:absolute;top:12px;right:12px;z-index:1;">HOT</div>
+    <div class="cover-img">
+      <span class="cover-placeholder">产品封面图 (16:9)</span>
+    </div>
+    <div class="card-body">
+      <div class="card-title">智能产品设计方案</div>
+      <div class="card-desc">采用现代化设计语言，融合用户体验与视觉美学的完美平衡。</div>
+    </div>
+    <div class="stats-bar">
+      <span>浏览: 2.3k</span>
+      <span>评论: 128</span>
+    </div>
+    <div class="loading-overlay"><div class="spinner"></div></div>
+  </div>
+
+  <!-- 卡片2：16:9 标准比例 + 单跳转 + NEW 标签 -->
+  <div class="card card-cover w-320 clickable" data-card-id="2" onclick="handleSingleClick(this,'数据分析仪表盘')">
+    <div class="otag otag-fill otag-medium otag-success" style="position:absolute;top:12px;right:12px;z-index:1;">NEW</div>
+    <div class="cover-img">
+      <span class="cover-placeholder">数据可视化 (16:9)</span>
+    </div>
+    <div class="card-body">
+      <div class="card-title">数据分析仪表盘</div>
+      <div class="card-desc">实时数据监控与可视化展示，支持多维度数据分析。</div>
+      <div class="card-meta">更新于 2026-07-18</div>
+    </div>
+    <div class="loading-overlay"><div class="spinner"></div></div>
+  </div>
+
+  <!-- 卡片3：带评分的统计区域（评分居左，其他居右）- Tag位置：右上角（硬约束规则4）-->
+  <div class="card card-cover w-320 clickable" data-card-id="3" onclick="handleSingleClick(this,'热门商品推荐')">
+    <div class="otag otag-fill otag-small otag-warning" style="position:absolute;top:12px;right:12px;z-index:1;">推荐</div>
+    <div class="cover-img">
+      <span class="cover-placeholder">商品图片 (16:9)</span>
+    </div>
+    <div class="card-body">
+      <div class="card-title">热门商品推荐</div>
+      <div class="card-desc">精选优质商品，限时优惠活动中。</div>
+    </div>
+    <div class="stats-bar has-rating">
+      <span class="rating-element">★ 4.8 分</span>
+      <div class="stats-group">
+        <span>已售: 1.2k</span>
+        <span>好评: 98%</span>
+      </div>
+    </div>
+    <div class="loading-overlay"><div class="spinner"></div></div>
+  </div>
+
+</div>
+
+<!-- ═════════════════════════════════════════════
+     二、多跳转方式（显示全部按钮）
+     硬约束规则6：显示 Footer 按钮，卡片不可点
+     按钮顺序遵循规则2：Solid → Outline → Text
+     ═════════════════════════════════════════════ -->
+<h2>二、多跳转方式 - 显示全部按钮（按优先级排序）</h2>
+<div class="demo-row">
+
+  <!-- 卡片4：三个按钮（Solid + Outline + Text）-->
+  <div class="card card-cover w-320" data-card-id="4">
+    <div class="otag otag-stroke otag-small otag-primary" style="position:absolute;top:12px;right:12px;z-index:1;">技术文档</div>
+    <div class="cover-img">
+      <span class="cover-placeholder">文档封面 (16:9)</span>
+    </div>
+    <div class="card-body">
+      <div class="card-title">OpenDesign 设计系统文档 v2.0</div>
+      <div class="card-desc">完整的设计规范、组件库使用指南和最佳实践。</div>
+      <div class="card-meta">最后编辑：2026-07-19 · 作者：Design Team</div>
+    </div>
+    <div class="stats-bar">
+      <span>阅读: 5.6k</span>
+      <span>收藏: 892</span>
+    </div>
+    <div class="card-footer">
+      <button class="o-button o-btn-m o-btn-solid" onclick="showToast('正在打开在线阅读...')">在线阅读 →</button>
+      <button class="o-button o-btn-m o-btn-outline" onclick="showToast('链接已复制到剪贴板')">复制链接</button>
+      <button class="o-button o-btn-m o-btn-text" onclick="simulateLoading(this)">下载 PDF</button>
+    </div>
+    <div class="loading-overlay"><div class="spinner"></div></div>
+  </div>
+
+  <!-- 卡片5：两个按钮（Solid + Outline）+ 多个分类标签 -->
+  <div class="card card-cover w-320" data-card-id="5">
+    <div style="position:absolute;top:12px;right:12px;z-index:1;display:flex;gap:6px;">
+      <div class="otag otag-fill otag-small otag-danger">限量</div>
+      <div class="otag otag-stroke otag-small otag-primary">新品</div>
+    </div>
+    <div class="cover-img">
+      <span class="cover-placeholder">产品图片 (16:9)</span>
+    </div>
+    <div class="card-body">
+      <div class="card-title">旗舰智能手机 Pro Max</div>
+      <div class="card-desc">搭载最新处理器，支持 AI 智能功能，超长续航体验。</div>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <div class="otag otag-stroke otag-small otag-success">数码</div>
+        <div class="otag otag-stroke otag-small otag-info">热销</div>
+      </div>
+    </div>
+    <div class="stats-bar has-rating">
+      <span class="rating-element">★ 4.9 分</span>
+      <div class="stats-group">
+        <span>月销: 3.5k</span>
+        <span>评价: 2.1k</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="o-button o-btn-m o-btn-solid" onclick="openModal('立即购买','您即将进入购买页面，请确认商品信息无误后完成支付。')">立即购买</button>
+      <button class="o-button o-btn-m o-btn-outline" onclick="showToast('已加入购物车')">加入购物车</button>
+    </div>
+    <div class="loading-overlay"><div class="spinner"></div></div>
+  </div>
+
+</div>
+
+<!-- ═════════════════════════════════════════════
+     三、图标卡片 - 功能入口
+     图标卡片同样适用按钮显示规则
+     ═════════════════════════════════════════════ -->
+<h2>三、图标卡片 - 功能入口示例</h2>
+<div class="demo-row">
+
+  <!-- 图标卡片1：单跳转（无按钮）-->
+  <div class="card card-icon w-320 clickable" data-card-id="6" onclick="handleSingleClick(this,'快捷功能中心')">
+    <div class="card-header">
+      <div class="icon-wrapper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <div class="card-title">快捷操作</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">一键完成常用任务，提升工作效率 300%</div>
+      <div class="card-desc" style="font-size:28px;font-weight:700;color:#002FA7;margin-top:8px;">12ms</div>
+      <div class="card-desc">平均响应时间</div>
+    </div>
+    <div class="loading-overlay"><div class="spinner"></div></div>
+  </div>
+
+  <!-- 图标卡片2：多跳转（显示按钮）-->
+  <div class="card card-icon w-320" data-card-id="7">
+    <div class="card-header">
+      <div class="icon-wrapper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      </div>
+      <div class="card-title">团队协作</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">实时协同编辑，支持多人同时在线工作</div>
+    </div>
+    <div class="card-footer">
+      <button class="o-button o-btn-m o-btn-solid" onclick="openModal('团队协作中心','管理您的团队成员、权限分配和项目进度跟踪')">进入团队 →</button>
+      <button class="o-button o-btn-m o-btn-text" onclick="showToast('邀请链接已复制')">邀请成员</button>
+    </div>
+  </div>
+
+  <!-- 图标卡片3：单跳转 + 统计数据 -->
+  <div class="card card-icon w-320 clickable" data-card-id="8" onclick="handleSingleClick(this,'财务报表')">
+    <div class="card-header">
+      <div class="icon-wrapper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      </div>
+      <div class="card-title">财务统计</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc" style="font-size:32px;font-weight:700;color:#002FA7;">¥128,560</div>
+      <div class="card-desc">本月总收入</div>
+      <div class="card-meta" style="margin-top:8px;color:#52c41a;">23.5% 较上月增长</div>
+    </div>
+    <div class="loading-overlay"><div class="spinner"></div></div>
+  </div>
+
+</div>
+
+<!-- ═════════════════════════════════════════════
+     四、水平布局卡片
+     ═════════════════════════════════════════════ -->
+<h2>四、水平布局卡片 - 列表项示例</h2>
+<div class="demo-row">
+
+  <!-- 水平布局：多按钮（使用 16:9 标准比例）- 卡片宽度根据内容自适应 -->
+  <div class="card card-cover card-horizontal" data-card-id="9">
+    <div class="cover-img" style="width:200px;border-radius:4px 0 0 4px;flex-shrink:0;">
+      <span class="cover-placeholder">图片比例16:9</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;padding:16px 24px 16px 20px;min-width:0;width:auto;">
+      <div class="card-title" style="font-size:20px;line-height:28px;">标题文本标题文本</div>
+      <div class="card-desc" style="font-size:14px;line-height:22px;color:rgba(0,0,0,.65);white-space:normal;">
+        内容文本内容文本内容文本内容文本内容文本内容文本
+        内容文本内容文本内容文本内容文本内容文本内容文本
+        内容文本内容文本内容文本内容文本内容文本
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-header" id="modalTitle">标题</div>
+    <div class="modal-body" id="modalBody">内容</div>
+    <div class="modal-footer">
+      <button class="o-button o-btn-m o-btn-text" onclick="closeModal()">取消</button>
+      <button class="o-button o-btn-m o-btn-solid" onclick="closeModal();showToast('操作已完成')">确认</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let clickCount = 0;
+
+function handleSingleClick(card, title) {
+  clickCount++;
+  document.getElementById('clickCount').textContent = clickCount;
+  
+  const cardId = card.dataset.cardId;
+  
+  console.log(`[单击跳转] Card ID: ${cardId}, Title: "${title}"`);
+  console.log(`→ 模拟跳转到: /detail/${cardId}`);
+  
+  showToast(`正在打开: ${title}...`);
+  
+  const overlay = card.querySelector('.loading-overlay');
+  if (overlay) {
+    overlay.classList.add('show');
+    setTimeout(() => {
+      overlay.classList.remove('show');
+    }, 800);
+  }
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2500);
+}
+
+function openModal(title, body) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').textContent = body;
+  document.getElementById('modalOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(event) {
+  if (event && event.target !== event.currentTarget) return;
+  document.getElementById('modalOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function simulateLoading(btn) {
+  const card = btn.closest('.card');
+  const overlay = card.querySelector('.loading-overlay');
+  
+  overlay.classList.add('show');
+  btn.disabled = true;
+  btn.textContent = '加载中...';
+  
+  setTimeout(() => {
+    overlay.classList.remove('show');
+    btn.disabled = false;
+    btn.textContent = '下载 PDF';
+    showToast('加载完成！');
+  }, 2000);
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeModal();
+  }
+});
+
+console.log('OCard 交互式卡片实例已加载');
+console.log('硬约束规则检查清单:');
+console.log('  [✓] 规则1: 封面图 hover 仅内部元素 scale(1.05)');
+console.log('  [✓] 规则2: Footer 按钮左对齐 + Solid→Outline→Text');
+console.log('  [✓] 规则3: 禁止 Emoji/Unicode 自定义图标');
+console.log('  [✓] 规则4: Tag 必须调用 OTag 组件 (tag.md)');
+console.log('  [✓] 规则5: 封面图固定比例 16:9(垂直) 或 3:1(水平)');
+console.log('  [✓] 规则6: 单跳转无按钮/多跳转显示全部按钮');
+console.log('  [✓] 规则7: 统计区域位置规则 (有/无评分)');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1920"/>
+<title>openEuler 组件库 · 卡片列表</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'HarmonyOS Sans SC','HarmonyHeiTi','PingFang SC',sans-serif;font-size:14px;line-height:22px;color:rgba(0,0,0,.85);min-width:1920px;background:#F2F3F5;}
+/* NAV */
+.nav{width:100%;height:72px;background:#fff;box-shadow:0 3px 9px rgba(0,18,85,.08);display:flex;align-items:center;justify-content:space-between;padding:0 216px;position:sticky;top:0;z-index:100;}
+.nav-left{display:flex;align-items:flex-end;gap:40px;}
+.logo{display:flex;align-items:center;text-decoration:none;}
+.nav-menu{display:flex;gap:32px;}
+.nav-menu a{font-size:16px;line-height:24px;color:rgba(0,0,0,.85);text-decoration:none;}
+.nav-menu a:hover{color:#002FA7;}
+.nav-right{display:flex;align-items:center;gap:20px;}
+.nav-search{width:160px;height:32px;background:rgb(255,255,255);border:1px solid rgba(0,0,0,.25);border-radius:4px;display:flex;align-items:center;padding:0 12px;gap:8px;cursor:text;}
+.nav-search span{font-size:14px;line-height:22px;color:rgba(0,0,0,.4);}
+.icon-btn{width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:4px;color:rgba(0,0,0,.6);}
+.icon-btn:hover{background:rgba(0,0,0,.04);}
+.nav-btn{height:auto;padding:0;border:none;background:transparent;color:rgba(0,0,0,.85);font-size:14px;line-height:22px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;}
+.nav-btn:hover{color:rgba(0,0,0,1);}
+/* CONTENT
+   楼层间距规则（PC）：
+   间距6=32px 组件上下间距 | 间距7=40px 楼层标题→内容 | 间距10=72px 楼层之间
+*/
+.content{padding:32px 216px 72px;}
+/* 面包屑 */
+.breadcrumb{display:flex;align-items:center;gap:4px;}  /* OBreadcrumb: gap=4px，水平排列 */
+.bc-link{font-size:14px;line-height:22px;font-weight:400;color:rgba(0,0,0,.6);text-decoration:none;}  /* color-info3 */
+.bc-link:hover{color:#002FA7;}
+.bc-arrow{flex-shrink:0;}  /* 右箭头图标 24×24，color-info3 */
+.bc-cur{font-size:14px;line-height:22px;font-weight:600;color:#002FA7;}  /* color-primary1，加粗蓝色 */
+/* 页面标题（楼层标题） */
+.page-header{margin-top:32px;margin-bottom:40px;}  /* 间距6=32px（组件上下间距）; margin-bottom 间距7=40px（楼层标题→内容） */
+/* margin-bottom:40px = 间距7，楼层标题→内容（筛选区） */
+.page-title{font-size:32px;line-height:44px;font-weight:700;color:rgba(0,0,0,.85);margin-bottom:8px;}
+.page-subtitle{font-size:14px;line-height:22px;color:rgba(0,0,0,.6);}
+/* FILTER */
+.filter-bar{background:#fff;border-radius:4px;display:flex;align-items:center;height:88px;padding:0 24px;gap:16px;}
+.filter-search{flex:0 0 320px;height:40px;border:1px solid rgba(0,0,0,.15);border-radius:4px;display:flex;align-items:center;padding:0 12px;gap:8px;font-size:14px;color:rgba(0,0,0,.4);}
+.fdrop{height:40px;flex:0 0 auto;border:1px solid #002FA7;border-radius:100px;display:flex;align-items:center;gap:4px;padding:8px 16px 8px 24px;font-size:16px;line-height:24px;color:#002FA7;cursor:pointer;white-space:nowrap;}
+.fdrop:hover{background:rgba(0,47,167,.06);}
+.fdrop-w{}
+.btn-p{height:40px;padding:0 24px;background:#002FA7;border:none;border-radius:100px;color:#fff;font-size:16px;line-height:24px;cursor:pointer;font-family:inherit;}
+.btn-p:hover{background:#0039d0;}
+.btn-d{height:40px;padding:0 24px;background:transparent;border:1px solid #002FA7;border-radius:100px;color:#002FA7;font-size:16px;line-height:24px;cursor:pointer;font-family:inherit;}
+.btn-d:hover{background:rgba(0,47,167,.06);}
+/* 卡片网格 — OCard cover vertical */
+.card-grid{display:grid;grid-template-columns:repeat(4,348px);gap:32px;margin-top:32px;}  /* 间距6=32px（筛选栏→卡片网格） */
+/* 容器：color-fill2 背景，4px圆角，8px uniform padding，sections间距 24px（Header↔Body↔Footer gap） */
+.card{width:348px;background:rgb(255,255,255);border-radius:4px;padding:8px;display:flex;flex-direction:column;gap:24px;transition:box-shadow .2s;}
+.card:hover{box-shadow:0 2px 24px rgba(0,0,0,.15);}  /* shadow-2 */
+/* Header：封面图纯色占位，顶部4px圆角，固定高度 */
+.card-cover{border-radius:4px;height:160px;background:rgba(0,47,167,.06);flex-shrink:0;}
+/* Body：额外 left/right/bottom 各 8px → 总计 16px from 卡片边缘 */
+.card-body{padding:0 8px 8px;display:flex;flex-direction:column;gap:8px;flex:1;}
+.card-title{font-size:16px;line-height:24px;font-weight:700;color:rgba(0,0,0,.85);}  /* color-info1 */
+.card-desc{font-size:14px;line-height:22px;color:rgba(0,0,0,.6);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;}  /* color-info3 */
+.card-tags{display:flex;gap:8px;}
+.tag{height:22px;padding:0 8px;border-radius:4px;font-size:12px;line-height:22px;}
+.tag-b{background:rgba(0,47,167,.08);color:#002FA7;}
+.tag-g{background:rgba(0,0,0,.06);color:rgba(0,0,0,.65);}
+.tag-gr{background:rgba(0,125,80,.08);color:#007D50;}
+/* Footer：包含分隔线 + meta 行 */
+.card-footer{display:flex;flex-direction:column;gap:8px;padding:0 8px;}  /* 与 card-body 左右 padding 对齐，总计 16px from 卡片边缘 */
+.card-divider{height:1px;background:rgba(0,0,0,.08);}
+.card-footer-row{display:flex;align-items:center;justify-content:space-between;}
+.card-meta{font-size:12px;line-height:18px;color:rgba(0,0,0,.4);}
+/* OButton medium text 变体：黑色(grey-14)，无背景无边框，padding=0，高度 32px */
+.card-link{font-size:14px;line-height:22px;font-weight:400;color:rgba(0,0,0,1);text-decoration:none;height:32px;display:inline-flex;align-items:center;padding:0;background:transparent;border:none;cursor:pointer;font-family:inherit;}
+.card-link:hover{color:rgba(0,0,0,.6);}
+/* OPagination show=All Dark=off
+   结构：OPA 容器 (gap 24px) → Pager Ctrl (gap 8px) + Jumper Ctrl + 数据区 */
+.pagination-bar{display:flex;align-items:center;justify-content:flex-end;margin-top:32px;height:32px;}
+.opa{display:flex;align-items:center;gap:24px;}                        /* gap-6=24px 三区间距 */
+/* ── Pager Ctrl ── */
+.opa-pager{display:flex;align-items:center;gap:8px;}                   /* gap-2=8px */
+.opa-arrow{width:32px;height:32px;flex-shrink:0;border:1px solid rgba(0,0,0,.25);border-radius:4px;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(0,0,0,.85);}
+.opa-arrow:hover{border-color:#002FA7;color:#002FA7;}
+.opa-page{width:32px;height:32px;flex-shrink:0;border:none;border-radius:0;background:transparent;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:22px;color:rgba(0,0,0,.85);cursor:pointer;font-family:inherit;}
+.opa-page:hover{background:rgba(0,47,167,.06);border-radius:4px;}
+.opa-page.active{background:#002FA7;border-radius:4px;color:#fff;}
+.opa-ellipsis{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:14px;color:rgba(0,0,0,.85);}
+/* ── Jumper Ctrl ── */
+.opa-jumper{display:flex;align-items:center;gap:8px;font-size:14px;line-height:22px;color:rgba(0,0,0,.85);}
+.opa-input{width:56px;height:32px;border:1px solid rgba(0,0,0,.25);border-radius:4px;background:#fff;text-align:center;font-size:14px;color:rgba(0,0,0,.85);font-family:inherit;}
+.opa-input:hover{border-color:rgba(0,47,167,.4);}
+.opa-input:focus{border-color:#002FA7;outline:none;}
+/* ── 数据区：Pagesize + Total Label ── */
+.opa-data{display:flex;align-items:center;gap:16px;font-size:14px;line-height:22px;color:rgba(0,0,0,.85);}
+.opa-pagesize{height:32px;display:flex;align-items:center;gap:4px;border:1px solid rgba(0,0,0,.25);border-radius:4px;background:#fff;padding:0 12px;cursor:pointer;}
+.opa-pagesize:hover{border-color:rgba(0,0,0,.4);}
+/* FOOTER */
+.footer{background:rgba(18,18,20,1);min-height:460px;padding:24px 216px 34px;}
+.footer-intro{margin-bottom:32px;display:flex;flex-direction:column;align-items:center;gap:16px;}
+.footer-intro-text{font-size:20px;line-height:28px;color:rgba(255,255,255,1);text-align:center;}
+.footer-nav{display:flex;gap:0;margin-bottom:24px;}
+.footer-col{flex:1;}
+.footer-col-title{font-size:20px;line-height:28px;font-weight:400;color:rgba(255,255,255,1);margin-bottom:16px;}
+.footer-col a{display:block;font-size:14px;line-height:22px;color:rgba(255,255,255,.6);margin-bottom:8px;text-decoration:none;}
+.footer-col a:hover{color:rgba(255,255,255,1);}
+.footer-links{margin-bottom:24px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;}
+.footer-links-title{font-size:12px;line-height:24px;font-weight:200;color:rgba(255,255,255,1);margin-right:8px;white-space:nowrap;}
+.footer-links a{font-size:12px;line-height:18px;color:rgba(255,255,255,.6);text-decoration:none;padding:0 8px;}
+.footer-links a:hover{color:rgba(255,255,255,1);}
+.footer-links-sep{font-size:12px;color:rgba(255,255,255,.3);}
+.footer-divider{height:2px;background:rgba(229,229,229,1);opacity:.12;margin-bottom:0;}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;height:78px;}
+.footer-logo{width:150px;height:68px;flex-shrink:0;}
+.footer-logo img{width:150px;height:68px;}
+.footer-copy{text-align:center;display:flex;flex-direction:column;gap:4px;}
+.footer-copy-links{font-size:14px;line-height:22px;color:rgba(255,255,255,1);}
+.footer-copy-sep{color:rgba(255,255,255,.4);margin:0 8px;}
+.footer-copy p{font-size:14px;line-height:22px;color:rgba(255,255,255,.6);}
+.footer-social{width:354px;height:52px;flex-shrink:0;}
+.footer-social img{width:354px;height:52px;}
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<header class="nav">
+  <div class="nav-left">
+    <a class="logo" href="#">
+      <img src="../assets/navigation/header-pc-light logo.svg" width="136" height="32" alt="openEuler">
+    </a>
+    <nav class="nav-menu">
+      <a>下载</a><a>开发</a><a>文档</a><a>学习</a><a>支持</a><a>社区</a><a>动态</a>
+    </nav>
+  </div>
+  <div class="nav-right">
+    <!-- 搜索框 -->
+    <div class="nav-search">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="7" cy="7" r="4.5" stroke="rgba(0,0,0,0.4)" stroke-width="1.4"/>
+        <line x1="10.3" y1="10.3" x2="13.5" y2="13.5" stroke="rgba(0,0,0,0.4)" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <span>搜索</span>
+    </div>
+    <!-- 源码下拉（48×24，text+箭头，排在国际化之前） -->
+    <button class="nav-btn">
+      源码
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="rgba(0,0,0,.85)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <!-- 国际化图标（24×24） -->
+    <div class="icon-btn">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <circle cx="10" cy="10" r="7.5" stroke="rgba(0,0,0,0.6)" stroke-width="1.4"/>
+        <path d="M10 2.5C10 2.5 7 5.5 7 10s3 7.5 3 7.5M10 2.5c0 0 3 3 3 7.5s-3 7.5-3 7.5M2.5 10h15" stroke="rgba(0,0,0,0.6)" stroke-width="1.4"/>
+      </svg>
+    </div>
+    <!-- 主题切换图标（24×24） -->
+    <div class="icon-btn">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M10 3v1M10 16v1M3 10H2M18 10h-1M5.05 5.05l-.71-.71M15.66 15.66l-.71-.71M5.05 14.95l-.71.71M15.66 4.34l-.71.71" stroke="rgba(0,0,0,0.6)" stroke-width="1.4" stroke-linecap="round"/>
+        <circle cx="10" cy="10" r="3.5" stroke="rgba(0,0,0,0.6)" stroke-width="1.4"/>
+      </svg>
+    </div>
+    <!-- 用户图标（24×24） -->
+    <div class="icon-btn">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <circle cx="10" cy="7" r="3.5" stroke="rgba(0,0,0,0.6)" stroke-width="1.4"/>
+        <path d="M3 18c0-3.5 3.1-6 7-6s7 2.5 7 6" stroke="rgba(0,0,0,0.6)" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<!-- ══ CONTENT ══ -->
+<main class="content">
+
+  <!-- 面包屑 OBreadcrumb Dark=off：gap=4px，分隔符为右箭头图标24×24，当前页蓝色加粗 -->
+  <nav class="breadcrumb">
+    <a class="bc-link">首页</a>
+    <svg class="bc-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="rgba(0,0,0,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <a class="bc-link">组件库</a>
+    <svg class="bc-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="rgba(0,0,0,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <a class="bc-link">数据展示</a>
+    <svg class="bc-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="rgba(0,0,0,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span class="bc-cur">卡片列表</span>
+  </nav>
+
+  <!-- 标题 -->
+  <div class="page-header">
+    <h1 class="page-title">卡片列表</h1>
+    <p class="page-subtitle">共 120 个组件，支持按名称、状态和类型筛选</p>
+  </div>
+
+  <!-- 筛选栏 -->
+  <div class="filter-bar">
+    <div class="filter-search">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="7" cy="7" r="4.5" stroke="rgba(0,0,0,0.4)" stroke-width="1.4"/>
+        <line x1="10.3" y1="10.3" x2="13.5" y2="13.5" stroke="rgba(0,0,0,0.4)" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <span>搜索组件名称</span>
+    </div>
+    <div class="fdrop">
+      <span>状态</span>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#002FA7" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="fdrop">
+      <span>类型</span>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#002FA7" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="fdrop">
+      <span>版本</span>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#002FA7" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="fdrop fdrop-w">
+      <span>排序方式</span>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#002FA7" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <button class="btn-p">搜 索</button>
+    <button class="btn-d">重 置</button>
+  </div>
+
+
+  <!-- 卡片列表 -->
+  <div class="card-grid">
+
+    <!-- 1. OButton -->
+    <div class="card">
+      <div class="card-cover"></div>
+      <div class="card-body">
+        <div class="card-title">OButton 按钮</div>
+        <div class="card-desc">触发操作或跳转的基础交互入口，支持实心、描边、文字三种外观类型与三种尺寸规格。</div>
+        <div class="card-tags"><span class="tag tag-b">交互类</span><span class="tag tag-g">基础</span></div>
+      </div>
+      <div class="card-footer">
+        <div class="card-divider"></div>
+        <div class="card-footer-row"><a class="card-link">查看详情 →</a><span class="card-meta">v1.2.0 · 2026-04-17</span></div>
+      </div>
+    </div>
+
+    <!-- 2. OInput -->
+    <div class="card">
+      <div class="card-cover"></div>
+      <div class="card-body">
+        <div class="card-title">OInput 输入框</div>
+        <div class="card-desc">通用文本输入控件，支持多种尺寸和状态，可配置前缀图标、后缀操作和清除按钮。</div>
+        <div class="card-tags"><span class="tag tag-gr">表单类</span><span class="tag tag-g">基础</span></div>
+      </div>
+      <div class="card-footer">
+        <div class="card-divider"></div>
+        <div class="card-footer-row"><a class="card-link">查看详情 →</a><span class="card-meta">v1.1.0 · 2026-04-15</span></div>
+      </div>
+    </div>
+
+    <!-- 3. ONavigation -->
+    <div class="card">
+      <div class="card-cover"></div>
+      <div class="card-body">
+        <div class="card-title">ONavigation 导航</div>
+        <div class="card-desc">全局顶部导航栏与底部页脚，支持 PC/移动端双端及 Light/Dark 主题切换。</div>
+        <div class="card-tags"><span class="tag tag-b">导航类</span><span class="tag tag-g">全局</span></div>
+      </div>
+      <div class="card-footer">
+        <div class="card-divider"></div>
+        <div class="card-footer-row"><a class="card-link">查看详情 →</a><span class="card-meta">v2.0.0 · 2026-04-28</span></div>
+      </div>
+    </div>
+
+    <!-- 4. OCard -->
+    <div class="card">
+      <div class="card-cover"></div>
+      <div class="card-body">
+        <div class="card-title">OCard 卡片</div>
+        <div class="card-desc">信息聚合容器，提供封面竖版、封面横版、图标竖版、图标横版四种布局模式。</div>
+        <div class="card-tags"><span class="tag tag-b">数据展示</span><span class="tag tag-g">容器</span></div>
+      </div>
+      <div class="card-footer">
+        <div class="card-divider"></div>
+        <div class="card-footer-row"><a class="card-link">查看详情 →</a><span class="card-meta">v1.0.0 · 2026-03-22</span></div>
+      </div>
+    </div>
+
+    <!-- 5. ODropdown -->
+    <div class="card">
+      <div class="card-cover"></div>
+      <div class="card-body">
+        <div class="card-title">ODropdown 下拉菜单</div>
+        <div class="card-desc">收纳折叠操作项的下拉面板，支持实心、描边、文字触发样式及多级菜单结构。</div>
+        <div class="card-tags"><span class="tag tag-b">交互类</span><span class="tag tag-g">基础</span></div>
+      </div>
+      <div class="card-footer">
+        <div class="card-divider"></div>
+        <div class="card-footer-row"><a class="card-link">查看详情 →</a><span class="card-meta">v1.2.1 · 2026-04-10</span></div>
+      </div>
+    </div>
+
+    <!-- 6. OSearch -->
+    <div class="card">
+      <div class="card-cover"></div>
+      <div class="card-body">
+        <div class="card-title">OSearch 搜索框</div>
+        <div class="card-desc">带关键词输入与触发按钮的搜索控件，提供大号与中号两种规格，支持自定义占位符。</div>
+        <div class="card-tags"><span class="tag tag-b">交互类</span><span class="tag tag-g">基础</span></div>
+      </div>
+      <div class="card-footer">
+        <div class="card-divider"></div>
+        <div class="card-footer-row"><a class="card-link">查看详情 →</a><span class="card-meta">v1.0.2 · 2026-04-05</span></div>
+      </div>
+    </div>
+
+    <!-- 7. OTab -->
+    <div class="card">
+      <div class="card-cover"></div>
+      <div class="card-body">
+        <div class="card-title">OTab 标签页</div>
+        <div class="card-desc">在同一内容区切换不同视图的选项卡，支持线条与填充两种外观，溢出时可横向滚动。</div>
+        <div class="card-tags"><span class="tag tag-b">导航类</span><span class="tag tag-g">基础</span></div>
+      </div>
+      <div class="card-footer">
+        <div class="card-divider"></div>
+        <div class="card-footer-row"><a class="card-link">查看详情 →</a><span class="card-meta">v1.1.0 · 2026-03-28</span></div>
+      </div>
+    </div>
+
+    <!-- 8. OPagination -->
+    <div class="card">
+      <div class="card-cover"></div>
+      <div class="card-body">
+        <div class="card-title">OPagination 分页</div>
+        <div class="card-desc">长列表的分页导航，提供完整与简洁两种模式，自动计算页码显示范围。</div>
+        <div class="card-tags"><span class="tag tag-b">导航类</span><span class="tag tag-g">基础</span></div>
+      </div>
+      <div class="card-footer">
+        <div class="card-divider"></div>
+        <div class="card-footer-row"><a class="card-link">查看详情 →</a><span class="card-meta">v1.0.1 · 2026-04-01</span></div>
+      </div>
+    </div>
+
+    <!-- 9. OTag -->
+    <div class="card">
+      <div class="card-cover"></div>
+      <div class="card-body">
+        <div class="card-title">OTag 标签</div>
+        <div class="card-desc">用于分类标注和状态展示的小型标签，支持多种预设语义色彩与可关闭按钮。</div>
+        <div class="card-tags"><span class="tag tag-b">数据展示</span><span class="tag tag-g">标注</span></div>
+      </div>
+      <div class="card-footer">
+        <div class="card-divider"></div>
+        <div class="card-footer-row"><a class="card-link">查看详情 →</a><span class="card-meta">v1.0.0 · 2026-03-15</span></div>
+      </div>
+    </div>
+
+    <!-- 10. OCheckbox -->
+    <div class="card">
+      <div class="card-cover"></div>
+      <div class="card-body">
+        <div class="card-title">OCheckbox 复选框</div>
+        <div class="card-desc">多选控件，提供全选、半选、单选三种状态切换，可嵌入 CheckboxGroup 批量管理。</div>
+        <div class="card-tags"><span class="tag tag-gr">表单类</span><span class="tag tag-g">基础</span></div>
+      </div>
+      <div class="card-footer">
+        <div class="card-divider"></div>
+        <div class="card-footer-row"><a class="card-link">查看详情 →</a><span class="card-meta">v1.0.3 · 2026-04-08</span></div>
+      </div>
+    </div>
+
+    <!-- 11. ORadio -->
+    <div class="card">
+      <div class="card-cover"></div>
+      <div class="card-body">
+        <div class="card-title">ORadio 单选框</div>
+        <div class="card-desc">互斥单选控件，在一组选项中只允许选中一个，支持水平与垂直两种排列方式。</div>
+        <div class="card-tags"><span class="tag tag-gr">表单类</span><span class="tag tag-g">基础</span></div>
+      </div>
+      <div class="card-footer">
+        <div class="card-divider"></div>
+        <div class="card-footer-row"><a class="card-link">查看详情 →</a><span class="card-meta">v1.0.2 · 2026-04-03</span></div>
+      </div>
+    </div>
+
+    <!-- 12. OSwitch -->
+    <div class="card">
+      <div class="card-cover"></div>
+      <div class="card-body">
+        <div class="card-title">OSwitch 开关</div>
+        <div class="card-desc">即时切换两种状态的开关控件，可与文字标签结合使用，支持禁用态与加载态展示。</div>
+        <div class="card-tags"><span class="tag tag-gr">表单类</span><span class="tag tag-g">基础</span></div>
+      </div>
+      <div class="card-footer">
+        <div class="card-divider"></div>
+        <div class="card-footer-row"><a class="card-link">查看详情 →</a><span class="card-meta">v1.1.0 · 2026-04-20</span></div>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+
+  <!-- OPagination show=All Dark=off：Pager Ctrl + Jumper Ctrl + 数据区，三区 gap 24px -->
+  <div class="pagination-bar">
+    <div class="opa">
+
+      <!-- Pager Ctrl：左箭头 + 页码(透明无边框) + 右箭头，gap 8px -->
+      <div class="opa-pager">
+        <div class="opa-arrow">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 6L9 12l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="opa-page active">1</div>
+        <div class="opa-page">2</div>
+        <div class="opa-page">3</div>
+        <div class="opa-page">4</div>
+        <div class="opa-page">5</div>
+        <div class="opa-ellipsis">···</div>
+        <div class="opa-page">10</div>
+        <div class="opa-arrow">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <!-- Jumper Ctrl：跳至 [input] 页，gap 8px -->
+      <div class="opa-jumper">
+        <span>跳至</span>
+        <input class="opa-input" type="number" value="1" min="1" max="10">
+        <span>页</span>
+      </div>
+
+      <!-- 数据区：Pagesize Ctrl + Total Label -->
+      <div class="opa-data">
+        <div class="opa-pagesize">
+          <span>10条/页</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="rgba(0,0,0,0.45)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <span>共 120 条</span>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+
+  <div class="footer-intro">
+    <p class="footer-intro-text">openEuler 是由开放原子开源基金会（OpenAtom Foundation）孵化及运营的开源项目</p>
+    <img src="../assets/navigation/footer-pc-基金会logo.svg" width="160" height="32" alt="OpenAtom Foundation">
+  </div>
+
+  <div class="footer-nav">
+    <div class="footer-col">
+      <div class="footer-col-title">关于openEuler</div>
+      <a>成员单位</a><a>组织架构</a><a>社区章程</a><a>贡献看板</a><a>社区介绍</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">新闻与资讯</div>
+      <a>新闻</a><a>博客</a><a>白皮书</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">获取与下载</div>
+      <a>获取openEuler操作系统</a><a>最新社区发行版</a><a>商业发行版</a><a>软件中心</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">支持与服务</div>
+      <a>FAQ</a><a>联系我们</a><a>反馈问题</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">互动与交流</div>
+      <a>邮件列表</a><a>活动</a><a>论坛</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">贡献与成长</div>
+      <a>SIG中心</a><a>贡献攻略</a><a>课程中心</a>
+    </div>
+  </div>
+
+  <div class="footer-links">
+    <span class="footer-links-title">友情链接</span>
+    <a>木兰开源社区</a><span class="footer-links-sep">/</span>
+    <a>鲲鹏社区</a><span class="footer-links-sep">/</span>
+    <a>鲲鹏小智</a><span class="footer-links-sep">/</span>
+    <a>鹏城实验室</a><span class="footer-links-sep">/</span>
+    <a>InfoQ</a><span class="footer-links-sep">/</span>
+    <a>开源社</a><span class="footer-links-sep">/</span>
+    <a>中科微澜</a><span class="footer-links-sep">/</span>
+    <a>Authing</a><span class="footer-links-sep">/</span>
+    <a>openGauss</a><span class="footer-links-sep">/</span>
+    <a>昇思MindSpore</a><span class="footer-links-sep">/</span>
+    <a>Ebaina</a>
+  </div>
+
+  <div class="footer-divider"></div>
+
+  <div class="footer-bottom">
+    <!-- Footer logo：openEuler 白色 Logo + 联系邮箱 (PC页脚-底部logo.svg, 150×68) -->
+    <div class="footer-logo">
+      <img src="../assets/navigation/footer-pc-底部logo.svg" width="150" height="68" alt="openEuler">
+    </div>
+
+    <div class="footer-copy">
+      <div class="footer-copy-links">品牌<span class="footer-copy-sep">|</span>隐私政策<span class="footer-copy-sep">|</span>法律声明</div>
+      <p>版权所有 © 2024 openEuler 保留一切权利</p>
+      <p>遵循 木兰宽松许可证第2版（MulanPSL2）</p>
+    </div>
+
+    <!-- 社交媒体：二维码行 + 平台 Logo 行 (PC页脚-社交媒体.svg, 353.91×52) -->
+    <div class="footer-social">
+      <img src="../assets/navigation/footer-pc-社交媒体logo.svg" width="354" height="52" alt="社交媒体">
+    </div>
+  </div>
+
+</footer>
+</body>
+</html>

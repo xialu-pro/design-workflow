@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORadio 单选框 · 设计规范</title>
+    <style>
+        :root {
+            --o-color-primary1: #002FA7;
+            --o-color-primary2: #1A54C7;
+            --o-color-primary3: #336FE0;
+            --o-color-primary4: #84A1DC;
+            --o-color-fill2: #FFFFFF;
+            --o-color-control1: rgba(0, 0, 0, 0.25);
+            --o-color-control2: #002FA7;
+            --o-color-control3: #001F73;
+            --o-color-control4: rgba(0, 0, 0, 0.15);
+            --o-color-control2-light: #EBF1FA;
+            --o-color-info1: #000000;
+            --o-color-info4: rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'HarmonyHeiTi', sans-serif;
+            line-height: 1.6;
+            color: var(--o-color-info1);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--o-color-primary1) 0%, var(--o-color-primary3) 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .header .meta {
+            opacity: 0.9;
+            font-size: 0.95em;
+        }
+
+        .nav {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            padding: 15px 40px;
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+        }
+
+        .nav a {
+            color: var(--o-color-primary1);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .nav a:hover {
+            background: var(--o-color-primary1);
+            color: white;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            color: var(--o-color-primary1);
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--o-color-primary1);
+            font-weight: 600;
+        }
+
+        .subsection-title {
+            color: var(--o-color-primary2);
+            font-size: 1.4em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .subsubsection-title {
+            color: var(--o-color-primary3);
+            font-size: 1.2em;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        strong {
+            color: var(--o-color-primary1);
+            font-weight: 600;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9em;
+            color: #d63384;
+        }
+
+        pre {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        thead {
+            background: linear-gradient(135deg, var(--o-color-primary1) 0%, var(--o-color-primary2) 100%);
+            color: white;
+        }
+
+        th {
+            padding: 14px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95em;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 0.93em;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        blockquote {
+            border-left: 4px solid var(--o-color-primary1);
+            background: #f8f9fa;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-left: 4px solid var(--o-color-primary1);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-left: 4px solid #ff9800;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        /* Interactive Demo Section */
+        .demo-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 12px;
+            margin: 40px 0;
+            color: white;
+        }
+
+        .demo-section h2 {
+            color: white;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .radio-demo-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .demo-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            color: #333;
+        }
+
+        .demo-card h3 {
+            color: var(--o-color-primary1);
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+            user-select: none;
+        }
+
+        .radio-item:hover {
+            background: #f8f9fa;
+            transform: translateX(5px);
+        }
+
+        .radio-outer {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .radio-inner {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            transition: all 0.3s ease;
+        }
+
+        .radio-item.selected .radio-inner {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .radio-label {
+            font-size: 16px;
+            line-height: 24px;
+            user-select: none;
+        }
+
+        /* State Variations */
+        .state-default .radio-outer {
+            background: var(--o-color-fill2);
+            border: 1.5px solid var(--o-color-control1);
+        }
+        .state-default.selected .radio-outer {
+            background: var(--o-color-primary1);
+            border: none;
+        }
+        .state-default .radio-inner {
+            background: var(--o-color-fill2);
+        }
+
+        .state-hover .radio-outer {
+            background: var(--o-color-fill2);
+            border: 2px solid var(--o-color-control2);
+        }
+        .state-hover.selected .radio-outer {
+            background: var(--o-color-primary2);
+            border: none;
+        }
+        .state-hover .radio-inner {
+            background: var(--o-color-fill2);
+        }
+
+        .state-pressed .radio-outer {
+            background: var(--o-color-fill2);
+            border: 2.5px solid var(--o-color-control3);
+        }
+        .state-pressed.selected .radio-outer {
+            background: var(--o-color-primary3);
+            border: none;
+        }
+        .state-pressed .radio-inner {
+            background: var(--o-color-fill2);
+        }
+
+        .state-disabled .radio-outer {
+            background: var(--o-color-control2-light);
+            border: 1.5px solid var(--o-color-control4);
+            cursor: not-allowed;
+        }
+        .state-disabled.selected .radio-outer {
+            background: var(--o-color-primary4);
+            border: none;
+        }
+        .state-disabled .radio-inner {
+            background: var(--o-color-fill2);
+        }
+        .state-disabled .radio-label {
+            color: var(--o-color-info4);
+            cursor: not-allowed;
+        }
+
+        .state-selected .radio-outer {
+            background: var(--o-color-primary1);
+            border: none;
+        }
+        .state-selected .radio-inner {
+            background: var(--o-color-fill2);
+        }
+
+        .color-swatch {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px;
+            padding: 5px 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.85em;
+        }
+
+        .color-box {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .flowchart {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            line-height: 1.8;
+            border: 1px solid #dee2e6;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            background: var(--o-color-primary1);
+            color: white;
+            border-radius: 12px;
+            font-size: 0.85em;
+            margin-right: 5px;
+            font-weight: 500;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            text-align: center;
+            color: #6c757d;
+            border-top: 1px solid #e9ecef;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+            
+            .nav {
+                padding: 15px 20px;
+            }
+            
+            .radio-demo-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .interactive-demo {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .interactive-demo h3 {
+            color: var(--o-color-primary1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .interactive-radios {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .interactive-radio {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #333;  /* ✅ 默认状态文字颜色 */
+        }
+
+        .interactive-radio span:not(.status-badge) {
+            color: inherit;  /* ✅ 继承父容器颜色 */
+        }
+
+        .interactive-radio:hover {
+            border-color: var(--o-color-primary2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 47, 167, 0.15);
+        }
+
+        .interactive-radio.active {
+            border-color: var(--o-color-primary1);
+            background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%);
+            color: #002FA7;  /* ✅ 选中状态文字使用品牌蓝 */
+        }
+
+        .interactive-radio.active span:not(.status-badge) {
+            font-weight: 500;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .badge-enabled {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-disabled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📻 ORadio 单选框 · 设计 Skill</h1>
+            <div class="meta">组件集合节点：`1042:16975` · 组件名：ORadio 单选框 · 变体总数：8</div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <a href="#part-a">Part A: 设计使用卡</a>
+            <a href="#part-b">Part B: 规格速查</a>
+            <a href="#part-c">Part C: 交互状态</a>
+            <a href="#demo">交互演示</a>
+            <a href="#part-d">Part D: 变量绑定</a>
+            <a href="#part-e">Part E: 最佳实践</a>
+        </nav>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Part A -->
+            <section id="part-a" class="section">
+                <h2 class="section-title">Part A：设计使用卡</h2>
+                
+                <h3 class="subsection-title">组件概览</h3>
+                <p><strong>ORadio 单选框</strong>：用于在多个互斥选项中选择其一的表单控件。通过圆形选中指示器（外圈 + 内圈）传达选中/未选中状态，支持禁用状态表达不可操作。通常以单选组形式使用，同一组内只能选中一个选项。</p>
+
+                <h3 class="subsection-title">适用场景</h3>
+                <ul>
+                    <li>✅ <strong>表单单选</strong>：性别选择、付款方式、配送方式等互斥选项</li>
+                    <li>✅ <strong>设置面板</strong>：配置选项切换，如主题选择、语言选择</li>
+                    <li>✅ <strong>筛选条件</strong>：单一筛选维度，如排序方式、时间范围</li>
+                    <li>✅ <strong>问卷调查</strong>：单选题型答案选择</li>
+                    <li>❌ <strong>不适合</strong>：多选场景（用 Checkbox）、开关切换（用 Switch）、需快速切换的二元状态</li>
+                </ul>
+
+                <h3 class="subsection-title">变体说明</h3>
+                <p><strong>check（选中状态）</strong></p>
+                <ul>
+                    <li><code>Selected</code> — 已选中，外圈使用品牌色填充，内圈显示选中指示点</li>
+                    <li><code>Unselected</code> — 未选中，外圈使用描边样式，无内圈指示点</li>
+                </ul>
+
+                <p><strong>state（交互状态）</strong></p>
+                <ul>
+                    <li><code>Enabled</code> — 正常可点击状态</li>
+                    <li><code>Disabled</code> — 颜色使用禁用色 Token，不可点击</li>
+                </ul>
+
+                <p><strong>Dark（主题）</strong></p>
+                <ul>
+                    <li><code>off</code> — 浅色模式（默认）</li>
+                    <li><code>on</code> — 深色模式，品牌色系和背景色自动切换为对应深色值</li>
+                </ul>
+
+                <h3 class="subsection-title">布局结构</h3>
+                <blockquote>
+                    🧩 <strong>布局结构</strong>：单选框水平排列（HORIZONTAL Auto Layout），由圆形选择器和文字标签组成。选择器与文字间距 8px，整体高度 24px。
+                </blockquote>
+                <pre><code>ORadio（HORIZONTAL，自适应宽度，固定高度 24px）
+├── autoLayoutItemSpacing: 8px（选择器↔文字间距）
+├── autoLayoutPadding: 0px（上下左右）
+│
+├── [组合 圆形选择器 GROUP]（16×16）
+│   ├── [外圈 ELLIPSE]（16×16，cornerRadius: 50%）
+│   │     fill: 选中=--o-color-primary1 / 未选中=--o-color-fill2
+│   │     stroke: 未选中=--o-color-control1 / 选中=无
+│   └── [内圈选中指示 ELLIPSE]（8×8，仅选中状态显示）
+│         fill: `--o-color-fill2`
+│
+└── [text PARAGRAPH]（自适应宽度，固定高度 24px）
+      fill: Enabled=--o-color-info1 / Disabled=--o-color-info4
+      font: 16px / 24px，Regular</code></pre>
+            </section>
+
+            <!-- Part B -->
+            <section id="part-b" class="section">
+                <h2 class="section-title">Part B：规格速查参考</h2>
+                
+                <h3 class="subsection-title">变体索引表</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>变体属性</th>
+                            <th>可选值</th>
+                            <th>默认值</th>
+                            <th>视觉差异</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>check</strong></td>
+                            <td><code>Selected</code> / <code>Unselected</code></td>
+                            <td><code>Unselected</code></td>
+                            <td>外圈填充样式 + 内圈指示点显示/隐藏</td>
+                        </tr>
+                        <tr>
+                            <td><strong>state</strong></td>
+                            <td><code>Enabled</code> / <code>Disabled</code></td>
+                            <td><code>Enabled</code></td>
+                            <td>颜色切换为禁用 Token，不可交互</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dark</strong></td>
+                            <td><code>off</code> / <code>on</code></td>
+                            <td><code>off</code></td>
+                            <td>品牌色/背景色切换为深色主题对应值</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 class="subsection-title">布局规格</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>规格项</th>
+                            <th>值</th>
+                            <th>Token</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>整体高度</td><td>24px</td><td>—</td></tr>
+                        <tr><td>整体宽度</td><td>自适应（文字宽度 + 24px）</td><td>—</td></tr>
+                        <tr><td>Auto Layout Spacing</td><td>8px</td><td><code>gap-2</code></td></tr>
+                        <tr><td>Auto Layout Padding</td><td>0px（上下左右）</td><td>—</td></tr>
+                        <tr><td>外圈尺寸</td><td>16×16px</td><td><code>icon_size_control-xs</code></td></tr>
+                        <tr><td>内圈尺寸</td><td>8×8px</td><td>—</td></tr>
+                        <tr><td>文字高度</td><td>24px</td><td><code>line_height-text1</code></td></tr>
+                        <tr><td>文字字号</td><td>16px</td><td><code>font_size-text1</code></td></tr>
+                    </tbody>
+                </table>
+
+                <h3 class="subsection-title">颜色 Token 映射</h3>
+                
+                <h4 class="subsubsection-title">Unselected 状态</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>区域</th>
+                            <th>Light 模式</th>
+                            <th>Dark 模式</th>
+                            <th>Token</th>
+                            <th>RGB 值</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>外圈背景（Enabled）</td>
+                            <td><span class="color-swatch"><span class="color-box" style="background:#fff; border:1px solid #ddd;"></span>grey-1</span></td>
+                            <td><span class="color-swatch"><span class="color-box" style="background:#242427;"></span>grey-4</span></td>
+                            <td><code>--o-color-fill2</code></td>
+                            <td>rgb(255,255,255) → rgb(36,36,39)</td>
+                        </tr>
+                        <tr>
+                            <td>外圈描边（Enabled）</td>
+                            <td>grey-14 @ 0.25</td>
+                            <td>grey-14 @ 0.25</td>
+                            <td><code>--o-color-control1</code></td>
+                            <td>rgba(0,0,0,0.25)</td>
+                        </tr>
+                        <tr>
+                            <td>外圈背景（Disabled Light）</td>
+                            <td><span class="color-swatch"><span class="color-box" style="background:#EBF1FA;"></span>brand-1</span></td>
+                            <td>—</td>
+                            <td><code>--o-color-control2-light</code></td>
+                            <td>rgb(235,241,250)</td>
+                        </tr>
+                        <tr>
+                            <td>外圈描边（Disabled）</td>
+                            <td>grey-14 @ 0.1</td>
+                            <td>grey-14 @ 0.15</td>
+                            <td><code>--o-color-control4</code></td>
+                            <td>rgba(0,0,0,0.1)</td>
+                        </tr>
+                        <tr>
+                            <td>文字（Enabled）</td>
+                            <td>grey-14</td>
+                            <td>grey-14</td>
+                            <td><code>--o-color-info1</code></td>
+                            <td>rgb(0,0,0)</td>
+                        </tr>
+                        <tr>
+                            <td>文字（Disabled）</td>
+                            <td>grey-14 @ 0.4</td>
+                            <td>grey-14 @ 0.4</td>
+                            <td><code>--o-color-info4</code></td>
+                            <td>rgba(0,0,0,0.4)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4 class="subsubsection-title">Selected 状态</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>区域</th>
+                            <th>Light 模式</th>
+                            <th>Dark 模式</th>
+                            <th>Token</th>
+                            <th>RGB 值</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>外圈背景（Enabled）</td>
+                            <td><span class="color-swatch"><span class="color-box" style="background:#002FA7;"></span>brand-6</span></td>
+                            <td><span class="color-swatch"><span class="color-box" style="background:#497AF8;"></span>brand-6</span></td>
+                            <td><code>--o-color-primary1</code></td>
+                            <td>rgb(0,47,167) → rgb(73,122,248)</td>
+                        </tr>
+                        <tr>
+                            <td>外圈背景（Disabled）</td>
+                            <td><span class="color-swatch"><span class="color-box" style="background:#84A1DC;"></span>brand-3</span></td>
+                            <td><span class="color-swatch"><span class="color-box" style="background:#1D3378;"></span>brand-3</span></td>
+                            <td><code>--o-color-primary4</code></td>
+                            <td>rgb(132,161,220) → rgb(29,51,120)</td>
+                        </tr>
+                        <tr>
+                            <td>内圈指示点（Enabled）</td>
+                            <td>white</td>
+                            <td>grey-4</td>
+                            <td><code>--o-color-fill2</code></td>
+                            <td>rgb(255,255,255) → rgb(36,36,39)</td>
+                        </tr>
+                        <tr>
+                            <td>文字（Enabled）</td>
+                            <td>grey-14</td>
+                            <td>grey-14</td>
+                            <td><code>--o-color-info1</code></td>
+                            <td>rgb(0,0,0)</td>
+                        </tr>
+                        <tr>
+                            <td>文字（Disabled）</td>
+                            <td>grey-14 @ 0.4</td>
+                            <td>grey-14 @ 0.4</td>
+                            <td><code>--o-color-info4</code></td>
+                            <td>rgba(0,0,0,0.4)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box">
+                    💡 <strong>说明</strong>：选中状态外圈使用品牌色填充，无描边；内圈指示点使用 <code>--o-color-fill2</code>（Light=white，Dark=grey-4）。
+                </div>
+            </section>
+
+            <!-- Part C -->
+            <section id="part-c" class="section">
+                <h2 class="section-title">Part C：交互与状态</h2>
+                
+                <h3 class="subsection-title">完整交互状态规格表</h3>
+                <div class="info-box">
+                    📋 <strong>交互状态矩阵</strong>：以下表格展示 Radio 组件在不同选择状态和交互状态下的完整视觉规格。
+                </div>
+
+                <h4 class="subsubsection-title">未选中状态（Unselected）</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>交互状态</th>
+                            <th>填充（fill）</th>
+                            <th>描边（stroke）</th>
+                            <th>文本样式</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>默认</strong></td>
+                            <td><code>--o-color-fill2</code></td>
+                            <td><code>--o-color-control1</code></td>
+                            <td>鸿蒙黑体 (Regular) / 16px / <code>--o-color-info1</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>悬浮</strong></td>
+                            <td><code>--o-color-fill2</code></td>
+                            <td><code>--o-color-control2</code></td>
+                            <td>鸿蒙黑体 (Regular) / 16px / <code>--o-color-info1</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>按下</strong></td>
+                            <td><code>--o-color-fill2</code></td>
+                            <td><code>--o-color-control3</code></td>
+                            <td>鸿蒙黑体 (Regular) / 16px / <code>--o-color-info1</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>选中</strong></td>
+                            <td><code>--o-color-primary1</code></td>
+                            <td>无描边</td>
+                            <td>鸿蒙黑体 (Regular) / 16px / <code>--o-color-info1</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>禁用</strong></td>
+                            <td><code>--o-color-control2-light</code></td>
+                            <td><code>--o-color-control4</code></td>
+                            <td>鸿蒙黑体 (Regular) / 16px / <code>--o-color-info1</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4 class="subsubsection-title">已选中状态（Selected）</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>交互状态</th>
+                            <th>填充（fill）</th>
+                            <th>描述</th>
+                            <th>文本样式</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>默认</strong></td>
+                            <td><code>--o-color-primary1</code></td>
+                            <td>显示内圈指示点</td>
+                            <td>鸿蒙黑体 (Regular) / 16px / <code>--o-color-info1</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>悬浮</strong></td>
+                            <td><code>--o-color-primary2</code></td>
+                            <td>显示内圈指示点</td>
+                            <td>鸿蒙黑体 (Regular) / 16px / <code>--o-color-info1</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>按下</strong></td>
+                            <td><code>--o-color-primary3</code></td>
+                            <td>显示内圈指示点</td>
+                            <td>鸿蒙黑体 (Regular) / 16px / <code>--o-color-info1</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>选中</strong></td>
+                            <td><code>--o-color-primary1</code></td>
+                            <td>显示内圈指示点</td>
+                            <td>鸿蒙黑体 (Regular) / 16px / <code>--o-color-info1</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>禁用</strong></td>
+                            <td><code>--o-color-primary4</code></td>
+                            <td>显示内圈指示点（半透明）</td>
+                            <td>鸿蒙黑体 (Regular) / 16px / <code>--o-color-info1</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 class="subsection-title">各状态详细说明</h3>
+                
+                <h4 class="subsubsection-title">1. 默认状态（Default）</h4>
+                <ul>
+                    <li><strong>未选中</strong>：外圈白色背景 + 灰色描边，无内圈指示点</li>
+                    <li><strong>已选中</strong>：外圈品牌色填充 + 白色内圈指示点</li>
+                </ul>
+
+                <h4 class="subsubsection-title">2. 悬浮状态（Hover）</h4>
+                <ul>
+                    <li><strong>未选中</strong>：描边颜色加深（<code>--o-color-control1</code> → <code>--o-color-control2</code>），背景不变</li>
+                    <li><strong>已选中</strong>：外圈背景颜色变浅（<code>--o-color-primary1</code> → <code>--o-color-primary2</code>），内圈不变</li>
+                    <li><strong>触发条件</strong>：鼠标悬停在 Radio 组件区域</li>
+                </ul>
+
+                <h4 class="subsubsection-title">3. 按下状态（Pressed/Active）</h4>
+                <ul>
+                    <li><strong>未选中</strong>：描边颜色进一步加深（<code>--o-color-control2</code> → <code>--o-color-control3</code>），背景不变</li>
+                    <li><strong>已选中</strong>：外圈背景颜色继续变深（<code>--o-color-primary2</code> → <code>--o-color-primary3</code>），内圈不变</li>
+                    <li><strong>触发条件</strong>：鼠标按下但未释放时</li>
+                </ul>
+
+                <h4 class="subsubsection-title">4. 选中状态（Selected/Focus）</h4>
+                <ul>
+                    <li><strong>从未选中切换到选中</strong>：外圈背景变为品牌色（<code>--o-color-fill2</code> → <code>--o-color-primary1</code>），描边隐藏，显示内圈指示点</li>
+                    <li><strong>保持选中</strong>：维持 <code>--o-color-primary1</code> 背景和内圈显示</li>
+                </ul>
+
+                <h4 class="subsubsection-title">5. 禁用状态（Disabled）</h4>
+                <ul>
+                    <li><strong>未选中禁用</strong>：外圈使用浅灰背景（<code>--o-color-control2-light</code>）+ 浅灰描边（<code>--o-color-control4</code>），文字使用禁用色</li>
+                    <li><strong>已选中禁用</strong>：外圈使用禁用品牌色（<code>--o-color-primary4</code>），内圈显示但整体透明度降低，文字使用禁用色</li>
+                    <li><strong>交互限制</strong>：不可点击、不可获得焦点、不响应鼠标事件</li>
+                </ul>
+
+                <h3 class="subsection-title">状态转换流程图</h3>
+                <div class="flowchart"><pre>                    ┌─────────────────┐
+                    │   Unselected    │
+                    │     Default     │
+                    └────────┬────────┘
+                             │ Click
+                             ▼
+                    ┌─────────────────┐
+              ┌─────│    Selected     │──────┐
+              │     │     Default     │      │
+              │     └────────┬────────┘      │
+              │              │               │
+        Hover │         Click│          Hover│
+              │              ▼               │
+              │     ┌─────────────────┐      │
+              └─────│    Selected     │◄─────┘
+                    │     Hover       │
+                    └────────┬────────┘
+                             │
+                        (其他状态类似)
+                             
+                    ┌─────────────────┐
+                    │    Disabled     │
+                    │  (任何状态下设置)│
+                    └─────────────────┘</pre></div>
+            </section>
+
+            <!-- Interactive Demo -->
+            <section id="demo" class="section demo-section">
+                <h2>🎮 交互式状态演示</h2>
+                <p style="text-align:center; margin-bottom:20px; opacity:0.95;">点击下方各状态卡片查看实际效果</p>
+                
+                <div class="radio-demo-container">
+                    <!-- Default State -->
+                    <div class="demo-card">
+                        <h3>📌 默认状态 (Default)</h3>
+                        <div class="radio-item state-default" onclick="toggleRadio(this)">
+                            <div class="radio-outer">
+                                <div class="radio-inner"></div>
+                            </div>
+                            <span class="radio-label">选项 A（未选中）</span>
+                        </div>
+                        <div class="radio-item state-default selected" onclick="toggleRadio(this)">
+                            <div class="radio-outer">
+                                <div class="radio-inner"></div>
+                            </div>
+                            <span class="radio-label">选项 B（已选中）</span>
+                        </div>
+                    </div>
+
+                    <!-- Hover State -->
+                    <div class="demo-card">
+                        <h3>🖱️ 悬浮状态 (Hover)</h3>
+                        <div class="radio-item state-hover" onclick="toggleRadio(this)">
+                            <div class="radio-outer">
+                                <div class="radio-inner"></div>
+                            </div>
+                            <span class="radio-label">悬浮未选中</span>
+                        </div>
+                        <div class="radio-item state-hover selected" onclick="toggleRadio(this)">
+                            <div class="radio-outer">
+                                <div class="radio-inner"></div>
+                            </div>
+                            <span class="radio-label">悬浮已选中</span>
+                        </div>
+                    </div>
+
+                    <!-- Pressed State -->
+                    <div class="demo-card">
+                        <h3>✊ 按下状态 (Pressed)</h3>
+                        <div class="radio-item state-pressed" onclick="toggleRadio(this)">
+                            <div class="radio-outer">
+                                <div class="radio-inner"></div>
+                            </div>
+                            <span class="radio-label">按下未选中</span>
+                        </div>
+                        <div class="radio-item state-pressed selected" onclick="toggleRadio(this)">
+                            <div class="radio-outer">
+                                <div class="radio-inner"></div>
+                            </div>
+                            <span class="radio-label">按下已选中</span>
+                        </div>
+                    </div>
+
+                    <!-- Disabled State -->
+                    <div class="demo-card">
+                        <h3>🚫 禁用状态 (Disabled)</h3>
+                        <div class="radio-item state-disabled">
+                            <div class="radio-outer">
+                                <div class="radio-inner"></div>
+                            </div>
+                            <span class="radio-label">禁用未选中</span>
+                        </div>
+                        <div class="radio-item state-disabled selected">
+                            <div class="radio-outer">
+                                <div class="radio-inner"></div>
+                            </div>
+                            <span class="radio-label">禁用已选中</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Demo -->
+                <div class="interactive-demo">
+                    <h3>💡 试试点击这些单选框（真实交互）</h3>
+                    <div class="interactive-radios">
+                        <div class="interactive-radio active" onclick="selectInteractiveRadio(this)">
+                            <div style="width:20px;height:20px;border-radius:50%;border:2px solid #002FA7;position:relative;">
+                                <div style="width:10px;height:10px;border-radius:50%;background:#002FA7;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+                            </div>
+                            <span>选项一：这是正常状态的单选框</span>
+                            <span class="status-badge badge-enabled">Enabled</span>
+                        </div>
+                        <div class="interactive-radio" onclick="selectInteractiveRadio(this)">
+                            <div style="width:20px;height:20px;border-radius:50%;border:2px solid rgba(0,0,0,0.25);background:#fff;position:relative;"></div>
+                            <span>选项二：点击可以选中我</span>
+                            <span class="status-badge badge-enabled">Enabled</span>
+                        </div>
+                        <div class="interactive-radio" onclick="selectInteractiveRadio(this)" style="opacity:0.5;cursor:not-allowed;">
+                            <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(0,0,0,0.15);background:#EBF1FA;"></div>
+                            <span>选项三：我是禁用状态</span>
+                            <span class="status-badge badge-disabled">Disabled</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part D -->
+            <section id="part-d" class="section">
+                <h2 class="section-title">Part D：设计变量绑定</h2>
+                
+                <h3 class="subsection-title">推荐绑定变量</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>元素</th>
+                            <th>属性</th>
+                            <th>推荐变量 Token</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>外圈背景（Selected Enabled）</td><td>fill</td><td><code>--o-color-primary1</code></td></tr>
+                        <tr><td>外圈背景（Selected Disabled）</td><td>fill</td><td><code>--o-color-primary4</code></td></tr>
+                        <tr><td>外圈背景（Unselected Enabled）</td><td>fill</td><td><code>--o-color-fill2</code></td></tr>
+                        <tr><td>外圈背景（Unselected Disabled）</td><td>fill</td><td><code>--o-color-control2-light</code></td></tr>
+                        <tr><td>外圈描边（Unselected Enabled）</td><td>stroke</td><td><code>--o-color-control1</code></td></tr>
+                        <tr><td>外圈描边（Unselected Disabled）</td><td>stroke</td><td><code>--o-color-control4</code></td></tr>
+                        <tr><td>内圈指示点</td><td>fill</td><td><code>--o-color-fill2</code></td></tr>
+                        <tr><td>文字（Enabled）</td><td>fill</td><td><code>--o-color-info1</code></td></tr>
+                        <tr><td>文字（Disabled）</td><td>fill</td><td><code>--o-color-info4</code></td></tr>
+                        <tr><td>文字字号</td><td>fontSize</td><td><code>font_size-text1</code>（16px）</td></tr>
+                        <tr><td>文字行高</td><td>lineHeight</td><td><code>line_height-text1</code>（24px）</td></tr>
+                        <tr><td>选择器↔文字间距</td><td>autoLayoutItemSpacing</td><td><code>gap-2</code>（8px）</td></tr>
+                        <tr><td>外圈尺寸</td><td>width/height</td><td><code>icon_size_control-xs</code>（16px）</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Part E -->
+            <section id="part-e" class="section">
+                <h2 class="section-title">Part E：最佳实践</h2>
+                
+                <h3 class="subsection-title">使用建议</h3>
+                <ol>
+                    <li><strong>单选组布局</strong>：多个 Radio 垂直排列时，间距建议 8-12px（gap-2 ~ gap-3）</li>
+                    <li><strong>选项文字简洁</strong>：每个选项文字控制在 2-8 个字，避免过长描述</li>
+                    <li><strong>默认选中</strong>：单选组应设置一个默认选中项，避免用户困惑</li>
+                    <li><strong>禁用提示</strong>：禁用选项应配合说明文字解释原因</li>
+                </ol>
+
+                <h3 class="subsection-title">设计提示</h3>
+                <ul>
+                    <li>单选框左侧选择器 + 右侧文字是标准布局，不建议反向排列</li>
+                    <li>选中状态内圈指示点使用 <code>--o-color-fill2</code>（Light=white，Dark=grey-4），确保在深色背景下可识别</li>
+                    <li>单选框整体高度固定 24px，与文字行高一致，确保视觉对齐</li>
+                    <li>同一组单选框应保持一致的尺寸和间距</li>
+                    <li>禁用状态应同时禁用外圈和文字的交互</li>
+                </ul>
+
+                <div class="warning-box">
+                    ⚠️ <strong>注意事项</strong>：
+                    <ul style="margin-top:10px;margin-bottom:0;">
+                        <li>选中状态识别：选中时外圈使用品牌色填充（<code>--o-color-primary1</code>），内圈显示指示点</li>
+                        <li>未选中状态识别：未选中时外圈使用 <code>--o-color-fill2</code> 背景 + <code>--o-color-control1</code> 描边，无内圈指示点</li>
+                        <li>Dark 模式差异：选中状态内圈指示点在 Dark 模式下为 grey-4（而非 white），确保在深色背景下可识别</li>
+                        <li>单选组逻辑：多个 Radio 组合使用时，同一组内只能选中一个，需在交互层面实现互斥</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>技术备注</strong></p>
+            <p>组件节点 ID：<code>1042:16975</code>（组件集） | 变体总数：8 | 生成日期：2026-04-17</p>
+            <p style="margin-top:10px;">© 2026 OpenDesign Design System · ORadio Component Specification</p>
+        </div>
+    </div>
+
+    <script>
+        function toggleRadio(element) {
+            if (element.classList.contains('state-disabled')) return;
+            
+            const parent = element.parentElement;
+            const siblings = parent.querySelectorAll('.radio-item');
+            
+            siblings.forEach(sibling => {
+                sibling.classList.remove('selected');
+            });
+            
+            element.classList.add('selected');
+        }
+
+        function selectInteractiveRadio(element) {
+            if (element.style.opacity === '0.5') return;
+            
+            const parent = element.parentElement;
+            const radios = parent.querySelectorAll('.interactive-radio');
+            
+            radios.forEach(radio => {
+                radio.classList.remove('active');
+                const outerCircle = radio.querySelector('div > div') || radio.querySelector('div');
+                if (!radio.querySelector('.status-badge').classList.contains('badge-disabled')) {
+                    outerCircle.style.background = '#fff';
+                    outerCircle.style.border = '2px solid rgba(0,0,0,0.25)';
+                    const innerDot = outerCircle.querySelector('div');
+                    if (innerDot) innerDot.remove();
+                }
+            });
+            
+            element.classList.add('active');
+            const circle = element.querySelector('div > div');
+            circle.style.background = '#002FA7';
+            circle.style.border = '2px solid #002FA7';
+            
+            if (!circle.querySelector('div')) {
+                const innerDot = document.createElement('div');
+                innerDot.style.cssText = 'width:10px;height:10px;border-radius:50%;background:#fff;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);';
+                circle.appendChild(innerDot);
+            }
+        }
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add hover effects for demo cards
+        document.querySelectorAll('.demo-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.25)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.2)';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OCard 卡片组件 · 实例演示</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'HarmonyOS Sans SC','HarmonyHeiTi','PingFang SC',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;line-height:22px;color:rgba(0,0,0,.85);background:#F2F3F5;padding:40px 24px;}
+h1{font-size:28px;line-height:36px;font-weight:700;margin-bottom:8px;color:rgba(0,0,0,.85);}
+h2{font-size:20px;line-height:28px;font-weight:600;margin:48px 0 24px;color:rgba(0,0,0,.85);}
+p.intro{font-size:14px;line-height:22px;color:rgba(0,0,0,.6);margin-bottom:32px;}
+.demo-section{margin-bottom:48px;}
+.demo-row{display:flex;flex-wrap:wrap;gap:24px;margin-bottom:24px;}
+
+/* ═════════════════════════════════════════════
+   OCard 基础样式
+   ═════════════════════════════════════════════ */
+.card{
+  background:var(--o-color-fill2,#fff);
+  border-radius:4px;
+  display:flex;
+  flex-direction:column;
+  transition:box-shadow .2s,color .2s;
+  overflow:hidden;
+}
+.card:hover{box-shadow:0 2px 24px rgba(0,0,0,.15);}
+
+/* ── cover 类型 ── */
+.card-cover{
+  padding:8px;
+  gap:24px;
+}
+
+/* ── icon 类型 ── */
+.card-icon{
+  padding:24px 32px;
+  gap:16px;
+}
+
+/* ── horizontal 布局 ── */
+.card-horizontal{
+  flex-direction:row;
+}
+
+/* ═════════════════════════════════════════════
+   Header 区域
+   ═════════════════════════════════════════════ */
+
+/* cover 类型 Header */
+.card-cover .card-header{display:none;} /* cover 的封面图直接作为第一元素 */
+
+/* icon 类型 Header */
+.card-icon .card-header{
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.icon-wrapper{
+  width:32px;height:32px;
+  background:rgba(0,47,167,.08);
+  border-radius:4px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+.icon-wrapper svg{width:20px;height:20px;color:#002FA7;}
+.card-title{
+  font-size:22px;
+  line-height:30px;
+  font-weight:600;
+  color:var(--o-color-info1,rgba(0,0,0,.85));
+  transition:color .2s;
+}
+.card:hover .card-title{color:var(--o-color-primary1,#002FA7);}
+
+/* ═════════════════════════════════════════════
+   Body 内容区
+   ═════════════════════════════════════════════ */
+
+/* cover 类型 Body */
+.card-cover .card-body{
+  padding:0 16px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+/* icon 类型 Body */
+.card-icon .card-body{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.card-desc{
+  font-size:16px;
+  line-height:24px;
+  color:var(--o-color-info3,rgba(0,0,0,.6));
+}
+.card-meta{
+  font-size:14px;
+  line-height:22px;
+  color:rgba(0,0,0,.45);
+  margin-top:4px;
+}
+
+/* ═════════════════════════════════════════════
+   Footer 底部操作区
+   ═════════════════════════════════════════════ */
+
+.card-footer{
+  padding:0 16px 8px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.card-icon .card-footer{
+  padding:0;
+  margin-top:auto;
+}
+
+/* ═════════════════════════════════════════════
+   OButton 按钮组件（原子组件硬约束调用）
+   遵循 button.md 规范：Variant(solid/outline/text) × size(medium)
+   ═════════════════════════════════════════════ */
+.o-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-family:'HarmonyOS Sans SC','HarmonyHeiTi','PingFang SC',sans-serif;
+  cursor:pointer;
+  transition:all .2s;
+  text-decoration:none;
+  border:none;
+  white-space:nowrap;
+  user-select:none;
+}
+.o-button:focus{outline:none;}
+
+/* ── Medium 尺寸（默认）：高32px · 圆角16px · 字号14px ── */
+.o-btn-m{
+  height:32px;
+  padding:5px 16px;
+  border-radius:16px;
+  font-size:14px;
+  line-height:22px;
+  min-width:80px;
+}
+
+/* ── Solid 变体：实心填充 ── */
+.o-btn-solid{
+  background:var(--o-color-primary1,#002FA7);
+  color:#fff;
+  border:1px solid var(--o-color-primary1,#002FA7);
+}
+.o-btn-solid:hover{background:var(--o-color-primary2,#0039d0);border-color:var(--o-color-primary2,#0039d0);}
+.o-btn-solid:active{background:var(--o-color-primary3,#002a87);border-color:var(--o-color-primary3,#002a87);}
+
+/* ── Outline 变体：描边样式 ── */
+.o-btn-outline{
+  background:transparent;
+  color:var(--o-color-primary1,#002FA7);
+  border:1px solid var(--o-color-primary1,#002FA7);
+}
+.o-btn-outline:hover{background:rgba(0,47,167,.06);color:var(--o-color-primary2,#0039d0);border-color:var(--o-color-primary2,#0039d0);}
+.o-btn-outline:active{background:rgba(0,47,167,.12);color:var(--o-color-primary3,#002a87);border-color:var(--o-color-primary3,#002a87);}
+
+/* ── Text 变体：无背景无边框 ── */
+.o-btn-text{
+  background:transparent;
+  color:var(--o-grey-14,rgba(0,0,0,.85));
+  border:1px solid transparent;
+  padding-left:0;padding-right:0;min-width:auto;
+}
+.o-btn-text:hover{color:var(--o-color-primary2,#0039d0);}
+.o-btn-text:active{color:var(--o-color-primary3,#002a87);}
+
+/* ═════════════════════════════════════════════
+   封面图区域（cover 类型专用）
+   规范：卡片容器 padding 8px，各 section 无独立 padding，
+   封面图直接贴合容器内边距，无额外圆角或边距
+   ═════════════════════════════════════════════ */
+.cover-img{
+  width:100%;
+  height:160px;
+  background:linear-gradient(135deg,rgba(0,47,167,.06) 0%,rgba(0,125,80,.06) 100%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  transition:transform .2s;
+}
+.card:hover .cover-img{transform:scale(1.05);}
+.cover-placeholder{
+  font-size:14px;
+  color:rgba(0,0,0,.4);
+}
+
+/* ═════════════════════════════════════════════
+   Dark 深色模式
+   ═════════════════════════════════════════════ */
+.dark-mode{
+  background:#1a1a1a;
+  padding:40px 24px;
+  margin-top:48px;
+  border-radius:8px;
+}
+.dark-mode h2{color:rgba(255,255,255,.85);}
+.dark-mode .card{
+  --o-color-fill2:rgb(36,36,39);
+  --o-color-info1:rgba(255,255,255,.85);
+  --o-color-info3:rgba(255,255,255,.6);
+  --o-color-primary1:#4a9eff;
+  background:rgb(36,36,39);
+}
+.dark-mode .card:hover{box-shadow:0 2px 24px rgba(255,255,255,.15);}
+.dark-mode .icon-wrapper{background:rgba(74,158,255,.15);}
+.dark-mode .icon-wrapper svg{color:#4a9eff;}
+.dark-mode .btn-primary{
+  border-color:#4a9eff;
+  color:#4a9eff;
+}
+.dark-mode .btn-primary:hover{background:#4a9eff;color:#fff;}
+.dark-mode .btn-text{color:rgba(255,255,255,.85);}
+.dark-mode .btn-text:hover{color:rgba(255,255,255,.6);}
+.dark-mode .cover-img{
+  background:linear-gradient(135deg,rgba(74,158,255,.15) 0%,rgba(0,200,150,.15) 100%);
+}
+.dark-mode .cover-placeholder{color:rgba(255,255,255,.4);}
+
+/* ═════════════════════════════════════════════
+   卡片尺寸控制
+   ═════════════════════════════════════════════ */
+.w-320{width:320px;}
+.w-360{width:360px;}
+.w-full{width:100%;max-width:480px;}
+</style>
+</head>
+<body>
+
+<h1>OCard 卡片组件 · 实例演示</h1>
+<p class="intro">展示 OCard 的所有变体组合：type（cover/icon）× layout（vertical/horizontal）× Dark（off/on）</p>
+
+<!-- ═════════════════════════════════════════════
+     一、封面卡片 · cover + vertical（默认）
+     ═════════════════════════════════════════════ -->
+<h2>一、封面卡片（cover）· 垂直布局（vertical）</h2>
+<div class="demo-row">
+
+  <!-- 单体卡片：仅标题+描述 -->
+  <div class="card card-cover w-320">
+    <div class="cover-img">
+      <span class="cover-placeholder">📷 封面图片区域</span>
+    </div>
+    <div class="card-body">
+      <div class="card-title">产品标题 A</div>
+      <div class="card-desc">这是卡片的描述文字，支持多行显示并自动截断。</div>
+    </div>
+  </div>
+
+  <!-- 复合卡片：带底部操作按钮 -->
+  <div class="card card-cover w-320">
+    <div class="cover-img">
+      <span class="cover-placeholder">🖼️ 图片占位</span>
+    </div>
+    <div class="card-body">
+      <div class="card-title">新闻资讯 B</div>
+      <div class="card-desc">支持 Header、Body、Footer 三段式结构，适用于信息展示场景。</div>
+    </div>
+    <div class="card-footer">
+      <button class="btn btn-text">查看详情</button>
+      <button class="btn btn-primary">立即购买</button>
+    </div>
+  </div>
+
+  <!-- 带元信息的卡片 -->
+  <div class="card card-cover w-320">
+    <div class="cover-img" style="height:120px;background:rgba(0,125,80,.06);">
+      <span class="cover-placeholder">🎨 自定义高度</span>
+    </div>
+    <div class="card-body">
+      <div class="card-title">商品卡片 C</div>
+      <div class="card-desc">可自定义封面图高度和样式。</div>
+      <div class="card-meta">发布时间：2026-07-15 · 浏览量：1.2k</div>
+    </div>
+    <div class="card-footer">
+      <button class="btn btn-primary">了解更多 →</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═════════════════════════════════════════════
+     二、封面卡片 · cover + horizontal
+     ═════════════════════════════════════════════ -->
+<h2>二、封面卡片（cover）· 水平布局（horizontal）</h2>
+<div class="demo-row">
+
+  <div class="card card-cover card-horizontal w-full">
+    <div class="cover-img" style="width:200px;height:auto;min-height:180px;border-radius:4px 0 0 4px;">
+      <span class="cover-placeholder" style="writing-mode:vertical-lr;">📐 左侧封面</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;flex:1;padding:16px 24px 16px 0;">
+      <div class="card-body" style="padding:0;">
+        <div class="card-title">水平布局卡片</div>
+        <div class="card-desc">适用于列表项横向展示、侧边栏卡片等场景。封面图固定宽度，内容区自适应。</div>
+        <div class="card-meta">分类：技术文档 · 标签：HTML/CSS</div>
+      </div>
+      <div class="card-footer" style="padding:0;">
+        <button class="btn btn-text">收藏</button>
+        <button class="btn btn-primary">阅读全文</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═════════════════════════════════════════════
+     三、图标卡片 · icon + vertical
+     ═════════════════════════════════════════════ -->
+<h2>三、图标卡片（icon）· 垂直布局（vertical）</h2>
+<div class="demo-row">
+
+  <!-- 功能入口卡片 -->
+  <div class="card card-icon w-320">
+    <div class="card-header">
+      <div class="icon-wrapper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <div class="card-title">快捷功能</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">图标卡片适合功能入口、统计卡片等场景，语义传达清晰。</div>
+    </div>
+  </div>
+
+  <!-- 统计数据卡片 -->
+  <div class="card card-icon w-320">
+    <div class="card-header">
+      <div class="icon-wrapper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="card-title">用户统计</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc" style="font-size:32px;font-weight:700;color:#002FA7;">12,580</div>
+      <div class="card-desc">本月活跃用户数</div>
+    </div>
+  </div>
+
+  <!-- 操作引导卡片 -->
+  <div class="card card-icon w-320">
+    <div class="card-header">
+      <div class="icon-wrapper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      </div>
+      <div class="card-title">订单管理</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">查看和管理您的所有订单记录。</div>
+    </div>
+    <div class="card-footer">
+      <button class="btn btn-primary">进入管理 →</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═════════════════════════════════════════════
+     四、图标卡片 · icon + horizontal
+     ═════════════════════════════════════════════ -->
+<h2>四、图标卡片（icon）· 水平布局（horizontal）</h2>
+<div class="demo-row">
+
+  <div class="card card-icon card-horizontal w-full">
+    <div class="card-header" style="padding-right:24px;">
+      <div class="icon-wrapper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;flex:1;">
+      <div class="card-body">
+        <div class="card-title">系统设置面板</div>
+        <div class="card-desc">水平布局的图标卡片适合侧边栏或功能导航区域，图标与内容横向排列节省纵向空间。</div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-text">配置向导</button>
+        <button class="btn btn-primary">打开设置</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═════════════════════════════════════════════
+     五、Dark 深色模式示例
+     ═════════════════════════════════════════════ -->
+<div class="dark-mode">
+  <h2>五、Dark 深色模式（Dark=on）</h2>
+  
+  <h3 style="font-size:16px;color:rgba(255,255,255,.65);margin:24px 0 16px;">封面卡片（cover + vertical）</h3>
+  <div class="demo-row">
+    <div class="card card-cover w-320">
+      <div class="cover-img">
+        <span class="cover-placeholder">🌙 暗色封面</span>
+      </div>
+      <div class="card-body">
+        <div class="card-title">暗色主题产品</div>
+        <div class="card-desc">在深色模式下，卡片背景自动切换为深灰色值，保持良好的对比度和可读性。</div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-primary">查看详情</button>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-size:16px;color:rgba(255,255,255,.65);margin:24px 0 16px;">图标卡片（icon + vertical）</h3>
+  <div class="demo-row">
+    <div class="card card-icon w-320">
+      <div class="card-header">
+        <div class="icon-wrapper">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <div class="card-title">时间统计</div>
+      </div>
+      <div class="card-body">
+        <div class="card-desc" style="font-size:28px;font-weight:700;color:#4a9eff;">08:42:15</div>
+        <div class="card-desc">今日工作时长</div>
+      </div>
+    </div>
+
+    <div class="card card-icon w-320">
+      <div class="card-header">
+        <div class="icon-wrapper">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="card-title">任务完成</div>
+      </div>
+      <div class="card-body">
+        <div class="card-desc">已完成 24/30 项任务，进度良好！</div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-primary">查看报告</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════
+     六、交互状态说明
+     ═════════════════════════════════════════════ -->
+<h2>六、交互状态说明</h2>
+<div class="demo-row">
+  <div style="flex:1;max-width:480px;padding:16px;background:rgba(0,47,167,.04);border-radius:4px;border-left:3px solid #002FA7;">
+    <strong style="display:block;margin-bottom:8px;">📝 交互反馈：</strong>
+    <ul style="padding-left:20px;color:rgba(0,0,0,.65);line-height:1.8;">
+      <li><strong>默认状态：</strong>标题颜色为 <code style="background:rgba(0,0,0,.06);padding:2px 6px;border-radius:3px;">--o-color-info1</code></li>
+      <li><strong>悬浮/按下：</strong>标题变为 <code style="background:rgba(0,47,167,.08);padding:2px 6px;border-radius:3px;color:#002FA7;">--o-color-primary1</code></li>
+      <li><strong>图文卡片：</strong>封面图放大至 105% + 标题变色</li>
+      <li><strong>复合卡片：</strong>主按钮从描边→实心填充</li>
+      <li><strong>阴影效果：</strong>悬浮时显示 <code style="background:rgba(0,0,0,.06);padding:2px 6px;border-radius:3px;">shadow-2</code></li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

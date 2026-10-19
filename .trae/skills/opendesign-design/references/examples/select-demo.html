@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSelect 选择器组件演示</title>
+    <style>
+        :root {
+            --o-color-fill2: rgb(255, 255, 255);
+            --o-color-control1: rgba(0, 0, 0, 0.25);
+            --o-color-control2: rgba(0, 47, 167, 0.5);
+            --o-color-control3: rgb(0, 47, 167);
+            --o-color-control4: rgba(0, 0, 0, 0.15);
+            --o-color-control4-light: rgba(0, 0, 0, 0.08);
+            --o-color-info1: rgb(0, 0, 0);
+            --o-color-info2: rgba(0, 0, 0, 0.8);
+            --o-color-info4: rgba(0, 0, 0, 0.4);
+            --o-color-primary1: rgb(0, 47, 167);
+            --o-color-control2-light: #E8F0FE;
+            --o-color-control3-light: #D2E3FC;
+        }
+
+        [data-theme="dark"] {
+            --o-color-fill2: rgb(36, 36, 39);
+            --o-color-control1: rgba(255, 255, 255, 0.25);
+            --o-color-control2: rgba(110, 148, 243, 0.5);
+            --o-color-control3: rgb(110, 148, 243);
+            --o-color-control4: rgba(255, 255, 255, 0.15);
+            --o-color-control4-light: rgba(255, 255, 255, 0.08);
+            --o-color-info1: rgb(255, 255, 255);
+            --o-color-info2: rgba(255, 255, 255, 0.8);
+            --o-color-info4: rgba(255, 255, 255, 0.4);
+            --o-color-primary1: rgb(110, 148, 243);
+            --o-color-control2-light: rgba(110, 148, 243, 0.15);
+            --o-color-control3-light: rgba(110, 148, 243, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'HarmonyOS', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            padding: 40px 20px;
+            background: #f5f5f5;
+            transition: background 0.3s;
+        }
+
+        [data-theme="dark"] body {
+            background: rgb(20, 20, 22);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--o-color-info1);
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--o-color-info4);
+            margin-bottom: 32px;
+        }
+
+        .section {
+            background: var(--o-color-fill2);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="dark"] .section {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--o-color-info1);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--o-color-control1);
+        }
+
+        .demo-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .demo-label {
+            min-width: 120px;
+            font-size: 14px;
+            color: var(--o-color-info2);
+            font-weight: 500;
+        }
+
+        /* OSelect 基础样式 */
+        .oselect {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            background: var(--o-color-fill2);
+            border: 1px solid var(--o-color-control1);
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+            vertical-align: top;
+        }
+
+        .oselect:hover:not(.disabled):not(.active) {
+            border-color: var(--o-color-control2);
+        }
+
+        .oselect.active:not(.disabled) {
+            border-color: var(--o-color-control3);
+            outline: none;
+        }
+
+        .oselect.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            border-color: var(--o-color-control4);
+        }
+
+        /* 尺寸变体 */
+        .oselect.large {
+            height: 40px;
+            width: 320px;
+            padding: 0 12px;
+        }
+
+        .oselect.medium {
+            height: 32px;
+            width: 320px;
+            padding: 0 12px;
+        }
+
+        .oselect.small {
+            height: 40px;
+            width: 280px;
+            padding: 0 10px;
+        }
+
+        /* 选择器内容 */
+        .select-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .select-text {
+            font-family: inherit;
+            color: var(--o-color-info1);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .select-placeholder {
+            color: var(--o-color-info4);
+        }
+
+        .large .select-text,
+        .large .select-placeholder {
+            font-size: 16px;
+            line-height: 24px;
+        }
+
+        .medium .select-text,
+        .medium .select-placeholder {
+            font-size: 14px;
+            line-height: 22px;
+        }
+
+        .small .select-text,
+        .small .select-placeholder {
+            font-size: 14px;
+            line-height: 22px;
+        }
+
+        .disabled .select-text,
+        .disabled .select-placeholder {
+            color: var(--o-color-info4);
+        }
+
+        /* 标签（多选） */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--o-color-control2-light);
+            color: var(--o-color-info1);
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 2px;
+            white-space: nowrap;
+        }
+
+        .tag-close {
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .tag-close:hover {
+            opacity: 1;
+        }
+
+        /* 箭头图标 */
+        .arrow-icon {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            margin-left: 8px;
+            transition: transform 0.2s;
+            color: var(--o-color-info1);
+        }
+
+        .disabled .arrow-icon {
+            color: var(--o-color-control4-light);
+        }
+
+        .active .arrow-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 加载图标 */
+        .loading-icon {
+            width: 24px;
+            height: 24px;
+            margin-left: 8px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 下拉面板 */
+        .dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            width: 100%;
+            background: var(--o-color-fill2);
+            border-radius: 4px;
+            box-shadow: 0 6px 24px rgba(18, 20, 23, 0.08);
+            padding: 4px;
+            z-index: 1000;
+            display: none;
+            max-height: 240px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        [data-theme="dark"] .dropdown {
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .oselect.active .dropdown {
+            display: block;
+        }
+
+        .dropdown-item {
+            height: 40px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 2px;
+            font-size: 16px;
+            color: var(--o-color-info1);
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        .medium .dropdown-item {
+            height: 32px;
+            font-size: 14px;
+        }
+
+        /* Hover/Selected 背景色块 - 上下各缩 1px 放量 */
+        .dropdown-item::before {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 0;
+            right: 0;
+            bottom: 1px;
+            background: transparent;
+            border-radius: 2px;
+            transition: background 0.15s;
+            z-index: -1;
+        }
+
+        .dropdown-item:hover::before {
+            background: var(--o-color-control2-light);
+        }
+
+        .dropdown-item.selected::before {
+            background: var(--o-color-control3-light);
+        }
+
+        .dropdown-item.selected {
+            color: var(--o-color-primary1);
+            font-weight: 500;
+        }
+
+        /* Hover 类（用于演示静态 hover 状态） */
+        .dropdown-item.hover::before {
+            background: var(--o-color-control2-light);
+        }
+
+        /* 多选复选框 */
+        .checkbox {
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--o-color-control1);
+            border-radius: 2px;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .checkbox.checked {
+            background: var(--o-color-primary1);
+            border-color: var(--o-color-primary1);
+        }
+
+        .checkbox svg {
+            width: 12px;
+            height: 12px;
+            color: white;
+        }
+
+        /* 搜索输入框 */
+        .search-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 16px;
+            color: var(--o-color-info1);
+            padding: 4px 0;
+        }
+
+        .search-input::placeholder {
+            color: var(--o-color-info4);
+        }
+
+        /* 主题切换按钮 */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            background: var(--o-color-primary1);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            z-index: 9999;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 47, 167, 0.3);
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 12px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .section {
+                padding: 16px;
+            }
+            
+            .demo-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .demo-label {
+                margin-bottom: 8px;
+            }
+
+            .oselect.large,
+            .oselect.medium,
+            .oselect.small {
+                width: 100%;
+            }
+        }
+
+        .info-text {
+            font-size: 13px;
+            color: var(--o-color-info4);
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+
+        /* 高亮文本 */
+        .highlight {
+            color: var(--o-color-primary1);
+            font-weight: 600;
+        }
+
+        .normal {
+            color: var(--o-color-info2);
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">切换深色模式</button>
+    
+    <div class="container">
+        <h1>OSelect 选择器组件</h1>
+        <p class="subtitle">完整交互状态演示 · 支持 Light/Dark 主题切换 · 包含单选/多选/可搜索模式</p>
+
+        <!-- 尺寸变体 -->
+        <div class="section">
+            <h2 class="section-title">尺寸变体 (Size Variants)</h2>
+            
+            <div class="demo-row">
+                <span class="demo-label">Large (40px)</span>
+                <div class="oselect large" onclick="toggleDropdown(this)">
+                    <div class="select-content">
+                        <span class="select-text">选项一</span>
+                    </div>
+                    <img src="../assets/public icons/icon-下箭头.svg" class="arrow-icon" alt="下拉箭头">
+                    <div class="dropdown">
+                        <div class="dropdown-item" onclick="selectOption(this, '选项一')">选项一</div>
+                        <div class="dropdown-item" onclick="selectOption(this, '选项二')">选项二</div>
+                        <div class="dropdown-item selected" onclick="selectOption(this, '选项一')">选项一</div>
+                        <div class="dropdown-item" onclick="selectOption(this, '选项三')">选项三</div>
+                        <div class="dropdown-item" onclick="selectOption(this, '选项四')">选项四</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-row">
+                <span class="demo-label">Medium (32px)</span>
+                <div class="oselect medium" onclick="toggleDropdown(this)">
+                    <div class="select-content">
+                        <span class="select-text">选项一</span>
+                    </div>
+                    <img src="../assets/public icons/icon-下箭头.svg" class="arrow-icon" alt="下拉箭头">
+                    <div class="dropdown">
+                        <div class="dropdown-item" onclick="selectOption(this, '选项一')">选项一</div>
+                        <div class="dropdown-item selected" onclick="selectOption(this, '选项一')">选项一</div>
+                        <div class="dropdown-item" onclick="selectOption(this, '选项二')">选项二</div>
+                        <div class="dropdown-item" onclick="selectOption(this, '选项三')">选项三</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-row">
+                <span class="demo-label">Small (移动端 40px)</span>
+                <div class="oselect small" onclick="toggleDropdown(this)">
+                    <div class="select-content">
+                        <span class="select-text">选项一</span>
+                    </div>
+                    <img src="../assets/public icons/icon-下箭头.svg" class="arrow-icon" alt="下拉箭头">
+                    <div class="dropdown">
+                        <div class="dropdown-item" onclick="selectOption(this, '选项一')">选项一</div>
+                        <div class="dropdown-item selected" onclick="selectOption(this, '选项一')">选项一</div>
+                        <div class="dropdown-item" onclick="selectOption(this, '选项二')">选项二</div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="info-text">💡 尺寸说明：Large/Medium 用于 PC 端，Small 用于移动端。点击选择器查看下拉菜单。</p>
+        </div>
+
+        <!-- 单选交互状态 -->
+        <div class="section">
+            <h2 class="section-title">单选交互状态 (Single Select States)</h2>
+            
+            <div class="demo-row">
+                <span class="demo-label">默认状态 (Enabled)</span>
+                <div class="oselect large" onclick="toggleDropdown(this)">
+                    <div class="select-content">
+                        <span class="select-placeholder">请选择</span>
+                    </div>
+                    <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+                    </svg>
+                    <div class="dropdown">
+                        <div class="dropdown-item" onclick="selectOption(this, '选项一')">选项一</div>
+                        <div class="dropdown-item" onclick="selectOption(this, '选项二')">选项二</div>
+                        <div class="dropdown-item" onclick="selectOption(this, '选项三')">选项三</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-row">
+                <span class="demo-label">已选中 (Complete)</span>
+                <div class="oselect large" onclick="toggleDropdown(this)">
+                    <div class="select-content">
+                        <span class="select-text">选项一</span>
+                    </div>
+                    <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+                    </svg>
+                    <div class="dropdown">
+                        <div class="dropdown-item selected" onclick="selectOption(this, '选项一')">选项一</div>
+                        <div class="dropdown-item" onclick="selectOption(this, '选项二')">选项二</div>
+                        <div class="dropdown-item" onclick="selectOption(this, '选项三')">选项三</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-row">
+                <span class="demo-label">激活态 (Active)</span>
+                <div class="oselect large active" onclick="toggleDropdown(this)">
+                    <div class="select-content">
+                        <span class="select-text">选项一</span>
+                    </div>
+                    <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+                    </svg>
+                    <div class="dropdown" style="display: block;">
+                        <div class="dropdown-item" onclick="selectOption(this, '选项一')">选项一</div>
+                        <div class="dropdown-item hover" onclick="selectOption(this, '选项二')">选项二 (Hover)</div>
+                        <div class="dropdown-item selected" onclick="selectOption(this, '选项一')">选项一 (Selected)</div>
+                        <div class="dropdown-item" onclick="selectOption(this, '选项三')">选项三</div>
+                        <div class="dropdown-item" onclick="selectOption(this, '选项四')">选项四</div>
+                        <div class="dropdown-item" onclick="selectOption(this, '选项五')">选项五</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-row">
+                <span class="demo-label">禁用态 (Disabled)</span>
+                <div class="oselect large disabled">
+                    <div class="select-content">
+                        <span class="select-placeholder">请选择</span>
+                    </div>
+                    <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="demo-row">
+                <span class="demo-label">加载态 (Loading)</span>
+                <div class="oselect large active">
+                    <div class="select-content">
+                        <span class="select-placeholder">请选择</span>
+                    </div>
+                    <svg class="loading-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-dasharray="31.4" stroke-dashoffset="10" stroke-linecap="round"/>
+                    </svg>
+                </div>
+            </div>
+
+            <p class="info-text">💡 交互提示：鼠标悬浮查看 Hover 效果，点击查看 Active 展开效果。</p>
+        </div>
+
+        <!-- 多选交互状态 -->
+        <div class="section">
+            <h2 class="section-title">多选交互状态 (Multi Select States)</h2>
+            
+            <div class="demo-row">
+                <span class="demo-label">默认多选</span>
+                <div class="oselect large" onclick="toggleDropdown(this)">
+                    <div class="select-content">
+                        <span class="select-placeholder">请选择</span>
+                    </div>
+                    <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+                    </svg>
+                    <div class="dropdown">
+                        <div class="dropdown-item" onclick="toggleCheckbox(this)">
+                            <div class="checkbox"><svg viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg></div>
+                            <span>选项一</span>
+                        </div>
+                        <div class="dropdown-item" onclick="toggleCheckbox(this)">
+                            <div class="checkbox"><svg viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg></div>
+                            <span>选项二</span>
+                        </div>
+                        <div class="dropdown-item" onclick="toggleCheckbox(this)">
+                            <div class="checkbox"><svg viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg></div>
+                            <span>选项三</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-row">
+                <span class="demo-label">已选多项</span>
+                <div class="oselect large" onclick="toggleDropdown(this)">
+                    <div class="select-content">
+                        <span class="tag">选项一<span class="tag-close">×</span></span>
+                        <span class="tag">选项二<span class="tag-close">×</span></span>
+                    </div>
+                    <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+                    </svg>
+                    <div class="dropdown">
+                        <div class="dropdown-item" onclick="toggleCheckbox(this)">
+                            <div class="checkbox checked"><svg viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg></div>
+                            <span>选项一</span>
+                        </div>
+                        <div class="dropdown-item" onclick="toggleCheckbox(this)">
+                            <div class="checkbox checked"><svg viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg></div>
+                            <span>选项二</span>
+                        </div>
+                        <div class="dropdown-item hover" onclick="toggleCheckbox(this)">
+                            <div class="checkbox"><svg viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg></div>
+                            <span>选项三 (Hover)</span>
+                        </div>
+                        <div class="dropdown-item" onclick="toggleCheckbox(this)">
+                            <div class="checkbox"><svg viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg></div>
+                            <span>选项四</span>
+                        </div>
+                        <div class="dropdown-item" onclick="toggleCheckbox(this)">
+                            <div class="checkbox"><svg viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg></div>
+                            <span>选项五</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="info-text">💡 多选说明：支持复选框多选，已选项以标签形式显示，点击标签 × 可删除。</p>
+        </div>
+
+        <!-- 可搜索选择器 -->
+        <div class="section">
+            <h2 class="section-title">可搜索选择器 (Searchable Select)</h2>
+            
+            <div class="demo-row">
+                <span class="demo-label">搜索激活态</span>
+                <div class="oselect large active searchable-select" id="searchableSelect1" style="position: relative;">
+                    <div class="select-content">
+                        <input type="text" class="search-input" placeholder="输入关键词搜索..." value="选项" oninput="filterOptions(this)">
+                    </div>
+                    <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+                    </svg>
+                    <div class="dropdown searchable-dropdown" style="display: block; position: absolute; top: calc(100% + 4px); left: 0; width: 100%; box-sizing: border-box;">
+                        <div class="dropdown-item" onclick="selectOption(this, '选项一')">
+                            <span class="highlight">选项</span><span class="normal">一</span>
+                        </div>
+                        <div class="dropdown-item hover" onclick="selectOption(this, '选项二')">
+                            <span class="highlight">选项</span><span class="normal">二</span>
+                        </div>
+                        <div class="dropdown-item" onclick="selectOption(this, '选项三')">
+                            <span class="highlight">选项</span><span class="normal">三</span>
+                        </div>
+                        <div class="dropdown-item" onclick="selectOption(this, '选项四')">
+                            <span class="highlight">选项</span><span class="normal">四</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-row">
+                <span class="demo-label">无匹配结果</span>
+                <div class="oselect large active searchable-select" id="searchableSelect2" style="position: relative;">
+                    <div class="select-content">
+                        <input type="text" class="search-input" placeholder="输入关键词搜索..." value="xyz无匹配">
+                    </div>
+                    <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+                    </svg>
+                    <div class="dropdown searchable-dropdown" style="display: block; position: absolute; top: calc(100% + 4px); left: 0; width: 100%; box-sizing: border-box;">
+                        <div style="padding: 16px; text-align: center; color: var(--o-color-info4);">
+                            无匹配结果
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="info-text">💡 搜索功能：支持实时过滤、关键词高亮显示（蓝色粗体）、无结果提示。</p>
+        </div>
+
+        <!-- 完整交互示例 -->
+        <div class="section">
+            <h2 class="section-title">完整交互示例 (Full Interactive Demo)</h2>
+            
+            <div class="demo-row">
+                <span class="demo-label">单选完整示例</span>
+                <div class="oselect large" id="interactiveSelect" onclick="toggleDropdown(this)">
+                    <div class="select-content">
+                        <span class="select-placeholder" id="selectPlaceholder">请选择城市</span>
+                        <span class="select-text" id="selectValue" style="display: none;"></span>
+                    </div>
+                    <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+                    </svg>
+                    <div class="dropdown" id="interactiveDropdown">
+                        <div class="dropdown-item" onclick="selectInteractive('北京')">北京</div>
+                        <div class="dropdown-item" onclick="selectInteractive('上海')">上海</div>
+                        <div class="dropdown-item" onclick="selectInteractive('广州')">广州</div>
+                        <div class="dropdown-item" onclick="selectInteractive('深圳')">深圳</div>
+                        <div class="dropdown-item" onclick="selectInteractive('杭州')">杭州</div>
+                    </div>
+                </div>
+                <div style="margin-top: 8px;">
+                    <strong style="color: var(--o-color-info1);">当前选中：</strong>
+                    <span id="selectedValue" style="color: var(--o-color-primary1);">未选择</span>
+                </div>
+            </div>
+
+            <div class="demo-row">
+                <span class="demo-label">多选完整示例</span>
+                <div class="oselect large" id="multiSelect" onclick="toggleDropdown(this)">
+                    <div class="select-content" id="multiSelectContent">
+                        <span class="select-placeholder">请选择标签</span>
+                    </div>
+                    <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+                    </svg>
+                    <div class="dropdown" id="multiDropdown">
+                        <div class="dropdown-item" onclick="toggleMultiSelect(this, '前端')">
+                            <div class="checkbox" id="cb-前端"><svg viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg></div>
+                            <span>前端</span>
+                        </div>
+                        <div class="dropdown-item" onclick="toggleMultiSelect(this, '后端')">
+                            <div class="checkbox" id="cb-后端"><svg viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg></div>
+                            <span>后端</span>
+                        </div>
+                        <div class="dropdown-item" onclick="toggleMultiSelect(this, '设计')">
+                            <div class="checkbox" id="cb-设计"><svg viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg></div>
+                            <span>设计</span>
+                        </div>
+                        <div class="dropdown-item" onclick="toggleMultiSelect(this, '产品')">
+                            <div class="checkbox" id="cb-产品"><svg viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg></div>
+                            <span>产品</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 8px;">
+                    <strong style="color: var(--o-color-info1);">已选标签：</strong>
+                    <span id="multiSelectedValues" style="color: var(--o-color-primary1);">未选择</span>
+                </div>
+            </div>
+
+            <p class="info-text">💡 完整交互：支持键盘导航（上下键）、Enter 选择、Esc 关闭、点击外部关闭。</p>
+        </div>
+
+        <!-- 规格参数速查 -->
+        <div class="section">
+            <h2 class="section-title">规格参数速查 (Specification Reference)</h2>
+            
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <thead>
+                    <tr style="background: var(--o-color-control2-light);">
+                        <th style="padding: 12px; text-align: left; border: 1px solid var(--o-color-control1);">规格项</th>
+                        <th style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">Large</th>
+                        <th style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">Medium</th>
+                        <th style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">Token</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid var(--o-color-control1);">选择器高度</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">40px</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">32px</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);"><code>control_size-l/m</code></td>
+                    </tr>
+                    <tr style="background: var(--o-color-control2-light);">
+                        <td style="padding: 12px; border: 1px solid var(--o-color-control1);">文字字号</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">16px</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">14px</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);"><code>font_size-text1/tip1</code></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid var(--o-color-control1);">圆角半径</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">4px</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">4px</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);"><code>radius_control-xs</code></td>
+                    </tr>
+                    <tr style="background: var(--o-color-control2-light);">
+                        <td style="padding: 12px; border: 1px solid var(--o-color-control1);">菜单项高度</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">40px</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">32px</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);"><code>control_size-l/m</code></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid var(--o-color-control1);">菜单项内边距</td>
+                        <td colspan="2" style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">上下 8px，左右 12px</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">—</td>
+                    </tr>
+                    <tr style="background: var(--o-color-control2-light);">
+                        <td style="padding: 12px; border: 1px solid var(--o-color-control1);">面板内边距</td>
+                        <td colspan="2" style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">4px（四周）</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">—</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid var(--o-color-control1);">与触发器间距</td>
+                        <td colspan="2" style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">4px</td>
+                        <td style="padding: 12px; text-align: center; border: 1px solid var(--o-color-control1);">—</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p class="info-text" style="margin-top: 16px;">📐 所有规格严格遵循 ODropdown 和 OSearch 下拉面板规范，确保跨组件一致性。</p>
+        </div>
+    </div>
+
+    <script>
+        // 主题切换
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                html.removeAttribute('data-theme');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+            }
+        }
+
+        // 切换下拉菜单
+        function toggleDropdown(element) {
+            if (element.classList.contains('disabled')) return;
+            
+            const isActive = element.classList.contains('active');
+            
+            // 关闭其他打开的下拉
+            document.querySelectorAll('.oselect.active').forEach(el => {
+                if (el !== element) {
+                    el.classList.remove('active');
+                }
+            });
+            
+            element.classList.toggle('active');
+        }
+
+        // 点击外部关闭
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.oselect')) {
+                document.querySelectorAll('.oselect.active').forEach(el => {
+                    el.classList.remove('active');
+                });
+            }
+        });
+
+        // 选择选项（单选）
+        function selectOption(element, value) {
+            event.stopPropagation();
+            const select = element.closest('.oselect');
+            const textEl = select.querySelector('.select-text');
+            const placeholderEl = select.querySelector('.select-placeholder');
+            
+            // 更新选中状态
+            select.querySelectorAll('.dropdown-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            
+            // 更新显示文字
+            if (placeholderEl) {
+                placeholderEl.style.display = 'none';
+            }
+            if (textEl) {
+                textEl.textContent = value;
+                textEl.style.display = 'inline';
+            }
+            
+            // 关闭下拉
+            setTimeout(() => {
+                select.classList.remove('active');
+            }, 150);
+        }
+
+        // 切换复选框（多选）
+        function toggleCheckbox(element) {
+            event.stopPropagation();
+            const checkbox = element.querySelector('.checkbox');
+            checkbox.classList.toggle('checked');
+        }
+
+        // 过滤选项（搜索）
+        function filterOptions(input) {
+            const value = input.value.toLowerCase();
+            const dropdown = input.closest('.oselect').querySelector('.dropdown');
+            const items = dropdown.querySelectorAll('.dropdown-item');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(value)) {
+                    item.style.display = 'flex';
+                    // 高亮匹配文字
+                    const regex = new RegExp(`(${value})`, 'gi');
+                    item.innerHTML = item.textContent.replace(regex, '<span class="highlight">$1</span>');
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // 检查是否有可见项
+            const visibleItems = Array.from(items).filter(item => item.style.display !== 'none');
+            const noResult = dropdown.querySelector('.no-result');
+            
+            if (visibleItems.length === 0 && !noResult) {
+                const noResultDiv = document.createElement('div');
+                noResultDiv.className = 'no-result';
+                noResultDiv.style.cssText = 'padding: 16px; text-align: center; color: var(--o-color-info4);';
+                noResultDiv.textContent = '无匹配结果';
+                dropdown.appendChild(noResultDiv);
+            } else if (visibleItems.length > 0 && noResult) {
+                noResult.remove();
+            }
+        }
+
+        // 完整交互示例 - 单选
+        function selectInteractive(value) {
+            event.stopPropagation();
+            const placeholder = document.getElementById('selectPlaceholder');
+            const selectValue = document.getElementById('selectValue');
+            const selectedDisplay = document.getElementById('selectedValue');
+            
+            placeholder.style.display = 'none';
+            selectValue.textContent = value;
+            selectValue.style.display = 'inline';
+            selectedDisplay.textContent = value;
+            
+            // 更新选中状态
+            const dropdown = document.getElementById('interactiveDropdown');
+            dropdown.querySelectorAll('.dropdown-item').forEach(item => {
+                item.classList.remove('selected');
+                if (item.textContent === value) {
+                    item.classList.add('selected');
+                }
+            });
+            
+            setTimeout(() => {
+                document.getElementById('interactiveSelect').classList.remove('active');
+            }, 150);
+        }
+
+        // 完整交互示例 - 多选
+        let multiSelected = [];
+        
+        function toggleMultiSelect(element, value) {
+            event.stopPropagation();
+            const checkbox = element.querySelector('#cb-' + value);
+            const content = document.getElementById('multiSelectContent');
+            const display = document.getElementById('multiSelectedValues');
+            
+            if (checkbox.classList.contains('checked')) {
+                // 取消选择
+                checkbox.classList.remove('checked');
+                multiSelected = multiSelected.filter(item => item !== value);
+                
+                // 移除标签
+                const tag = content.querySelector(`[data-value="${value}"]`);
+                if (tag) tag.remove();
+            } else {
+                // 添加选择
+                checkbox.classList.add('checked');
+                multiSelected.push(value);
+                
+                // 添加标签
+                const placeholder = content.querySelector('.select-placeholder');
+                if (placeholder) placeholder.style.display = 'none';
+                
+                const tag = document.createElement('span');
+                tag.className = 'tag';
+                tag.setAttribute('data-value', value);
+                tag.innerHTML = `${value}<span class="tag-close" onclick="removeTag('${value}', event)">×</span>`;
+                content.insertBefore(tag, content.firstChild);
+            }
+            
+            display.textContent = multiSelected.length > 0 ? multiSelected.join(', ') : '未选择';
+        }
+
+        function removeTag(value, event) {
+            event.stopPropagation();
+            const checkbox = document.getElementById('cb-' + value);
+            const tag = document.querySelector(`[data-value="${value}"]`);
+            
+            if (checkbox) checkbox.classList.remove('checked');
+            if (tag) tag.remove();
+            
+            multiSelected = multiSelected.filter(item => item !== value);
+            
+            const content = document.getElementById('multiSelectContent');
+            const display = document.getElementById('multiSelectedValues');
+            
+            if (multiSelected.length === 0) {
+                const placeholder = content.querySelector('.select-placeholder');
+                if (placeholder) placeholder.style.display = 'inline';
+            }
+            
+            display.textContent = multiSelected.length > 0 ? multiSelected.join(', ') : '未选择';
+        }
+
+        // 键盘导航支持
+        document.addEventListener('keydown', function(e) {
+            const activeSelect = document.querySelector('.oselect.active');
+            if (!activeSelect) return;
+            
+            const items = activeSelect.querySelectorAll('.dropdown-item');
+            const currentIndex = Array.from(items).findIndex(item => item === document.activeElement || item.classList.contains('hover') || item.classList.contains('selected'));
+            
+            switch(e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (currentIndex < items.length - 1) {
+                        // 移除当前项的高亮
+                        if (items[currentIndex]) {
+                            items[currentIndex].classList.remove('hover');
+                        }
+                        // 添加下一项高亮
+                        items[currentIndex + 1].classList.add('hover');
+                        items[currentIndex + 1].focus();
+                    }
+                    break;
+                    
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (currentIndex > 0) {
+                        // 移除当前项的高亮
+                        if (items[currentIndex]) {
+                            items[currentIndex].classList.remove('hover');
+                        }
+                        // 添加上一项高亮
+                        items[currentIndex - 1].classList.add('hover');
+                        items[currentIndex - 1].focus();
+                    }
+                    break;
+                    
+                case 'Enter':
+                    e.preventDefault();
+                    if (items[currentIndex]) {
+                        items[currentIndex].click();
+                    }
+                    break;
+                    
+                case 'Escape':
+                    e.preventDefault();
+                    activeSelect.classList.remove('active');
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>

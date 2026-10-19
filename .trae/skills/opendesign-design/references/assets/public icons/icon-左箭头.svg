@@ -1,0 +1,16 @@
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24.000000" height="24.000000" fill="none" customFrame="#000000">
+	<defs>
+		<clipPath id="clipPath_0">
+			<rect width="24.000000" height="24.000000" x="0.000000" y="0.000000" fill="rgb(255,255,255)" transform="matrix(-1,0,0,1,24,0)" />
+		</clipPath>
+	</defs>
+	<rect id="icon/01公共图标/线性/左箭头" width="24.000000" height="24.000000" x="0.000000" y="0.000000" fill="rgb(255,255,255)" fill-opacity="0" transform="matrix(-1,0,0,1,24,0)" />
+	<g id="icon/01公共图标/线性/右箭头" customFrame="url(#clipPath_0)">
+		<rect id="icon/01公共图标/线性/右箭头" width="24.000000" height="24.000000" x="0.000000" y="0.000000" transform="matrix(-1,0,0,1,24,0)" />
+		<g id="编组 23">
+			<rect id="矩形" width="24.000000" height="24.000000" x="0.000000" y="0.000000" fill="rgb(216,216,216)" fill-opacity="0" transform="matrix(-0,-1,1,0,0,24)" />
+			<rect id="矩形" width="23.000000" height="23.000000" x="0.500000" y="0.500000" stroke="rgb(151,151,151)" stroke-opacity="0" stroke-width="1.000000" transform="matrix(-0,-1,1,0,0,24)" />
+			<path id="路径" d="M0.7 0C1.05438 0 1.34726 0.263344 1.39361 0.605014L1.4 0.7L1.4 5.85451C1.4 5.99653 1.49868 6.1155 1.63121 6.14659L1.7 6.15451L6.90354 6.15451C7.29014 6.15451 7.60354 6.46791 7.60354 6.85451C7.60354 7.2089 7.3402 7.50177 6.99852 7.54812L6.90354 7.55451L1.7 7.55451C0.810531 7.55451 0.0806099 6.87141 0.00624001 6.0012L0 5.85451L0 0.7C0 0.313401 0.313401 0 0.7 0Z" fill="rgb(0,0,0)" fill-opacity="0.800000012" fill-rule="evenodd" transform="matrix(0.707107,0.707107,-0.707107,0.707107,13.7534,6.64082)" />
+		</g>
+	</g>
+</svg>
