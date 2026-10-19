@@ -10,6 +10,7 @@
 
 - 上游（atomgit openeuler/opendesign-skills）opendesign-design 由 2026-08-18 更新至 **2026-10-16**，全量同步进仓库副本（rsync --delete，30 个文件变更），上游 CHANGELOG 随副本携带
 - 同步后一致性自检通过：SKILL.md `last_update` == 其 CHANGELOG 最新条目（2026-10-16）
+- **版本号滞后说明**：上游 master 10-19 合入的 !51（导航封装平铺式/分类平铺式下拉、banner 对齐、卡片变体、搜索框交互、Token 语义规范化、icon 写法优化、导航封装案例）其 CHANGELOG 条目标注为 2026-10-16 且未更新 `last_update`——内容已随本次同步入库（`floors/navigation-dropdown*.md` 等新增文件即来自该提交），仅版本号滞后；已向使用方提示：合入涉及 opendesign-design 的变更时应同步更新 `last_update`，否则下游版本三查的"上游同步"检查无法感知
 - 上游中间版本要点（09-24 / 10-08 / 10-10 / 10-14 / 10-15 / 10-16）：
   - **⚠️ 破坏性（存量稿子需复核）**：① 楼层模板图标引用统一为内联 SVG，`<img src>` / CSS mask 判违规（渲染不变，复核动作机械性：grep `<img` 命中即内联替换，navigation/footer 楼层为主）；② ODropdown 面板菜单项规则与顶导下拉面板规则冲突消解（B.2 收敛为通用规范）
   - **规则强化**：SVG 逐属性原样搬运硬约束（禁止仅拷 path d 重写）、规则冲突裁决条款（floors/components 与 hard-constraints 冲突时以后者为准）、渲染验证按环境能力分级（无浏览器须显式标注"未做渲染目检"）
