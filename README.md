@@ -1,6 +1,6 @@
 # Design Workflow（需求 → 设计稿 → 交付检视 端到端工作流）
 
-面向华为计算生态产品团队（鲲鹏、昇腾、openEuler、openGauss、openUBMC 等）的设计工作流：由六个 Agent Skill 组成流水线，把"想法 → PRD → 设计稿 → 评审闭环 → 开发交付检视"跑成一条可恢复、可追溯的流水线。生成类环节（PRD/设计稿）在主对话交互执行，评审类环节（对抗评审/视觉检视/功能检视）由编排器以 subagent 独立派发——生成者与评审者上下文隔离，消除确认偏误。
+面向华为计算生态产品团队（鲲鹏、昇腾、openEuler、openGauss、openUBMC 等）的设计工作流：由六个 Agent Skill 组成流水线，把"想法/ISSUE → 轻量 PRD → 设计稿 → 评审与迭代定稿 → 详细 PRD → 开发交付检视"跑成一条可恢复、可追溯的流水线。团队无专职产品经理、设计师兼任需求工作，需求常由 ISSUE 触发、在设计中逐步明晰——PRD 双模式（轻量先行、定稿后反向升级详细版）即为此设计。生成类环节（PRD/设计稿）在主对话交互执行，评审类环节（对抗评审/视觉检视/功能检视）由编排器以 subagent 独立派发——生成者与评审者上下文隔离，消除确认偏误。
 
 ## 工作流总览
 
@@ -9,9 +9,9 @@ flowchart TD
     S[用户需求输入] --> E{阶段 0：输入判定}
     E -- 已有 PRD --> G2
     E -- 新建社区·有简报素材 --> G2
-    E -- 只有想法/简述 --> G1
+    E -- ISSUE / 想法 / 简述 --> G1
 
-    G1[阶段 1：生成 PRD<br/>requirement-doc-generator]
+    G1[阶段 1：生成 PRD<br/>轻量默认 / 详细可选<br/>requirement-doc-generator]
     G1 --> D1{确认门 1<br/>PRD 评审通过？}
     D1 -- 需修改 --> G1
     D1 -- 通过 --> G2
@@ -27,9 +27,11 @@ flowchart TD
     G3 --> D2{全部 ✅？}
     D2 -- 有 ❌ --> F[修复 + 复检]
     F --> D2
-    D2 -- 通过 --> H[回填 PRD 第 4 章]
+    D2 -- 通过 --> H{用户验收 DEMO}
+    H -- 需调整 --> G2
+    H -- 定稿 --> P[PRD 闭环<br/>轻量模式：基于定稿 DEMO<br/>反向升级详细 PRD v1.0<br/>详细先行模式：回填原型路径]
 
-    H --> DEV[开发实现<br/>部署测试环境]
+    P --> DEV[开发实现<br/>部署测试环境]
     DEV --> VR[阶段 4：交付检视 subagent<br/>先 visual-reviewer 后 functional-reviewer]
     VR --> D3{视觉 P0/P1 关闭？<br/>→ 功能 ❌ 关闭？}
     D3 -- 修复后复检 --> VR
@@ -39,9 +41,9 @@ flowchart TD
 | 阶段 | 执行角色 | 对应 skill | 核心动作 | 通过条件 |
 |------|---------|-----------|---------|---------|
 | 0 输入判定 | 项目主管 | design-workflow | 判定从哪进入，避免重复劳动 | 入口确定 |
-| 1 PRD 生成 | 产品经理 | requirement-doc-generator | 提问 → 生成 `docs/PRD_[主题]_[YYYYMMDD].md` | 用户确认通过 |
+| 1 PRD 生成 | 需求梳理（设计师兼任） | requirement-doc-generator | 提问（ISSUE 可选输入）→ 生成轻量 PRD（默认：用户/场景/功能清单）/详细 PRD `docs/PRD_[主题]_[YYYYMMDD].md` | 用户确认通过 |
 | 2 设计稿生成 | 体验设计师 | design-draft-generator | 路由判定（用户确认是否使用设计系统） → 预消化/简报 → 生成 `design/prototype_*.html` | 设计稿产出 |
-| 3 对抗评审 + 闭环 | 对抗评审员 | adversarial-reviewer（subagent 派发） | 7 项检查表 → 修复闭环 → 回填 PRD | 全部 ✅ + 回填完成 |
+| 3 对抗评审 + 闭环 | 对抗评审员 | adversarial-reviewer（subagent 派发） | 7 项检查表 → 修复闭环 → **DEMO 迭代定稿** → 轻量模式反向升级详细 PRD v1.0 / 详细先行模式回填 PRD | 全部 ✅ + 定稿确认 + PRD 闭环完成 |
 | 4 交付检视 | 视觉一致性测试员 → 功能测试员 | visual-reviewer → functional-reviewer | 先测试环境 vs DEMO 还原度比对（P0/P1/P2 分级），P0/P1 关闭后再做设计师清单主基准的关键流程走查 | 视觉 P0/P1 先关闭，功能 ❌ 随后关闭（或有显式风险声明） |
 
 ## 六个 Skill = 六种工作角色
@@ -50,7 +52,7 @@ flowchart TD
 
 | Skill | 扮演角色 | 职责 |
 |-------|---------|------|
-| [requirement-doc-generator](.trae/skills/requirement-doc-generator/SKILL.md) | **产品经理** | 交互式提问收集需求，产出 7 章标准化 PRD——功能编号可溯、验收标准可测试、边界清晰（"本期不做"明确） |
+| [requirement-doc-generator](.trae/skills/requirement-doc-generator/SKILL.md) | **需求梳理（设计师兼任，无专职产品经理）** | 交互式提问收集需求（ISSUE 为可选输入），产出**轻量 PRD**（默认：用户/场景/功能清单，设计前快速梳理）或**详细 PRD**（复杂需求前置 / DEMO 定稿后基于定稿 DEMO 反向升级 v1.0，补全交互细节与视觉细节）；功能编号全程可溯、边界清晰（"本期不做"明确） |
 | [design-draft-generator](.trae/skills/design-draft-generator/SKILL.md) | **体验设计师**（阶段 2） | 读取 PRD 后**询问用户是否使用 OpenDesign 设计系统**——使用则委托 opendesign-design（路由 A），不使用则产出 HTML 交互原型（路由 B）；路由不靠 PRD 措辞推断，已有社区增改属路由 A、新建社区也可选择路由 A；生成完成后执行强制自查（导航对齐/图标颜色），交付以对抗评审通过为前置条件 |
 | [adversarial-reviewer](.trae/skills/adversarial-reviewer/SKILL.md) | **对抗评审员**（阶段 3，subagent 派发） | 以独立评审者视角对照 7 项检查表（需求可溯/纲领合规/五大原则/CRAP/视觉细节/多方案横向/真实可评审）审查设计稿，产出 `reports/Review_Design_*.md`；与生成者上下文物理隔离，假设"这份 demo 一定有问题" |
 | [design-workflow](.trae/skills/design-workflow/SKILL.md) | **项目主管** | 编排整个流水线（阶段 0-4）：阶段流转、确认门（PRD 未确认不放行设计）、评审 subagent 派发与硬阻断（视觉 P0/P1 未关闭不放行功能检视）、交接物清单管理；不插手各角色的具体工作 |
@@ -65,9 +67,11 @@ flowchart TD
 
 ## 关键机制
 
-- **阶段 0 输入判定**：已有 PRD 直接进阶段 2；新建社区有简报直接进阶段 2（默认建议路由 B，仍需用户确认是否使用设计系统）；只有想法从头开始；只要评审直接进阶段 3；开发完成、测试环境就绪直接进阶段 4
-- **确认门**：PRD 未经用户确认，禁止生成设计稿
-- **交接物清单**：PRD 路径、功能编号索引、路由记录、设计稿路径、评审报告、回填位置——全程维护，兼作上下文压缩后的现场恢复依据
+- **阶段 0 输入判定**：已有 PRD 直接进阶段 2；新建社区有简报直接进阶段 2（默认建议路由 B，仍需用户确认是否使用设计系统）；ISSUE / 想法从头开始（ISSUE 为可选输入，是否提供由用户选择）；只要评审直接进阶段 3；开发完成、测试环境就绪直接进阶段 4
+- **轻量 PRD 双模式**：设计前默认轻量 PRD（用户/场景/功能清单，验收标准允许暂缺）——需求在设计与业务对齐中逐步明晰，不强迫初始阶段定义详尽；DEMO 定稿后基于定稿 DEMO 反向升级详细 PRD v1.0（补全交互细节与视觉细节），功能编号全程不变；复杂/规则密集需求可选详细 PRD 先行
+- **确认门**：PRD 未经用户确认，禁止生成设计稿——轻量版确认用户/场景/功能清单对齐，详细版确认验收标准可测试
+- **DEMO 迭代定稿**：对抗评审通过 ≠ 定稿——用户多轮调整回到设计迭代，涉及交互/结构变化须复检（只复检影响范围），用户明确宣布定稿后才进入 PRD 闭环与开发
+- **交接物清单**：PRD 路径+版本+模式、功能编号索引、路由记录、设计稿路径、评审报告、定稿记录、PRD 闭环位置——全程维护，兼作上下文压缩后的现场恢复依据
 - **对抗评审**：生成者切换为对抗评审者，按 7 项检查表（需求可溯 / 纲领合规 / 五大原则 / CRAP / 视觉细节 / 多方案横向 / 真实可评审）逐项给出 ✅/❌ 与证据，❌ 项修复后复检，全部通过才交付
 - **交付检视双路径串行**：先视觉还原度检视（测试环境 vs DEMO，7 维度 + P0/P1/P2 分级），P0/P1 关闭后再做功能检视（设计师清单主基准 + 关键流程走查）；两报告独立归档、独立闭环；所有判定证据先行，禁止凭印象判定；修复后只复检影响范围
 
@@ -107,7 +111,7 @@ cp -R .trae/skills/<skill-name> .agents/skills/    # Codex（OpenCode 亦兼容�
 对 AI 助手说：
 
 - **跑完整流水线**："从需求开始跑一次完整设计工作流"（design-workflow 从阶段 0 接管）
-- **只写 PRD**："帮我写一个 XX 的 PRD"（requirement-doc-generator）
+- **只写 PRD**："帮我写一个 XX 的 PRD"（requirement-doc-generator，默认轻量版，可指定详细版；ISSUE 链接/文本可作为输入）
 - **已有 PRD 出设计稿**："根据 docs/PRD_xxx.md 生成设计稿"（design-draft-generator）
 - **开发完成做视觉还原度检视**："开发做完了，帮我检视测试环境和 DEMO 的还原度"（visual-reviewer，串行第一步）
 - **开发完成做功能检视**："走查一遍测试环境的关键流程"（functional-reviewer，需视觉检视 P0/P1 已关闭；建议先让设计师填写功能检视清单）
