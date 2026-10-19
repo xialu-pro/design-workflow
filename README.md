@@ -41,7 +41,7 @@ flowchart TD
 | 阶段 | 执行角色 | 对应 skill | 核心动作 | 通过条件 |
 |------|---------|-----------|---------|---------|
 | 0 输入判定 | 项目主管 | design-workflow | 判定从哪进入，避免重复劳动 | 入口确定 |
-| 1 PRD 生成 | 需求梳理（设计师兼任） | requirement-doc-generator | 提问（ISSUE 可选输入）→ 生成轻量 PRD（默认：用户/场景/功能清单）/详细 PRD `docs/PRD_[主题]_[YYYYMMDD].md` | 用户确认通过 |
+| 1 PRD 生成 | 需求梳理（设计师兼任） | requirement-doc-generator | 提问（ISSUE / DEMO 生成 Prompt 等来源可选输入）→ 生成轻量 PRD（默认：用户/场景/功能清单 + 交付物性质 + 素材）/详细 PRD `docs/PRD_[主题]_[YYYYMMDD].md` | 用户确认通过 |
 | 2 设计稿生成 | 体验设计师 | design-draft-generator | 路由判定（用户确认是否使用设计系统） → 预消化/简报 → 生成 `design/prototype_*.html` | 设计稿产出 |
 | 3 对抗评审 + 闭环 | 对抗评审员 | adversarial-reviewer（subagent 派发） | 7 项检查表 → 修复闭环 → **DEMO 迭代定稿** → 轻量模式反向升级详细 PRD v1.0 / 详细先行模式回填 PRD | 全部 ✅ + 定稿确认 + PRD 闭环完成 |
 | 4 交付检视 | 视觉一致性测试员 → 功能测试员 | visual-reviewer → functional-reviewer | 先测试环境 vs DEMO 还原度比对（P0/P1/P2 分级），P0/P1 关闭后再做设计师清单主基准的关键流程走查 | 视觉 P0/P1 先关闭，功能 ❌ 随后关闭（或有显式风险声明） |
@@ -69,6 +69,7 @@ flowchart TD
 
 - **阶段 0 输入判定**：已有 PRD 直接进阶段 2；新建社区有简报直接进阶段 2（默认建议路由 B，仍需用户确认是否使用设计系统）；ISSUE / 想法从头开始（ISSUE 为可选输入，是否提供由用户选择）；只要评审直接进阶段 3；开发完成、测试环境就绪直接进阶段 4
 - **轻量 PRD 双模式**：设计前默认轻量 PRD（用户/场景/功能清单，验收标准允许暂缺）——需求在设计与业务对齐中逐步明晰，不强迫初始阶段定义详尽；DEMO 定稿后基于定稿 DEMO 反向升级详细 PRD v1.0（补全交互细节与视觉细节），功能编号全程不变；复杂/规则密集需求可选详细 PRD 先行
+- **交付物性质**：轻量 PRD 必填"可演示原型（无实际功能，评审排版/调性/风格）"或"正式上线页面"——二者设计基准不同，生成器与评审员均按声明的性质执行；功能描述列可直接承载已确认素材（技术数据、案例清单等），素材须如实进入 DEMO，禁止弃用另编占位
 - **确认门**：PRD 未经用户确认，禁止生成设计稿——轻量版确认用户/场景/功能清单对齐，详细版确认验收标准可测试
 - **DEMO 迭代定稿**：对抗评审通过 ≠ 定稿——用户多轮调整回到设计迭代，涉及交互/结构变化须复检（只复检影响范围），用户明确宣布定稿后才进入 PRD 闭环与开发
 - **交接物清单**：PRD 路径+版本+模式、功能编号索引、路由记录、设计稿路径、评审报告、定稿记录、PRD 闭环位置——全程维护，兼作上下文压缩后的现场恢复依据
@@ -79,12 +80,13 @@ flowchart TD
 
 ```
 ├── docs/                          # PRD 输出（PRD_[主题]_[YYYYMMDD].md；功能检视清单 FuncChecklist_*.md）
-├── design/                        # 设计稿输出（prototype_[主题]_[YYYYMMDD].html）
-├── reports/                       # 交付检视报告（Review_Visual_* / Review_Func_*.md）
+├── design/                        # 设计稿输出（prototype_[主题]_[YYYYMMDD].html，gitignore 本地留痕）
+├── reports/                       # 交付检视报告（Review_Visual_* / Review_Func_*.md，gitignore 本地留痕）
 └── .trae/skills/
     ├── requirement-doc-generator/ # 阶段 1：PRD 生成
     ├── design-draft-generator/    # 阶段 2-3：设计稿 + 对抗评审
     │   └── templates/new-community-brief.md  # 路由 B 设计简报模板
+    ├── opendesign-design/         # 路由 A：OpenDesign 设计系统规范（随仓库分发）
     ├── design-workflow/           # 编排器
     ├── visual-reviewer/           # 阶段 4：视觉还原度检视
     └── functional-reviewer/       # 阶段 4：功能检视
@@ -102,7 +104,7 @@ cp -R .trae/skills/<skill-name> .opencode/skills/  # OpenCode 原生
 cp -R .trae/skills/<skill-name> .agents/skills/    # Codex（OpenCode 亦兼容此路径）
 ```
 
-路由 A 另需安装 [opendesign-design](https://atomgit.com/openeuler/opendesign-skills/tree/master/skills/opendesign-design) skill（OpenDesign 设计系统规范与硬约束）。
+路由 A 依赖 [opendesign-design](.trae/skills/opendesign-design/SKILL.md) skill（OpenDesign 设计系统规范与硬约束），已随本仓库分发（`.trae/skills/opendesign-design/`），按上述方式安装即可，无需外部获取。
 
 各 skill 的全局安装路径、验证方式见其 SKILL.md 的"安装方式"章节。
 
