@@ -628,7 +628,7 @@ npx playwright test
 
 - [OpenDesign 设计系统总览](../../SKILL.md)
 - [组件组合硬约束](../hard-constraints.md)
-- [Pixso 操作指南](https://pixso.cn/help/)
+- [OpenDesign CodeGen 工程规范](../../opendesign-codegen/SKILL.md)
 - [Web Content Accessibility Guidelines (WCAG 2.1)](https://www.w3.org/WAI/WCAG21/quickref/)
 - [MDN Web Docs](https://developer.mozilla.org/)
 

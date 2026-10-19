@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>导航下拉面板（分类平铺式）高保真验证 · 交互模型</title>
+<style>
+:root {
+    /* ⚠️ 语义 Token 必须先定义再使用：fill/color 引用未定义的 var() 会导致该属性无效，
+       元素继承 svg 的 fill="none" 而完全不可见 */
+    --o-color-fill1: #F5F5F5;
+    --o-color-fill2: #FFFFFF;
+    --o-color-fill3: #EDEDF0;
+    --o-color-info1: #000000;
+    --o-color-info2: #333333;
+    --o-color-info3: #666666;
+    --o-color-info4: #999999;
+    --o-color-control1: rgba(0, 0, 0, 0.25);
+    --o-color-primary1: #002FA7;
+    --o-color-primary2: #5177CA;
+    --o-color-primary3: #002793;
+    /* 链接色（OLink）——值来源 opendesign-tokens/references/tokens-openeuler.md「品牌色/Primary/链接色」表：
+       link1=#002FA7(=brand-6 链接常规色)、link2=#5177CA(=brand-4 链接悬浮)、link3=#002793(=brand-7 链接激活) */
+    --o-color-link1: #002FA7;
+    --o-color-link2: #5177CA;
+    --o-color-link3: #002793;
+    --o-color-danger1: #E60012;
+    --o-color-white: #FFFFFF;
+    --o-shadow-1: 0 3px 9px 0 rgba(0, 18, 85, 0.078);  /* 值来源 components/navigation.md 顶导 boxShadow 规格 */
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    /* 🔴 hard-constraints §2 铁律：全局字体一律鸿蒙黑体，禁止 PingFang / 系统默认字体 / 任何其他字族 */
+    font-family: 'HarmonyOS Sans', 'HarmonyHeiTi';
+    background: var(--o-color-fill1);
+    color: var(--o-color-info1);
+}
+
+/* ===================== 顶导骨架（floors/navigation.md） ===================== */
+.o-nav {
+    width: 100%;
+    height: 72px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 216px;
+    background: var(--o-color-fill2);
+    box-shadow: var(--o-shadow-1);
+    backdrop-filter: blur(4.53px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+/* ⭐ 顶导下阴影的「面板补偿层」——必须这样写，否则阴影永远看不见：
+   .o-nav__dropdown 是 .o-nav 的【后代】，而后代的绘制永远压在父元素的
+   box-shadow 之上（box-shadow 属于父元素自身绘制的一部分，先于一切后代；
+   z-index 只在同一 stacking context 的兄弟之间比较，跨父子无效，
+   所以把 .o-nav 提到 101 也不会让它的下阴影盖住面板）。
+   零间距贴合时面板会整条盖住顶导的下阴影，交界处"平贴"无悬浮感。
+   解法 = 用伪元素在 .o-nav 内部以更高 z-index(102) 重画同一道阴影，叠在面板之上。
+   ⚠️ 几何必须与顶导本体一致（top: 0 + height: 100%），不能图省事写成一条细线：
+   实测三种高度的接缝处像素（x1560, y72）——
+     height: 0    → (255,255,255) 零高度元素的 box-shadow 完全不渲染，整条规则是死代码
+     height: 1px  → (254,254,254) 源盒子太矮，9px 模糊把阴影摊成弥散斑，几乎不可见
+     height: 100% → (241,241,245) 与顶导自身阴影的有效透明度一致（0.055 vs 0.057），正确 */
+.o-nav::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;                   /* 与顶导本体同高：阴影的锐利度由源盒子高度决定，
+                                 细线源 + 大模糊 = 阴影被稀释（实测见上） */
+    height: 100%;             /* ⭐ 撑满顶导高度，复刻顶导自身 box-shadow 的强度 */
+    box-shadow: var(--o-shadow-1);
+    z-index: 102;              /* ⭐ 必须 > 面板的 100，才能把阴影画在面板之上 */
+    pointer-events: none;      /* 不挡鼠标 */
+    /* 伪元素自身无背景、无边框，只有 border-box 之外的阴影会画出来（落在 y>72px 的面板上），
+       不会遮挡顶导内的 Logo / 菜单 / 图标 */
+}
+/* ⚠️ L2 左侧区域：漏写这条规则，.o-nav__left 就是普通块级容器，
+   Logo 与菜单会纵向堆叠成两行（已复现：菜单掉到 Logo 下方、指示线飘出导航外） */
+.o-nav__left {
+    display: flex;
+    align-items: flex-end;                  /* ⭐ L2：子元素默认贴底（Tab 需要） */
+    gap: 40px;                              /* Logo ↔ 菜单间距 */
+}
+/* ⚠️ 分类平铺式面板很宽（5 列 + 快捷链接栏），不能用基类的「居中于触发器」定位
+   （会以触发器为中心向两侧展开，左侧整体溢出视口、第一列被挤出屏幕）。
+   正确做法 = 面板通栏撑满页面宽度，内部用 padding 把条目内容对齐【栅格内容区】：
+   PC padding-left/right = 216px（hard-constraints §4.1：1488 + 216×2 = 1920）
+   MB padding-left/right = 24px（hard-constraints §4.1：312 + 24×2 = 360）
+   与页面内容区（.page margin 216px）、顶导内容区（.o-nav padding 216px）三者完全一致。
+   做法：包含块上移到顶导本体（sticky 即定位元素），面板 left: 0 + right: 0 + width: auto */
+.o-nav__item:has(> .o-nav__dropdown--categorized) { position: static; }
+.o-nav__logo { padding: 20px 0; align-self: center; display: flex; }
+.o-nav__logo svg { display: block; }
+.o-nav__menu { display: flex; gap: 32px; list-style: none; align-self: flex-end; }
+
+/* 触发器（基础几何归 floors/navigation.md：32×48px, padding-bottom 24px, border-bottom 2px） */
+.o-nav__item { position: relative; align-self: flex-end; }  /* align-self: flex-end 贴底对齐（navigation.md 菜单项完整样式） */
+.o-nav__link {
+    display: flex; align-items: center; height: 48px; padding: 0 4px 24px;
+    font-size: 16px; line-height: 24px; font-weight: 400;
+    color: var(--o-color-info1); text-decoration: none;
+    white-space: nowrap;
+    /* ⛔ 禁止 border-radius：触发器背景一律透明，圆角无视觉效果，
+       却会把 border-bottom 指示线两端裁成圆弧（应为完整一根直线） */
+    border-bottom: 2px solid transparent;      /* 默认透明指示线（navigation.md Part C） */
+    transition: color .2s ease, border-color .2s ease;
+}
+
+/* ===== 触发器状态（floors/navigation.md「菜单项完整样式」+ components/navigation.md Part C） ===== */
+/* ⛔ 2026-10-15 用户打回：禁止 hover / 选中态切 Semibold——字重随交互切换会产生肉眼可见的
+   文字跳动，与下拉条目标题「全状态统一字重」是同一原则：触发器全状态 Regular(400) 不切换。
+   （2026-10-14 设计稿标注的「悬停项 Semibold」已作废，见 navigation-dropdown-categorized.md §4.1）
+   ⚠️ 状态规则禁止用 :has(> .o-nav__dropdown--categorized) 收窄：无下拉面板的普通菜单项
+   （社区 / 下载 / 文档）同样必须有 hover 与 is-current 态——收窄后它们 hover 完全没反应、
+   is-current 连指示线都不渲染（2026-10-15 已复现并修正） */
+/* Hover / 展开态：仅文字变 primary2（设计稿标注 #5177FA，取值 #5177CA），无下划线、无背景 */
+.o-nav__link:hover,
+.o-nav__item:focus-within > .o-nav__link,
+.o-nav__item[data-open="true"] > .o-nav__link {
+    color: var(--o-color-primary2);
+}
+/* 选中态（当前页）：primary1 + 2px 指示线，字重不变；选中优先于 hover（hover 不抢回 primary2） */
+.o-nav__item.is-current > .o-nav__link,
+.o-nav__item.is-current:hover > .o-nav__link,
+.o-nav__item.is-current:focus-within > .o-nav__link,
+.o-nav__item.is-current[data-open="true"] > .o-nav__link {
+    color: var(--o-color-primary1);
+    border-bottom-color: var(--o-color-primary1);
+}
+
+.o-nav__right { display: flex; align-items: center; gap: 20px; }
+.o-nav__search {
+    position: relative; width: 160px; height: 32px;
+    border: 1px solid var(--o-color-control1); border-radius: 4px;
+    background: var(--o-color-fill2); overflow: hidden; cursor: text;
+}
+.o-nav__search span {
+    /* ⚠️ 占位文字在图标右侧：left = 16px 左内边距 + 16px 图标 + 8px gap = 40px */
+    position: absolute; left: 40px; top: 50%; transform: translateY(-50%);
+    font-size: 14px; line-height: 22px; color: var(--o-color-info4); pointer-events: none;
+}
+/* ⚠️ 搜索图标在【左侧】（OSearch small：图标 位置=左侧，占位文字 位置=图标右侧）
+   ⛔ 严禁 right——会把图标推到占位文字右边 */
+.o-nav__search svg {
+    position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px; pointer-events: none;
+}
+.o-nav__source {
+    display: flex; align-items: center; gap: 8px; min-width: 48px; height: 24px;
+    font-size: 14px; line-height: 22px; color: var(--o-color-info1);
+    white-space: nowrap; cursor: pointer;
+}
+.o-nav__source svg { width: 16px; height: 16px; flex: none; }
+.o-nav__icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.o-nav__icon svg { width: 24px; height: 24px; display: block; }
+
+/* =============== 分类平铺式下拉面板（多列平铺） =============== */
+/* 基类：定位 / 显隐三规则 / 热区桥接 / 互斥 全部继承 floors/navigation-dropdown.md */
+.o-nav__dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 50%;
+    z-index: 100;
+    height: auto;                          /* ⚠️ 禁止写死高度 */
+    background: var(--o-color-fill2);
+    border-radius: 4px;
+    box-shadow: 0 6px 24px rgba(18, 20, 23, 0.08);
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -8px);
+    transition: opacity .2s ease, transform .2s ease, visibility .2s;
+}
+/* 4px 间隙热区桥接（平铺式用；分类平铺式零间距后已关闭，见下方） */
+.o-nav__dropdown::before {
+    content: ''; position: absolute; top: -4px; left: 0; right: 0; height: 4px;
+}
+.o-nav__item:hover > .o-nav__dropdown,
+.o-nav__item:focus-within > .o-nav__dropdown,
+.o-nav__item[data-open="true"] > .o-nav__dropdown {
+    opacity: 1; visibility: visible; transform: translate(-50%, 0);
+}
+/* ===== 单开互斥：hover 与锁定展开不得重叠 ===== */
+.o-nav__menu:has(> .o-nav__item:hover > .o-nav__dropdown) > .o-nav__item:not(:hover) > .o-nav__dropdown,
+.o-nav__menu:has(> .o-nav__item:focus-within > .o-nav__dropdown) > .o-nav__item:not(:focus-within) > .o-nav__dropdown {
+    opacity: 0; visibility: hidden; transform: translate(-50%, -8px);
+}
+
+/* ⚠️ 必须写成复合选择器（两类同级），优先级才高于基类 */
+.o-nav__dropdown.o-nav__dropdown--categorized {
+    display: flex;
+    flex-direction: row;                    /* ⭐ 多列横向排布 */
+    flex-wrap: wrap;                        /* ⭐ 超宽整列折行，禁止压缩列宽 */
+    align-items: flex-start;                /* 列头顶部对齐，禁止 stretch 拉成等高 */
+    gap: 24px;                              /* ⭐ 列间距（条目间左右间距）≥1681px */
+    /* ⭐ 与顶导零间距：紧贴顶导底边，像抽屉一样展开（2026-10-15 用户确认，覆盖基类 calc(100% + 4px)） */
+    top: 100%;
+    /* ⭐ 面板通栏撑满页面宽度（left:0 / right:0），内部用 padding 把条目内容
+       对齐到【栅格内容区】：PC 左右 216px（hard-constraints §4.1：1488+216×2=1920）
+       与页面内容区、顶导内容区三者完全一致 */
+    left: 0;                                /* ⭐ 通栏：相对顶导贴屏幕左缘 */
+    right: 0;                               /* ⭐ 通栏：相对顶导贴屏幕右缘 */
+    width: auto;
+    padding: 24px 216px;                    /* 上下 24px ⚠️推断值 / 左右 216px 栅格边距 */
+    /* 上圆角压平为 0：面板已零间距紧贴顶导底边，若保留 4px 上圆角会在左上/右上
+       露出两个月牙形缺口，视觉上又"裂开"了；只保留下圆角 */
+    border-radius: 0 0 4px 4px;
+    transform: translateY(-8px);
+}
+/* 零间距后基类的 4px 热区桥接已无用（无间隙可穿），显式关闭 */
+.o-nav__dropdown.o-nav__dropdown--categorized::before { display: none; }
+/* 显示态：覆盖基类的 translate(-50%, 0) */
+.o-nav__item:hover > .o-nav__dropdown.o-nav__dropdown--categorized,
+.o-nav__item:focus-within > .o-nav__dropdown.o-nav__dropdown--categorized,
+.o-nav__item[data-open="true"] > .o-nav__dropdown.o-nav__dropdown--categorized {
+    opacity: 1; visibility: visible; transform: translateY(0);
+}
+/* 互斥规则同步覆盖 transform（无 translateX） */
+.o-nav__menu:has(> .o-nav__item:hover > .o-nav__dropdown) > .o-nav__item:not(:hover) > .o-nav__dropdown.o-nav__dropdown--categorized,
+.o-nav__menu:has(> .o-nav__item:focus-within > .o-nav__dropdown) > .o-nav__item:not(:focus-within) > .o-nav__dropdown.o-nav__dropdown--categorized {
+    opacity: 0; visibility: hidden; transform: translateY(-8px);
+}
+
+/* ===== 分类列 ===== */
+.o-nav__cat { display: flex; flex-direction: column; flex: none; min-width: 0; }
+/* 列头：>1440px 16px/24px · ≤1440px 14px/22px（见响应式 2）；颜色两档统一 info4 */
+.o-nav__cat-title {
+    margin-bottom: 12px;                    /* 列头与条目列表间距（推断值） */
+    font-size: 16px; line-height: 24px; font-weight: 400;   /* ⭐ >1440px 基准档 */
+    color: var(--o-color-info4);            /* ⭐ info4（2026-10-15 用户确认，原 info3 作废） */
+    cursor: default;                        /* ⛔ PC 端列头无交互 */
+}
+.o-nav__cat-list { display: flex; flex-direction: column; gap: 24px; }
+
+/* ===== 条目（透明容器，hover 只改文字，无背景色块） ===== */
+.o-nav__cat-item {
+    display: flex; flex-direction: column; gap: 4px;
+    text-decoration: none;
+    /* ⛔ 禁止 background / border-radius */
+}
+/* 标题行 = 文字（可截断）+ 外链图标 + 红标签，三者横排 */
+.o-nav__cat-item-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 16px; line-height: 24px;     /* ⭐ >1440px 基准档；≤1440px 见响应式 2 */
+    font-weight: 600;                       /* ⭐ 默认态即 Semibold，全状态统一不切换 */
+    color: var(--o-color-info1);
+}
+.o-nav__cat-item-text {
+    display: -webkit-box;                   /* ⭐ line-clamp 四件套之一 */
+    -webkit-box-orient: vertical;           /* ⭐ 标题最多 2 行 */
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    min-width: 0;                           /* ⭐ 允许被压缩，图标/标签不参与换行计算 */
+}
+.o-nav__cat-item-title svg { flex: none; width: 24px; height: 24px; }  /* 外链图标 24×24，currentColor 跟随标题态 */
+.o-nav__cat-item-desc {
+    display: -webkit-box;                   /* ⭐ line-clamp 四件套之一 */
+    -webkit-box-orient: vertical;           /* ⭐ 选项最多 6 行 */
+    -webkit-line-clamp: 6;
+    overflow: hidden;
+    min-height: 36px;                       /* ⭐ 预留 2 行高度（2 × 18px），文本 1 行时也占两行空间，
+                                               便于后续文案延展成 2 行时不挤压其他条目 */
+    font-size: 12px; line-height: 18px; font-weight: 400;
+    color: var(--o-color-info2);
+}
+/* 两色分级：hover=primary2 / 按下=primary3；字重恒为 Semibold，不再随态切换 */
+/* ⛔ 无 .is-selected 规则：面板条目点击即跳走，不存在持久选中态（2026-10-15 用户确认） */
+.o-nav__cat-item:hover .o-nav__cat-item-title { color: var(--o-color-primary2); }
+.o-nav__cat-item:active .o-nav__cat-item-title { color: var(--o-color-primary3); }
+/* 禁用态：唯一允许字重回落 Regular 的状态（禁用不是交互态） */
+.o-nav__cat-item.is-disabled .o-nav__cat-item-title { font-weight: 400; color: var(--o-color-info4); }
+.o-nav__cat-item.is-disabled .o-nav__cat-item-desc { color: var(--o-color-info4); }
+.o-nav__cat-item.is-disabled { cursor: not-allowed; }
+
+/* 红色小标签 = OTag（components/tag.md）fill + danger + small */
+.o-tag {
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+    height: 20px;                            /* small 高度 20px */
+    padding: 0 6px;                          /* small 水平内边距 6px（垂直 2px 由定高吸收） */
+    border-radius: 4px;                      /* radius_control-m */
+    font-size: 12px; line-height: 18px; font-weight: 400;   /* small 字号 / 行高 */
+    white-space: nowrap;
+}
+.o-tag--fill.o-tag--danger { background: var(--o-color-danger1); color: var(--o-color-white); }
+
+/* ===== OButton（components/button.md）：本页仅用到 text + large ===== */
+.o-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    border: none; background: none; cursor: pointer;
+    font-family: inherit;
+    -webkit-appearance: none; appearance: none;
+}
+/* large：高 40px、水平内边距 24px、圆角 100px、字号 16px/24px、图标 24×24、图文间距 8px */
+.o-btn--large {
+    height: 40px;
+    padding: 8px 24px;
+    border-radius: 100px;
+    font-size: 16px; line-height: 24px; font-weight: 400;
+}
+/* text 变体：无背景、无边框、水平内边距 0、无最小宽度；图标 24×24、图文间距 8px */
+.o-btn--text { padding-left: 0; padding-right: 0; min-width: 0; gap: 8px; }
+/* text 变体状态色：默认 info1 → hover primary2 → 按下 primary3（禁用 info4） */
+.o-btn--text { color: var(--o-color-info1); }
+.o-btn--text:hover { color: var(--o-color-primary2); }
+.o-btn--text:active { color: var(--o-color-primary3); }
+.o-btn--text:disabled { color: var(--o-color-info4); cursor: not-allowed; }
+.o-btn svg { flex: none; width: 24px; height: 24px; }   /* large 图标 24×24（icon_size_control-m） */
+
+/* 列底部「更多项目」入口 = OButton text large（button.md），图标在右侧（继续/跳转语义） */
+.o-nav__cat-more {
+    align-self: flex-start;                 /* 列是 column flex，贴左缘不拉宽；文字天然与上方条目左缘对齐 */
+}
+
+/* 左列末项切换箭头：仅 MB 端（导航项过多时）显示；图标取自 assets 上/下箭头 */
+.o-nav__cat-toggle {
+    display: none;
+    align-self: flex-start;
+    width: 16px; height: 16px; padding: 0;
+    border: none; background: none;
+    color: var(--o-color-info3);
+    cursor: pointer;
+}
+.o-nav__cat-toggle svg { display: block; width: 16px; height: 16px; }
+/* 展开态显示 ⌃（点击收起）／折叠态显示 ⌄（点击展开） */
+.o-nav__cat-toggle .icon-collapse { display: block; }
+.o-nav__cat-toggle .icon-expand { display: none; }
+.o-nav__dropdown--categorized.is-collapsed .o-nav__cat-toggle .icon-collapse { display: none; }
+.o-nav__dropdown--categorized.is-collapsed .o-nav__cat-toggle .icon-expand { display: block; }
+@media (max-width: 840px) { .o-nav__cat-toggle { display: block; } }
+
+/* ===== 快捷链接栏（⚠️ 可选模块：看需求挂载，默认不出现） ===== */
+/* ⭐ 栏内整体左对齐（标题 / 色块 / 卡片同一左缘）；整栏 margin-left:auto 靠栅格内容区右缘 */
+.o-nav__quick {
+    display: flex; flex-direction: column; align-items: flex-start;   /* ⭐ 栏内左对齐 */
+    gap: 8px; flex: none; width: 342px;
+    margin-left: auto;                      /* ⭐ 整栏靠右（贴栅格内容区右缘，PC 距右 216px） */
+}
+/* 栏标题：与分类列头同规格（>1440px 16px/24px · ≤1440px 14px/22px，info4） */
+.o-nav__quick-title {
+    margin-bottom: 4px;
+    font-size: 16px; line-height: 24px; font-weight: 400;
+    color: var(--o-color-info4);
+    cursor: default;
+}
+/* 灰底按钮块：宽 342px 固定 / 高 40px / 圆角 4px / fill3 底 / 块内 link 距左 24px + 上下居中 */
+.o-nav__quick-link {
+    display: flex; align-items: center;
+    width: 342px; height: 40px;
+    padding-left: 24px;
+    border-radius: 4px;
+    background: var(--o-color-fill3);
+    text-decoration: none;
+}
+/* 内部 OLink medium（components/link.md）：
+   整体高 34px / 上下 padding 5px / 左右 padding 0 / 文字 14px-22px Regular /
+   link1 → hover link2 + 下划线 → active link3 + 下划线 / 后缀图标 24×24、图文间距 4px */
+.o-nav__quick-link-text {
+    display: inline-flex; align-items: center; gap: 4px;
+    height: 34px; padding: 5px 0;
+    font-size: 14px; line-height: 22px; font-weight: 400;
+    color: var(--o-color-link1);
+}
+.o-nav__quick-link:hover .o-nav__quick-link-text { color: var(--o-color-link2); text-decoration: underline; }
+.o-nav__quick-link:active .o-nav__quick-link-text { color: var(--o-color-link3); text-decoration: underline; }
+.o-nav__quick-link-text svg { flex: none; width: 24px; height: 24px; }  /* OLink 后缀图标 24×24，颜色随文字 */
+/* 带图 + 文本卡片：左图右文、图文垂直居中，图文间距 8px；⭐ 无背景、无圆角、无内边距（无背后色块） */
+.o-nav__quick-card {
+    display: flex; flex-direction: row;            /* ⭐ 左图右文 */
+    align-items: center;                          /* ⭐ 文字与图水平居中 */
+    gap: 8px;                                      /* ⭐ 图文间距 8px */
+    width: 342px;
+    text-decoration: none;
+}
+.o-nav__quick-card img { flex: none; width: 121px; height: 68px; object-fit: cover; border-radius: 4px; }
+.o-nav__quick-card-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.o-nav__quick-card-title { display: block; font-size: 16px; line-height: 24px; font-weight: 600; color: var(--o-color-info1); }
+.o-nav__quick-card-desc { display: block; font-size: 12px; line-height: 18px; font-weight: 400; color: var(--o-color-info3); }
+/* hover / 按下态与左侧分类条目保持完全一致：只改标题颜色（primary2 / primary3），
+   无背景色块、无字重变化，图片与描述行均不变 */
+.o-nav__quick-card:hover .o-nav__quick-card-title { color: var(--o-color-primary2); }
+.o-nav__quick-card:active .o-nav__quick-card-title { color: var(--o-color-primary3); }
+
+/* ===================== 响应式（六档断点） ===================== */
+/* 响应式 1：1680~1441px 仅调菜单间距，面板/页面/顶导仍对齐栅格 216px */
+@media (max-width: 1680px) and (min-width: 1441px) {
+    .o-nav { padding: 0 216px; }
+    .o-nav__menu { gap: 32px; }
+}
+/* 响应式 2：≤1440px 列头 / 栏标题 / 选项标题降为 14px/22px（颜色不变，仍 info4 / info1） */
+@media (max-width: 1440px) {
+    .o-nav__cat-title,
+    .o-nav__quick-title { font-size: 14px; line-height: 22px; }
+    .o-nav__cat-item-title { font-size: 14px; line-height: 22px; }
+}
+/* 响应式 2：1440~1201px 面板仍对齐栅格 216px */
+@media (max-width: 1440px) and (min-width: 1201px) {
+    .o-nav { padding: 0 216px; }
+}
+/* 响应式 3：1200~841px 列距 16px（标题字号已在 ≤1440px 档降为 14px；左右仍对齐栅格 216px） */
+@media (max-width: 1200px) and (min-width: 841px) {
+    .o-nav { padding: 0 216px; }
+    .o-nav__dropdown.o-nav__dropdown--categorized { gap: 16px; }
+}
+/* 响应式 4：840~601px 折叠屏 / Pad 竖屏 → 左一级导航列 + 右内容区
+   MB 栅格：内容区 312px，距画布两边各 24px（hard-constraints §4.1） */
+@media (max-width: 840px) and (min-width: 601px) {
+    .o-nav { padding: 0 24px; }
+    .o-nav__dropdown.o-nav__dropdown--categorized {
+        display: grid;
+        grid-template-columns: minmax(32px, 144px) 1fr;
+        gap: 12px;
+        width: auto; max-width: none;
+        padding: 12px 24px;                   /* 上下 12px / 左右 24px MB 栅格边距 */
+    }
+    .o-nav__dropdown.o-nav__dropdown--categorized .o-nav__cat { display: contents; }
+    .o-nav__cat-title { grid-column: 1; margin-bottom: 8px; cursor: pointer; }
+    .o-nav__cat:not(.is-active) .o-nav__cat-list { display: none; }
+    .o-nav__cat.is-active .o-nav__cat-list {
+        display: flex; grid-column: 2; grid-row: 1;   /* ⭐ 右内容区固定顶格 */
+        max-width: 40%;                              /* ⭐ 右侧内容区最大占整屏 40% */
+    }
+    .o-nav__quick {
+        grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap;
+        justify-content: flex-start;          /* ⭐ MB 端栏内同样左对齐（贴 MB 栅格左缘） */
+        align-items: flex-start;
+        width: auto; min-width: 0; margin-left: 0;
+    }
+    .o-nav__quick-link { width: 100%; }       /* MB 端色块撑满栏宽 */
+    .o-nav__quick-card { width: 100%; }
+    .o-nav__quick-title { flex-basis: 100%; }
+    .page { width: auto; margin: 72px 24px 0; }
+}
+/* 响应式 5：≤600px 手机竖屏（MB 栅格边距同为 24px） */
+@media (max-width: 600px) {
+    .o-nav { padding: 0 24px; }
+    .o-nav__cat-title { white-space: normal; }      /* 菜单最大 144px，超长自动换行 */
+    .o-nav__cat.is-active .o-nav__cat-list { max-width: none; }  /* ⭐ 手机不按 40% 收窄 */
+    /* 折叠态：左列最小宽度 32px */
+    .o-nav__dropdown.o-nav__dropdown--categorized.is-collapsed { grid-template-columns: 32px 1fr; }
+    .o-nav__dropdown.o-nav__dropdown--categorized.is-collapsed .o-nav__cat-title span { display: none; }
+    .page { width: auto; margin: 72px 24px 0; }
+}
+
+/* ===================== 页面内容 ===================== */
+.page { width: 1488px; margin: 72px 216px 0; }
+.page h1 { font-size: 40px; line-height: 56px; font-weight: 600; margin-bottom: 16px; }
+.page .desc { font-size: 16px; line-height: 24px; color: var(--o-color-info2); margin-bottom: 40px; }
+.card { background: var(--o-color-fill2); border-radius: 4px; padding: 32px; margin-bottom: 32px; }
+.card h2 { font-size: 22px; line-height: 30px; font-weight: 600; margin-bottom: 12px; }
+.card p { font-size: 16px; line-height: 24px; color: var(--o-color-info2); }
+.card .row { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+.card .row > div { font-size: 14px; line-height: 22px; color: var(--o-color-info2); }
+/* 状态图例：固定悬浮卡，⚠️ 放左下角（原右下角会压住右侧「快捷链接」栏，挡住验证） */
+.legend {
+    position: fixed; left: 24px; bottom: 24px; z-index: 200;
+    max-width: 380px; max-height: calc(100vh - 48px); overflow: auto;
+    background: var(--o-color-fill2); border-radius: 4px; padding: 12px 16px;
+    box-shadow: 0 6px 24px rgba(18,20,23,.08); font-size: 12px; line-height: 20px;
+    color: var(--o-color-info2);
+}
+.legend summary {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    cursor: pointer; list-style: none; user-select: none;
+    font-size: 14px; line-height: 22px;
+}
+.legend summary::-webkit-details-marker { display: none; }
+.legend summary b { color: var(--o-color-info1); }
+.legend summary .hint { flex: none; font-size: 12px; color: var(--o-color-info3); }
+.legend[open] summary { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--o-color-fill3); }
+.legend b { color: var(--o-color-info1); }
+.legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -2px; margin-right: 6px; }
+</style>
+</head>
+<body>
+
+<header class="o-nav">
+    <div class="o-nav__left">
+        <div class="o-nav__logo">
+            <!-- header-pc-light logo.svg 逐属性内联 -->
+            <svg viewBox="0 0 136.001 32" xmlns="http://www.w3.org/2000/svg" width="136" height="32" fill="none">
+                <defs><filter id="pixso_custom_mask_type_alpha"><feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0 " /></filter></defs>
+                <mask id="mask_0" width="28.863289" height="32.000000" x="0.000000" y="0.000000" maskUnits="userSpaceOnUse">
+                    <g filter="url(#pixso_custom_mask_type_alpha)"><path id="Clip 20" d="M0 0L28.8633 0L28.8633 32L0 32L0 0Z" fill="rgb(196,196,196)" fill-rule="evenodd" /></g>
+                </mask>
+                <g id="编组">
+                    <g id="组合 3">
+                        <path id="Fill 1" d="M53.7877 12.3762C54.7787 11.6553 56.0032 11.2234 57.3338 11.2234C60.6203 11.2234 63.2841 13.8253 63.2841 17.0354C63.2841 20.2451 60.6203 22.8473 57.3338 22.8473C56.0032 22.8473 54.7787 22.4155 53.7877 21.6945L53.7877 26.3814C53.7877 26.4818 53.7043 26.5631 53.6016 26.5631L51.3045 26.5631C51.2019 26.5631 51.1187 26.4818 51.1187 26.3814L51.1187 11.405C51.1187 11.3047 51.2019 11.2234 51.3045 11.2234L53.6016 11.2234C53.7043 11.2234 53.7877 11.3047 53.7877 11.405L53.7877 12.3762ZM54.1289 17.0345C54.1289 18.7645 55.5651 20.1671 57.3361 20.1671C59.1073 20.1671 60.5434 18.7645 60.5434 17.0345C60.5434 15.3044 59.1073 13.9019 57.3361 13.9019C55.5651 13.9019 54.1289 15.3044 54.1289 17.0345Z" fill="var(--o-color-info1)" fill-rule="evenodd" />
+                        <path id="Fill 3" d="M72.9847 19.2929C73.0071 19.2714 73.0267 19.2478 73.0467 19.225C73.0892 19.1769 73.1383 19.2011 73.1802 19.2218C73.1873 19.2253 73.1943 19.2287 73.2009 19.2317C73.2439 19.2505 73.2851 19.2682 73.5246 19.3728C73.9602 19.5628 74.3956 19.7533 74.8303 19.9444C75.1001 20.063 75.3727 20.1758 75.6391 20.3007C75.6756 20.3179 75.6703 20.3531 75.66 20.368C75.1556 21.1067 74.516 21.706 73.7239 22.1485C72.8057 22.6615 71.7927 22.9184 70.6867 22.9184C69.0587 22.9184 67.6689 22.3524 66.5174 21.221C65.3661 20.0896 64.7905 18.715 64.7905 17.098C64.7905 15.3651 65.4408 13.9206 66.7421 12.7656C67.8831 11.76 69.1947 11.2571 70.6765 11.2571C71.7475 11.2571 72.7546 11.5189 73.6978 12.0418C74.6404 12.5655 75.3763 13.2756 75.9047 14.1725C76.1592 14.604 76.3524 15.0521 76.4845 15.5165C76.4845 15.5165 76.6981 16.2679 76.6979 17.0775C76.6978 17.4152 76.6588 17.7478 76.6588 17.7478C76.6414 17.887 76.4803 17.8859 76.4735 17.8858L76.4733 17.8858C75.8257 17.8857 74.4289 17.8857 73.7811 17.8858L67.8922 17.8858C67.8922 17.8858 67.8096 17.8857 67.7921 17.8858C67.7659 17.8862 67.7446 17.9062 67.7345 17.9232C67.7252 17.9387 67.7211 17.9603 67.7291 17.9905C67.7695 18.1455 67.8218 18.2941 67.8844 18.4363C68.0267 18.7599 68.2261 19.0498 68.4883 19.3025C69.0774 19.8715 69.8242 20.1554 70.7284 20.1554C71.6325 20.1554 72.3844 19.8679 72.9847 19.2929ZM68.5012 14.8775C69.0976 14.3055 69.8445 14.0193 70.7415 14.0193C71.6597 14.0193 72.413 14.3021 73.0029 14.8675C73.213 15.0691 73.3619 15.2585 73.4946 15.5047C73.5096 15.5327 73.5461 15.5966 73.5557 15.627C73.5828 15.7122 73.5167 15.7122 73.5167 15.7122L67.9867 15.7122C67.9867 15.7122 67.9066 15.7122 67.945 15.635C67.9834 15.558 68.0262 15.4832 68.0717 15.4099C68.19 15.2191 68.3309 15.0404 68.5012 14.8775Z" fill="var(--o-color-info1)" fill-rule="evenodd" />
+                        <path id="Fill 5" d="M83.3543 11.2639C80.6137 11.2639 78.3921 13.4339 78.3921 16.1107L78.3921 19.1541L78.3921 21.3535L78.3921 22.6668C78.3921 22.775 78.4819 22.8627 78.5927 22.8627L81.0597 22.8627C81.1706 22.8627 81.2604 22.775 81.2604 22.6668L81.2604 21.3535L81.2604 20.5002L81.2604 19.1541L81.2604 16.1107C81.2604 14.9811 82.1979 14.0654 83.3543 14.0654C84.5105 14.0654 85.4481 14.9811 85.4481 16.1107L85.4481 19.1541L85.4481 20.5002L85.4481 21.3535L85.4481 22.6668C85.4481 22.775 85.5379 22.8627 85.6487 22.8627L88.1157 22.8627C88.2267 22.8627 88.3165 22.775 88.3165 22.6668L88.3165 21.3535L88.3165 19.1541L88.3165 16.1107C88.3165 13.4339 86.0947 11.2639 83.3543 11.2639Z" fill="var(--o-color-info1)" fill-rule="evenodd" />
+                        <path id="Fill 7" d="M99.5618 10.6229C99.6726 10.6229 99.7623 10.5351 99.7623 10.427L99.7623 8.0138C99.7623 7.90556 99.6726 7.81787 99.5618 7.81787L92.7388 7.81787L90.1234 7.81787C90.0126 7.81787 89.9229 7.90556 89.9229 8.0138L89.9229 10.427L89.9229 13.5202L89.9229 15.9333L89.9229 20.2697L89.9229 22.6829C89.9229 22.7911 90.0126 22.8788 90.1234 22.8788L92.7388 22.8788L99.5618 22.8788C99.6726 22.8788 99.7623 22.6829L99.7623 22.6829L99.7623 20.2697C99.7623 20.1614 99.6726 20.0737 99.5618 20.0737L92.9393 20.0737L92.9393 16.1294L99.222 16.1294C99.3329 16.1294 99.4227 16.0415 99.4227 15.9333L99.4227 13.5202C99.4227 13.412 99.3329 13.3243 99.222 13.3243L92.9393 13.3243L92.9393 10.6229L99.5618 10.6229Z" fill="var(--o-color-info1)" fill-rule="evenodd" />
+                        <path id="Fill 9" d="M105.807 22.8333C103.067 22.8333 100.845 20.6634 100.845 17.9865L100.845 14.9432L100.845 12.7436L100.845 11.4303C100.845 11.3222 100.935 11.2344 101.046 11.2344L103.513 11.2344C103.624 11.2344 103.714 11.3222 103.714 11.4303L103.714 12.7436L103.714 13.597L103.714 14.9432L103.714 17.9865C103.714 19.116 104.651 20.0317 105.807 20.0317C106.964 20.0317 107.901 19.116 107.901 17.9865L107.901 14.9432L107.901 13.597L107.901 12.7436L107.901 11.4303C107.901 11.3222 107.991 11.2344 108.102 11.2344L110.569 11.2344C110.68 11.2344 110.77 11.3222 110.77 11.4303L110.77 12.7436L110.77 14.9432L110.77 17.9865C110.77 20.6634 108.548 22.8333 105.807 22.8333Z" fill="var(--o-color-info1)" fill-rule="evenodd" />
+                        <path id="Fill 11" d="M115.074 22.8121L112.357 22.8121C112.317 22.8121 112.285 22.7803 112.285 22.7412L112.285 7.88871C112.285 7.84961 112.317 7.81787 112.357 7.81787L115.074 7.81787C115.114 7.81787 115.146 7.84961 115.146 7.88871L115.146 22.7412C115.146 22.7803 115.114 22.8121 115.074 22.8121Z" fill="var(--o-color-info1)" fill-rule="evenodd" />
+                        <path id="Fill 13" d="M135.2 11.7229C134.27 11.9039 133.47 12.3261 132.861 12.8976L132.861 11.4259C132.861 11.3177 132.772 11.23 132.661 11.23L130.358 11.23C130.247 11.23 130.157 11.3177 130.157 11.4259L130.157 22.69C130.157 22.7982 130.247 22.8859 130.358 22.8859L132.661 22.8859C132.772 22.8859 132.861 22.7982 132.861 22.69L132.861 16.8291C132.913 16.2506 133.082 15.8377 133.487 15.419C134.061 14.7454 134.86 14.3389 135.831 14.1498C135.875 14.1414 135.919 14.1368 135.919 14.1368C135.963 14.1329 136 14.1079 136 14.0547C135.996 12.612 135.999 12.0869 136 12.0573C136.002 11.9865 136 11.7454 136 11.6873C136 11.6527 135.993 11.6342 135.938 11.6377C135.938 11.6377 135.555 11.6536 135.2 11.7229Z" fill="var(--o-color-info1)" fill-rule="evenodd" />
+                        <path id="Fill 15" d="M124.844 19.2397C124.867 19.218 124.886 19.1946 124.906 19.1717C124.949 19.1237 124.998 19.1478 125.04 19.1685C125.047 19.1721 125.054 19.1755 125.06 19.1785C125.103 19.1973 125.144 19.215 125.384 19.3196C125.82 19.5096 126.255 19.7001 126.69 19.8912C126.959 20.0098 127.232 20.1226 127.499 20.2475C127.535 20.2647 127.53 20.2999 127.52 20.3148C127.015 21.0535 126.375 21.6528 125.583 22.0953C124.665 22.6083 123.652 22.8652 122.546 22.8652C120.918 22.8652 119.528 22.299 118.377 21.1678C117.225 20.0363 116.65 18.6618 116.65 17.0448C116.65 15.3119 117.3 13.8674 118.602 12.7122C119.742 11.7068 121.054 11.2037 122.536 11.2037C123.607 11.2037 124.614 11.4657 125.557 11.9886C126.5 12.5122 127.236 13.2222 127.764 14.1193C128.019 14.5508 128.212 14.9989 128.344 15.4633C128.344 15.4633 128.558 16.2147 128.557 17.0242C128.557 17.362 128.518 17.6946 128.518 17.6946C128.501 17.8337 128.34 17.8327 128.333 17.8326L128.333 17.8326C127.685 17.8325 126.288 17.8325 125.641 17.8326L119.752 17.8326C119.752 17.8326 119.669 17.8325 119.651 17.8326C119.625 17.833 119.604 17.853 119.594 17.87C119.585 17.8855 119.581 17.9071 119.588 17.9372C119.629 18.0923 119.681 18.2409 119.744 18.3831C119.886 18.7067 120.086 18.9966 120.348 19.2493C120.937 19.8183 121.684 20.1022 122.588 20.1022C123.492 20.1022 124.244 19.8147 124.844 19.2397ZM120.361 14.8254C120.957 14.2534 121.704 13.967 122.601 13.967C123.519 13.967 124.273 14.25 124.862 14.8154C125.073 15.017 125.221 15.2064 125.354 15.4525C125.369 15.4806 125.405 15.5445 125.415 15.5749C125.442 15.6601 125.376 15.6601 125.376 15.6601L119.846 15.6601C119.846 15.6601 119.766 15.6601 119.804 15.5829C119.843 15.5059 119.886 15.4311 119.931 15.3578C120.05 15.167 120.19 14.9883 120.361 14.8254Z" fill="var(--o-color-info1)" fill-rule="evenodd" />
+                        <path id="Fill 17" d="M43.2539 7.98479L48.7948 11.1095C49.189 11.3319 49.432 11.7429 49.432 12.1876L49.432 18.4369C49.432 18.8819 49.189 19.2929 48.7948 19.5153L43.2539 22.6401C42.8593 22.8623 42.3735 22.8623 41.979 22.6401L36.4383 19.5153C36.0441 19.2929 35.8008 18.8819 35.8008 18.8819L35.8008 18.4369L35.8008 12.1876C35.8008 11.7429 36.0438 11.3319 36.4383 11.1095L41.979 7.98479C42.3735 7.76223 42.8593 7.76223 43.2539 7.98479ZM46.1745 17.0158C46.1745 17.2032 46.0721 17.3763 45.906 17.4701L42.8853 19.1735C42.7193 19.2673 42.5144 19.2673 42.3481 19.1735L39.3276 17.4701C39.161 17.3763 39.0591 17.2032 39.0591 17.0158L39.0591 13.6089C39.0591 13.4215 39.161 13.2483 39.3276 13.1543L42.3481 11.451C42.5144 11.3573 42.7193 11.3573 42.8853 11.451L45.906 13.1543C46.0721 13.2483 46.1745 13.6089 46.1745 13.6089L46.1745 17.0158Z" fill="var(--o-color-info1)" fill-rule="evenodd" />
+                    </g>
+                    <g id="编组" mask="url(#mask_0)">
+                        <path id="Fill 19" d="M15.4282 0.261169L27.8669 7.28644C28.4836 7.63467 28.8633 8.27827 28.8633 8.97458L28.8633 23.0253C28.8633 23.7219 28.4836 24.3652 27.8669 24.7136L15.4282 31.739C14.8115 32.0871 14.0519 32.0871 13.4354 31.739L0.996375 24.7136C0.379723 24.3652 0 23.7219 0 23.0253L0 8.97458C0 8.27827 0.379723 7.63467 0.996375 7.28644L13.4354 0.261169C14.0519 -0.0870562 14.8115 -0.0870562 15.4282 0.261169ZM16.9705 11.5082C18.0223 11.8368 19.4786 11.5452 20.1574 10.8675C20.8119 10.2139 20.455 9.4818 19.42 9.22056C18.8529 9.07747 18.1912 9.10226 17.6058 9.25513C17.1199 9.3346 16.6178 9.32653 16.1962 9.21305C15.767 9.09745 15.5025 8.89387 15.4113 8.65657C15.4062 8.61421 15.3949 8.57341 15.3799 8.53346C15.3792 8.52793 15.378 8.52269 15.3774 8.51717L15.3734 8.51603C15.2804 8.2946 15.0358 8.11369 14.651 8.01665C14.638 8.01353 14.6241 8.01112 14.611 8.00815C14.231 7.88985 13.7286 7.86463 13.1958 7.96125C12.1443 8.15237 11.3751 8.74497 11.4775 9.28502C11.4826 9.31208 11.4659 9.53747 11.4588 9.58621C11.4255 9.81642 11.2352 10.069 10.9283 10.3097C10.6278 10.5453 10.3861 10.6781 9.98077 10.7968C9.87404 10.8281 9.57093 10.8627 9.39729 10.8717C9.34121 10.8747 9.27306 10.8759 9.19796 10.8772C9.00461 10.8807 8.76516 10.8849 8.56688 10.9214C8.16471 10.9954 7.79729 11.1861 7.62785 11.3823C7.36283 11.69 7.3482 11.9719 7.36819 12.2571C7.39947 12.4376 7.3944 12.608 7.39223 12.6154L7.39034 12.6168C7.37007 12.9472 7.13705 13.3288 6.68998 13.6796C6.23466 14.0366 5.65291 14.287 5.08796 14.3986L5.0855 14.4006C4.49289 14.5014 3.86436 14.7599 3.34851 15.1534C2.3488 15.9159 2.11622 16.9254 2.89478 17.4012C3.3514 17.68 4.04713 17.7067 4.75806 17.5186C5.32562 17.4356 5.86928 17.4955 6.28072 17.728C6.52185 17.864 6.69969 18.0395 6.807 18.2509C6.88694 18.4086 6.90258 18.5317 6.90258 18.5317C6.92228 18.6095 6.92416 18.7547 6.92416 18.7579L6.92489 18.7615C6.84321 19.3823 7.0112 19.9151 7.58991 20.2684C8.64609 20.9134 10.4313 20.5777 11.4794 19.5313C12.4807 18.5317 12.3561 17.322 11.29 16.8129C10.7098 16.5361 9.95963 16.5164 9.24479 16.7056C8.67014 16.7877 8.11489 16.7301 7.69432 16.5142C7.26739 16.295 7.04856 15.9536 7.06087 15.5764C7.06377 15.4851 7.13068 15.2182 7.18542 15.1004C7.28129 14.8952 7.44856 14.5543 7.82365 14.193C8.29852 13.736 8.86376 13.5807 9.13892 13.5099C9.34037 13.4579 9.6668 13.3937 9.73907 13.3876C10.2882 13.3416 10.7793 13.3356 11.1993 13.5041C11.617 13.6715 11.9241 13.9399 11.9489 14.2748C11.9803 14.7039 12.1883 15.1683 12.779 15.4223C13.8449 15.8807 15.4491 15.5682 16.2826 14.7358C17.0831 13.9368 16.8158 13.0047 15.7579 12.6405C15.1802 12.4416 14.4758 12.4487 13.8323 12.6177C13.3057 12.6991 12.777 12.6706 12.3519 12.5144C11.9196 12.3553 11.6354 12.0976 11.6222 11.7964C11.6131 11.5815 11.7463 11.0032 12.1467 10.6775C12.4685 10.4158 12.8552 10.2518 13.3013 10.1064C13.4675 10.0522 13.727 9.99733 13.8506 9.98246C14.3357 9.92466 14.8196 9.91318 15.2382 10.0357C15.6542 10.1571 16.0319 10.3817 16.0452 10.6266C16.0624 10.9447 16.3852 11.3255 16.9705 11.5082ZM25.8903 12.4766C25.2541 13.2647 23.6183 13.5845 22.3187 13.1788C21.0787 12.7914 20.679 11.9029 21.3507 11.2026C21.998 10.5282 23.4461 10.2371 24.653 10.5418C25.9139 10.86 26.5008 11.7203 25.8903 12.4766ZM17.6994 22.8808C16.6627 24.1721 14.5922 24.5452 13.206 23.6987C11.9007 22.9014 11.7854 21.359 12.8346 20.2615C13.8354 19.2143 15.6139 18.8775 16.9091 19.4959C18.2778 20.1491 18.6834 21.6551 17.6994 22.8808Z" fill="var(--o-color-primary1)" fill-rule="evenodd" />
+                    </g>
+                </g>
+            </svg>
+        </div>
+
+        <ul class="o-nav__menu">
+            <li class="o-nav__item" data-open="true">
+                <a class="o-nav__link" href="#">开发</a>
+
+                <!-- 分类平铺式下拉面板：基类 + 修饰类必须同时挂载 -->
+                <div class="o-nav__dropdown o-nav__dropdown--categorized" role="menu">
+
+                    <!-- ===== 分类列 × 5 ===== -->
+                    <div class="o-nav__cat is-active">
+                        <div class="o-nav__cat-title"><span>贡献社区</span></div>
+                        <div class="o-nav__cat-list">
+                            <a class="o-nav__cat-item" href="#">
+                                <span class="o-nav__cat-item-title">
+                                    <span class="o-nav__cat-item-text">提交 Issue</span>
+                                    <!-- 外链图标：references/assets/public icons/icon-外链.svg，
+                                         Read 后逐属性内联，24×24，fill="currentColor" 跟随标题态 -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M12.7077 5.2806C12.7077 4.95843 12.4465 4.69727 12.1243 4.69727L6.26823 4.69727C5.34775 4.69727 4.60156 5.44346 4.60156 6.36393L4.60156 17.509C4.60156 18.4295 5.34775 19.1756 6.26823 19.1756L17.622 19.1756C18.5425 19.1756 19.2887 18.4295 19.2887 17.509L19.2887 11.7114C19.2887 11.3892 19.0275 11.1281 18.7053 11.1281C18.3832 11.1281 18.122 11.3892 18.122 11.7114L18.122 17.509C18.122 17.7851 17.8982 18.009 17.622 18.009L6.26823 18.009C5.99209 18.009 5.76823 17.7851 5.76823 17.509L5.76823 6.36393C5.76823 6.08779 5.99209 5.86393 6.26823 5.86393L12.1243 5.86393C12.4465 5.86393 12.7077 5.60276 12.7077 5.2806ZM17.4223 4.70081C18.3428 4.70081 19.089 5.44699 19.089 6.36747L19.089 9.65911C19.089 9.98128 18.8278 10.2424 18.5057 10.2424C18.1835 10.2424 17.9223 9.98128 17.9223 9.65911L17.9223 6.7314L13.812 10.8039C13.5831 11.0307 13.2138 11.0289 12.987 10.8001C12.7603 10.5712 12.762 10.2019 12.9908 9.97515L17.1367 5.86747L14.1307 5.86747C13.8085 5.86747 13.5473 5.6063 13.5473 5.28414C13.5473 4.96197 13.8085 4.70081 14.1307 4.70081L17.4223 4.70081Z" fill="currentColor" fill-rule="evenodd" />
+                                    </svg>
+                                </span>
+                                <span class="o-nav__cat-item-desc">在 Gitee 提交缺陷与需求</span>
+                            </a>
+                            <a class="o-nav__cat-item" href="#">
+                                <span class="o-nav__cat-item-title">
+                                    <span class="o-nav__cat-item-text">安全漏洞</span>
+                                    <!-- OTag：fill + danger + small（components/tag.md） -->
+                                    <span class="o-tag o-tag--fill o-tag--danger o-tag--small">BETA</span>
+                                </span>
+                                <span class="o-nav__cat-item-desc">查看安全公告与修复方案</span>
+                            </a>
+                            <a class="o-nav__cat-item" href="#">
+                                <span class="o-nav__cat-item-title"><span class="o-nav__cat-item-text">SIG 组</span></span>
+                                <span class="o-nav__cat-item-desc">加入兴趣小组，参与技术讨论</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="o-nav__cat">
+                        <div class="o-nav__cat-title"><span>构建</span></div>
+                        <div class="o-nav__cat-list">
+                            <a class="o-nav__cat-item" href="#">
+                                <span class="o-nav__cat-item-title"><span class="o-nav__cat-item-text">本地构建</span></span>
+                                <span class="o-nav__cat-item-desc">基于源码本地编译镜像</span>
+                            </a>
+                            <a class="o-nav__cat-item" href="#">
+                                <span class="o-nav__cat-item-title"><span class="o-nav__cat-item-text">OBS 编译</span></span>
+                                <span class="o-nav__cat-item-desc">使用 openEuler OBS 云构建</span>
+                            </a>
+                            <a class="o-nav__cat-item" href="#">
+                                <span class="o-nav__cat-item-title"><span class="o-nav__cat-item-text">交叉编译</span></span>
+                                <span class="o-nav__cat-item-desc">为多架构生成软件包</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="o-nav__cat">
+                        <div class="o-nav__cat-title"><span>发布</span></div>
+                        <div class="o-nav__cat-list">
+                            <a class="o-nav__cat-item" href="#">
+                                <span class="o-nav__cat-item-title"><span class="o-nav__cat-item-text">发布镜像</span></span>
+                                <span class="o-nav__cat-item-desc">上传镜像至社区仓库</span>
+                            </a>
+                            <a class="o-nav__cat-item" href="#">
+                                <span class="o-nav__cat-item-title"><span class="o-nav__cat-item-text">发布 RPM</span></span>
+                                <span class="o-nav__cat-item-desc">提交软件包至 EPOL / everything</span>
+                            </a>
+                            <a class="o-nav__cat-item is-disabled" href="#">
+                                <span class="o-nav__cat-item-title"><span class="o-nav__cat-item-text">发布容器</span></span>
+                                <span class="o-nav__cat-item-desc">暂未开放，敬请期待</span>
+                            </a>
+                            <!-- 更多项目：OButton text large（components/button.md）——
+                                 高 40px / 水平内边距 0 / 16px-24px / 图标 24×24 在右侧（继续语义）/
+                                 右箭头取自 references/assets/public icons/icon-右箭头.svg -->
+                            <button class="o-btn o-btn--text o-btn--large o-nav__cat-more" type="button">
+                                更多项目
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M0.7 0C1.05438 0 1.34726 0.263344 1.39361 0.605014L1.4 0.7L1.4 5.85451C1.4 5.99653 1.49868 6.1155 1.63121 6.14659L1.7 6.15451L6.90354 6.15451C7.29014 6.15451 7.60354 6.46791 7.60354 6.85451C7.60354 7.2089 7.3402 7.50177 6.99852 7.54812L6.90354 7.55451L1.7 7.55451C0.810531 7.55451 0.0806099 6.87141 0.00624001 6.0012L0 5.85451L0 0.7C0 0.313401 0.313401 0 0.7 0Z" fill="currentColor" fill-rule="evenodd" transform="matrix(-0.707107,0.707107,0.707107,0.707107,10.2466,6.64082)" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="o-nav__cat">
+                        <div class="o-nav__cat-title"><span>分析</span></div>
+                        <div class="o-nav__cat-list">
+                            <!-- ⛔ 面板条目没有选中态：点击即跳走，禁止 .is-selected / primary1 -->
+                            <a class="o-nav__cat-item" href="#">
+                                <span class="o-nav__cat-item-title"><span class="o-nav__cat-item-text">代码扫描</span></span>
+                                <span class="o-nav__cat-item-desc">静态检查与质量门禁</span>
+                            </a>
+                            <a class="o-nav__cat-item" href="#">
+                                <span class="o-nav__cat-item-title"><span class="o-nav__cat-item-text">性能分析</span></span>
+                                <span class="o-nav__cat-item-desc">性能数据与火焰图</span>
+                            </a>
+                            <a class="o-nav__cat-item" href="#">
+                                <span class="o-nav__cat-item-title">
+                                    <span class="o-nav__cat-item-text">安全漏洞</span>
+                                    <!-- OTag：fill + danger + small（components/tag.md） -->
+                                    <span class="o-tag o-tag--fill o-tag--danger o-tag--small">新</span>
+                                </span>
+                                <span class="o-nav__cat-item-desc">CVE 跟踪与修复指引</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="o-nav__cat">
+                        <div class="o-nav__cat-title"><span>项目</span></div>
+                        <div class="o-nav__cat-list">
+                            <a class="o-nav__cat-item" href="#">
+                                <span class="o-nav__cat-item-title"><span class="o-nav__cat-item-text">全部项目</span></span>
+                                <span class="o-nav__cat-item-desc">浏览社区全部仓库</span>
+                            </a>
+                            <a class="o-nav__cat-item" href="#">
+                                <span class="o-nav__cat-item-title"><span class="o-nav__cat-item-text">孵化项目</span></span>
+                                <span class="o-nav__cat-item-desc">查看孵化期项目进展</span>
+                            </a>
+                            <a class="o-nav__cat-item" href="#">
+                                <span class="o-nav__cat-item-title"><span class="o-nav__cat-item-text">归档项目</span></span>
+                                <span class="o-nav__cat-item-desc">已归档项目历史存档</span>
+                            </a>
+                            <!-- 切换箭头：图标取自 assets 上/下箭头；展开态 ⌃ / 折叠态 ⌄ -->
+                            <button class="o-nav__cat-toggle" type="button" aria-label="展开或收起分类列表">
+                                <svg class="icon-collapse" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 0.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-rule="evenodd" transform="matrix(0,-1,1,0,5.55376,15.3774)" />
+                                </svg>
+                                <svg class="icon-expand" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 0.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="currentColor" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ===== 快捷链接栏（⚠️ 可选模块：看需求挂载，默认不渲染） =====
+                         本页为演示检验，默认渲染出来；正式落库时此段默认注释掉。
+                         栏内整体左对齐（标题 / 色块 / 卡片同一左缘）；整栏 margin-left:auto
+                         贴栅格内容区右缘（PC 距右 216px）。
+                         纯文本项 = 灰底块（342px 固定宽 / 高 40px / 圆角 4px / fill3 底 /
+                         块内 link 距左 24px + 上下居中）+ 内部 OLink medium（link.md）。
+                         图+文本卡片无背后的色块。 -->
+                    <div class="o-nav__quick">
+                        <div class="o-nav__quick-title"><span>快捷链接</span></div>
+                        <!-- 灰底按钮块：块高 40px，内部才是 OLink medium（高 34px） -->
+                        <a class="o-nav__quick-link" href="#">
+                            <span class="o-nav__quick-link-text">企业签署CLA流程</span>
+                        </a>
+                        <a class="o-nav__quick-link" href="#">
+                            <!-- OLink medium 后缀图标（link.md Part F）：icon-外链.svg，24×24，颜色随文字 -->
+                            <span class="o-nav__quick-link-text">
+                                CLA-FAQ
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12.7077 5.2806C12.7077 4.95843 12.4465 4.69727 12.1243 4.69727L6.26823 4.69727C5.34775 4.69727 4.60156 5.44346 4.60156 6.36393L4.60156 17.509C4.60156 18.4295 5.34775 19.1756 6.26823 19.1756L17.622 19.1756C18.5425 19.1756 19.2887 18.4295 19.2887 17.509L19.2887 11.7114C19.2887 11.3892 19.0275 11.1281 18.7053 11.1281C18.3832 11.1281 18.122 11.3892 18.122 11.7114L18.122 17.509C18.122 17.7851 17.8982 18.009 17.622 18.009L6.26823 18.009C5.99209 18.009 5.76823 17.7851 5.76823 17.509L5.76823 6.36393C5.76823 6.08779 5.99209 5.86393 6.26823 5.86393L12.1243 5.86393C12.4465 5.86393 12.7077 5.60276 12.7077 5.2806ZM17.4223 4.70081C18.3428 4.70081 19.089 5.44699 19.089 6.36747L19.089 9.65911C19.089 9.98128 18.8278 10.2424 18.5057 10.2424C18.1835 10.2424 17.9223 9.98128 17.9223 9.65911L17.9223 6.7314L13.812 10.8039C13.5831 11.0307 13.2138 11.0289 12.987 10.8001C12.7603 10.5712 12.762 10.2019 12.9908 9.97515L17.1367 5.86747L14.1307 5.86747C13.8085 5.86747 13.5473 5.6063 13.5473 5.28414C13.5473 4.96197 13.8085 4.70081 14.1307 4.70081L17.4223 4.70081Z" fill="currentColor" fill-rule="evenodd" />
+                                </svg>
+                            </span>
+                        </a>
+                        <a class="o-nav__quick-link" href="#">
+                            <span class="o-nav__quick-link-text">开发者日历</span>
+                        </a>
+                        <!-- 图+文本卡片：无背后的色块（无背景 / 无圆角 / 无内边距） -->
+                        <a class="o-nav__quick-card" href="#">
+                            <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='121' height='68'%3E%3Crect width='121' height='68' rx='4' fill='%23002FA7'/%3E%3Ctext x='60' y='37' font-size='11' fill='white' text-anchor='middle' font-family='HarmonyOS Sans'%3E16:9%3C/text%3E%3C/svg%3E" alt="openEuler Developer Day 2025 活动示意配图，上线前替换真实素材">
+                            <span class="o-nav__quick-card-body">
+                                <span class="o-nav__quick-card-title">openEuler Developer Day 2025</span>
+                                <span class="o-nav__quick-card-desc">时间: 2024/07/26 | 杭州</span>
+                            </span>
+                        </a>
+                        <a class="o-nav__quick-card" href="#">
+                            <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='121' height='68'%3E%3Crect width='121' height='68' rx='4' fill='%2338BDF8'/%3E%3Ctext x='60' y='37' font-size='11' fill='white' text-anchor='middle' font-family='HarmonyOS Sans'%3E16:9%3C/text%3E%3C/svg%3E" alt="操作系统大会&openEuler Summit 2024 活动示意配图，上线前替换真实素材">
+                            <span class="o-nav__quick-card-body">
+                                <span class="o-nav__quick-card-title">操作系统大会&amp;openEuler Summit 2024</span>
+                                <span class="o-nav__quick-card-desc">时间: 2024/11/15 - 2024/11/16 | 北京</span>
+                            </span>
+                        </a>
+                    </div>
+                </div>
+            </li>
+            <li class="o-nav__item is-current"><a class="o-nav__link" href="#">社区</a></li>
+            <li class="o-nav__item"><a class="o-nav__link" href="#">下载</a></li>
+            <li class="o-nav__item"><a class="o-nav__link" href="#">文档</a></li>
+        </ul>
+    </div>
+
+    <div class="o-nav__right">
+        <div class="o-nav__search">
+            <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">
+                <path id="椭圆形" d="M1.20215 6.8123C1.20215 3.7288 3.70182 1.22913 6.78532 1.22913C9.86883 1.22913 12.3685 3.7288 12.3685 6.8123C12.3685 9.8958 9.86883 12.3955 6.78532 12.3955C3.70182 12.3955 1.20215 9.8958 1.20215 6.8123ZM11.3685 6.8123C11.3685 4.28108 9.31654 2.22913 6.78532 2.22913C4.25411 2.22913 2.20215 4.28108 2.20215 6.8123C2.20215 9.34352 4.25411 11.3955 6.78532 11.3955C9.31654 11.3955 11.3685 9.34352 11.3685 6.8123Z" fill="var(--o-color-info4)" fill-rule="evenodd" />
+                <path id="路径" d="M11.2066 11.1586C11.4016 10.9631 11.7182 10.9627 11.9137 11.1577L14.0009 13.2399C14.1964 13.4349 14.1968 13.7515 14.0017 13.947C13.8067 14.1425 13.4901 14.1429 13.2946 13.9479L11.2074 11.8657C11.0119 11.6707 11.0115 11.3541 11.2066 11.1586Z" fill="var(--o-color-info4)" fill-rule="evenodd" />
+            </svg>
+            <span>搜索</span>
+        </div>
+        <div class="o-nav__source">源码
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+                <path id="路径" d="M0.250616 0.205025C2.94745e-05 0.455612 -0.0208527 0.848918 0.187969 1.12329L0.250616 1.19497L5.26695 6.21131C5.36737 6.31173 5.38172 6.46563 5.30999 6.58133L5.26695 6.63558L0.205025 11.6975C-0.0683418 11.9709 -0.0683418 12.4141 0.205025 12.6875C0.455612 12.938 0.848918 12.9589 1.12329 12.7501L1.19497 12.6875L6.2569 7.62553C6.88585 6.99658 6.91895 5.99741 6.35621 5.32949L6.2569 5.22136L1.24057 0.205025C0.967198 -0.0683418 0.523983 -0.0683418 0.250616 0.205025Z" fill="var(--o-color-info1)" fill-rule="evenodd" transform="matrix(0,1,1,0,5.55376,8.62259)" />
+            </svg>
+        </div>
+        <div class="o-nav__icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+                <path id="形状结合" d="M11.9985 3.3042C11.9819 3.30414 11.9653 3.30469 11.9487 3.30585C7.16357 3.32922 3.29199 7.21536 3.29199 12.0057C3.29199 16.7868 7.14844 20.6671 11.9209 20.7054C11.9468 20.7083 11.9731 20.7097 11.9995 20.7096C12.0249 20.7096 12.0503 20.7082 12.0762 20.7053C12.3883 20.7024 12.6965 20.683 13 20.648L13 18.1336C12.7918 18.3712 12.5726 18.5972 12.3423 18.8113C12.23 18.9158 12.1152 19.0174 11.998 19.1164C11.8804 19.0174 11.7656 18.9158 11.6533 18.8113C11.3799 18.5571 11.1221 18.2862 10.8799 17.9989C10.6299 17.7029 10.4004 17.3937 10.1909 17.0714C10.0156 16.8018 9.854 16.5227 9.70703 16.2346C9.37842 15.5912 9.12842 14.9188 8.95801 14.2174C8.90186 13.9876 8.85498 13.7564 8.81689 13.5238C8.77246 13.2531 8.74023 12.9804 8.71973 12.7057L13 12.7057L13 11.3058L8.71973 11.3058C8.74023 11.0319 8.77246 10.76 8.81689 10.49C8.85498 10.2574 8.90186 10.0262 8.95801 9.79651C9.04053 9.45667 9.1416 9.12363 9.26172 8.79742C9.38916 8.45029 9.5376 8.11087 9.70703 7.77918C9.854 7.49106 10.0156 7.21207 10.1909 6.94229C10.4004 6.62009 10.6299 6.31097 10.8799 6.01492C11.1221 5.72754 11.3804 5.4567 11.6533 5.20239C11.7656 5.09796 11.8804 4.99634 11.998 4.89752C12.1152 4.99634 12.23 5.09796 12.3423 5.20239C12.6157 5.4567 12.8735 5.72754 13.1157 6.01492C13.3657 6.31097 13.5952 6.62009 13.8047 6.94229L13.8047 6.94244C13.9805 7.21219 14.1416 7.49109 14.2886 7.77918C14.458 8.11087 14.6064 8.45029 14.7344 8.79742C14.854 9.12363 14.9551 9.45667 15.0381 9.79651C15.0938 10.0262 15.1406 10.2574 15.1792 10.49L15.1792 10.4902C15.2067 10.6593 15.2297 10.8292 15.248 10.9999L16.655 10.9999C16.6339 10.7731 16.6057 10.5475 16.5703 10.3229L16.5703 10.3228C16.5244 10.0352 16.4673 9.74936 16.3984 9.46545C16.3027 9.07245 16.1855 8.68735 16.0469 8.31018C15.9004 7.91205 15.73 7.52274 15.5356 7.14224C15.3638 6.80643 15.1758 6.48148 14.9707 6.16739C14.7319 5.80087 14.4702 5.44913 14.186 5.11215C14.1587 5.0799 14.1313 5.04779 14.1035 5.01587C16.7949 5.82787 18.8306 8.15171 19.2232 10.9999L20.6344 10.9999C20.1379 6.68703 16.4874 3.33398 12.0483 3.30594C12.0317 3.30475 12.0151 3.30417 11.9985 3.3042ZM4.7251 11.3058L7.31641 11.3058C7.33789 10.9758 7.37402 10.6482 7.42578 10.3229L7.42578 10.3228C7.47119 10.0352 7.52832 9.74936 7.59766 9.46545C7.69336 9.07245 7.81055 8.68735 7.94922 8.31018C8.09521 7.91205 8.26562 7.52274 8.46045 7.14224C8.63184 6.80643 8.81982 6.48148 9.0249 6.16739L9.02539 6.16675C9.26416 5.80048 9.52588 5.44894 9.80957 5.11215C9.83838 5.07828 9.86719 5.04459 9.896 5.01111C7.10107 5.84741 5.00977 8.31326 4.7251 11.3058ZM4.7251 12.7057C5.00977 15.6973 7.09961 18.1625 9.89355 18.9996C9.86523 18.9671 9.8374 18.9345 9.80957 18.9016C9.52539 18.5648 9.26367 18.2129 9.0249 17.8464L9.0249 17.8462C8.81982 17.5322 8.63184 17.2073 8.46045 17.8717C8.26562 17.4911 8.09521 17.1018 7.94922 16.7036C7.81055 16.3265 7.69336 16.2765 7.59766 16.5484C7.52832 16.2644 7.47119 15.9786 7.42578 13.6909C7.37402 13.3649 7.3374 13.0365 7.31641 12.7057L4.7251 12.7057Z" fill="var(--o-color-info2)" fill-rule="evenodd" />
+                <path id="中" d="M17.5999 13.51L17.5999 11.55L18.3899 11.55L18.3899 13.51L21.8599 13.51L21.8599 18.08L21.0899 18.08L21.0899 17.45L18.3899 17.45L18.3899 20.58L17.5999 20.58L17.5999 17.45L14.8999 17.45L14.8999 18.11L14.1299 18.11L14.1299 13.51L17.5999 13.51ZM14.8999 14.2501L17.5999 14.2501L17.5999 16.7001L14.8999 16.7001L14.8999 14.2501ZM21.0899 16.7001L21.0899 14.2501L18.3899 14.2501L18.3899 16.7001L21.0899 16.7001Z" fill="var(--o-color-info2)" fill-rule="evenodd" />
+            </svg>
+        </div>
+        <div class="o-nav__icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+                <path id="形状结合" d="M12.0005 2.30005C11.5637 2.30005 11.1317 2.32897 10.7069 2.38652C10.1922 2.45624 9.93005 3.04255 10.2213 3.47265C10.921 4.50608 11.3005 5.72385 11.3005 7.00005C11.3005 10.4794 8.47992 13.3 5.00052 13.3C4.43775 13.3 3.88631 13.2264 3.35538 13.0824C2.85413 12.9465 2.38458 13.3845 2.48546 13.894C3.37817 18.4024 7.34935 21.7 12.0005 21.7C17.3577 21.7 21.7005 17.3572 21.7005 12C21.7005 6.64289 17.3577 2.30005 12.0005 2.30005ZM12.0005 3.70005L11.9581 3.70105L12.0163 3.82254C12.4188 4.70983 12.651 5.67222 12.6934 6.66723L12.7005 7.00005C12.7005 11.2526 9.25312 14.7 5.00052 14.7C4.77163 14.7 4.54406 14.69 4.31829 14.6702L4.13213 14.649L4.20807 14.8666C5.35528 17.9901 8.31032 20.1879 11.7361 20.2959L12.0005 20.3C16.5845 20.3 20.3005 16.584 20.3005 12C20.3005 7.41609 16.5845 3.70005 12.0005L12.0005 3.70005Z" fill="var(--o-color-info2)" fill-rule="evenodd" />
+            </svg>
+        </div>
+        <div class="o-nav__icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+                <path id="形状结合" d="M7.05772 7.74722C7.05772 5.01767 9.27046 2.80493 12 2.80493C14.7296 2.80493 16.9423 5.01767 16.9423 7.74722C16.9423 10.4768 14.7296 12.6895 12 12.6895C11.9561 12.6895 11.9122 12.6889 11.8686 12.6878C7.62582 12.7559 4.21543 16.1162 4.21543 20.242C4.21543 20.6286 3.90203 20.942 3.51543 20.942C3.12883 20.942 2.81543 20.6286 2.81543 20.242C2.81543 16.2838 5.44722 12.9299 9.0931 11.7447C7.85948 10.846 7.05772 9.39026 7.05772 7.74722ZM12.0573 11.2891C12.0384 11.2875 12.0193 11.2867 12 11.2867C11.9598 11.2867 11.9196 11.287 11.8795 11.2875C9.97893 11.2239 8.45772 9.66323 8.45772 7.74722C8.45772 5.79087 10.0437 4.20493 12 4.20493C13.9564 4.20493 15.5423 5.79087 15.5423 7.74722C15.5423 9.68443 13.9873 11.2584 12.0573 11.2891ZM16.3373 12.3463C19.2959 13.8943 21.1846 16.9044 21.1846 20.242C21.1846 20.6286 20.8712 20.942 20.4846 20.942C20.098 20.942 19.7846 20.298 19.7846 20.242C19.7846 17.4343 18.1926 14.8971 15.6882 13.5868C15.3457 13.4075 15.2133 12.9846 15.3925 12.642C15.5717 12.2995 15.9947 12.1671 16.3373 12.3463Z" fill="var(--o-color-info2)" fill-rule="evenodd" />
+            </svg>
+        </div>
+    </div>
+</header>
+
+<main class="page">
+    <h1>导航下拉面板（分类平铺式）</h1>
+    <p class="desc">交互模型：<b>hover = 临时展开</b>（鼠标移走即消失，不改变锁定状态）；<b>click = 锁定展开</b>（面板固定，需再次点击同一菜单项才关闭）。「开发」已锁定展开（5 列 + 右侧<b>快捷链接栏</b>——该栏为可选模块，看需求挂载；本页为演示检验默认渲染，正式落库时该段 HTML 默认注释掉），「社区」为当前页选中态（<b>Regular(400) + primary1 + 底部 2px 指示线，背景透明、无字重变化</b>——2026-10-15 用户否决设计稿标注的 Semibold：字重随交互切换会肉眼跳动）。hover 任何菜单项（含无面板的社区/下载/文档）均仅文字变 <b>primary2</b>，<b>不变粗、无下划线、无背景</b>。「代码扫描」为已选态，「发布容器」为禁用态。</p>
+
+    <div class="card">
+        <h2>多列平铺结构</h2>
+        <p>主体为多列平铺：<b>列头（分类）+ 列内条目（标题 + 说明）</b>。典型列数：开发 Tab 5 列（贡献社区 / 构建 / 发布 / 分析 / 项目）；社区 Tab 4 列 + 右侧<b>快捷链接栏（可选，默认不挂载）</b>。</p>
+    </div>
+
+    <div class="card">
+        <h2>条目内元素</h2>
+        <p>标题右侧可带<b>外链图标 ↗</b>（16×16，取自 <code>references/assets/public icons/icon-外链.svg</code>，<code>fill="currentColor"</code> 跟随标题态）；标题后可挂<b>红色小标签</b>（BETA / 新，OTag <code>fill + danger + small</code>）。列底部「更多项目」的右箭头取自 <code>icon-右箭头.svg</code>；MB 端切换箭头取自 <code>icon-上箭头.svg</code> / <code>icon-下箭头.svg</code>。<b>全部图标禁止手写 SVG 或色块占位</b>。</p>
+    </div>
+
+    <div class="card">
+        <h2>字号 / 字重分档验证</h2>
+        <p><b>&gt;1440px</b>：分类列头 <b>16px</b> / info4，选项标题 <b>16px</b> / info1，选项说明 <b>12px</b> / info2。<b>≤1440px</b>：分类列头 <b>14px</b> / info4，选项标题 <b>14px</b> / info1，选项说明仍 <b>12px</b> / info2。<br>选项标题字重<b>默认态即为 Semibold，hover / 按下全程统一 Semibold，不随交互切换</b>（禁用态是唯一例外，回落 Regular）。</p>
+    </div>
+
+    <div class="card">
+        <h2>两色分级验证（条目无选中态）</h2>
+        <p>条目 hover → <b>primary2 #5177CA</b>、按下 → <b>primary3 #002793</b>。<b>条目没有选中态</b>：面板条目是直接点击跳走的链接，不存在"当前停在这一项"的持久状态，禁止 <code>.is-selected</code> 或 primary1 文字色（primary1 只属于顶导触发器 is-current）。<b>本样式 hover 只改文字颜色，全程无背景色块、无字重变化</b>（与平铺式的整行色块是两种交互表达）。说明文字在任何状态下都保持 info2 不变。</p>
+    </div>
+
+    <div class="card">
+        <h2>列头无交互验证</h2>
+        <p>「贡献社区 / 构建 / 发布 / 分析 / 项目」五个列头只是分组标题——<b>不是链接、无 hover / 按下 / 选中态、无下划线、无指针手势</b>（cursor: default）。MB 端列头才升级为左侧一级导航列的可点击项。</p>
+    </div>
+
+    <div class="card">
+        <h2>禁用态验证</h2>
+        <p>「发布容器」为禁用态：标题字重<b>回落 Regular</b>（禁用不是交互态，禁止保留 Semibold）、颜色 info4；说明同步变 info4；禁止出现 hover 变色。</p>
+    </div>
+
+    <div class="card">
+        <h2>截断规则验证</h2>
+        <p>下拉标题<b>最多 2 行</b>、下拉选项<b>最多 6 行</b>，超出显示 <b>...</b>（line-clamp 四件套：display:-webkit-box / -webkit-box-orient / -webkit-line-clamp / overflow:hidden）。被截断元素需挂 tooltip 显示完整内容（复用设计系统既有 tips 组件）。</p>
+    </div>
+
+    <div class="card">
+        <h2>单开互斥验证</h2>
+        <p>「开发」已锁定展开：此时把鼠标移到其他菜单项上，不应出现两个面板重叠；鼠标移出整个菜单后，「开发」锁定面板恢复。</p>
+    </div>
+
+    <div class="card">
+        <h2>触发器状态验证（全状态 Regular(400)，无字重变化）</h2>
+        <p>hover <b>任何</b>菜单项（含无下拉面板的「社区 / 下载 / 文档」）→ 仅文字变 <b>primary2</b>，<b>不变粗、无下划线、无背景</b>；当前选中项「社区」→ <b>primary1 + 底部 2px 指示线</b>（选中优先：被 hover 时仍保持 primary1）。<b>⛔ 2026-10-15 用户打回：禁止 hover / 选中态切 Semibold</b>——字重随交互切换会产生肉眼可见的文字跳动（与下拉条目标题「全状态统一字重」同一原则）；2026-10-14 设计稿标注的「悬停项 Semibold」已作废。<b>⛔ 状态规则禁止用 :has() 收窄</b>——收窄后无面板的普通菜单项连 hover 变色与 is-current 指示线都会丢失（已复现并修正）。</p>
+    </div>
+
+    <div class="card">
+        <h2>六档自适应验证（拖动浏览器窗口宽度）</h2>
+        <div class="row">
+            <div><b>≥1681px</b><br>列距 24px · 条目距 24px<br>列头/标题 16px · 面板 padding <b>24px 216px</b></div>
+            <div><b>1680~1441px</b><br>面板左右 padding <b>216px</b>（跟随栅格）<br>列头/标题 16px · 其余同基准档</div>
+            <div><b>1440~1201px</b><br>面板左右 padding <b>216px</b>（跟随栅格）<br>列头/标题降为 <b>14px</b> · 颜色不变</div>
+            <div><b>1200~841px</b><br>列距 <b>16px</b> · 列头/标题 <b>14px</b><br>左右 padding 仍 216px</div>
+            <div><b>840~601px</b><br>布局变为<b>左一级导航列 + 右内容区</b><br>右内容区最大占整屏 40% · 面板 padding <b>12px 24px</b></div>
+            <div><b>600~360px</b><br>左列最大宽 144px 可换行<br><b>右内容区不按 40% 收窄</b> · padding 仍 12px 24px</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>MB 双列交互验证（≤840px）</h2>
+        <p>点击左列分类 → 右内容区切换（同一时刻只有一个分类处于激活态）；导航项过多时左列最后一项显示<b>切换箭头</b>（展开态 ⌃ / 折叠态 ⌄，图标取自 assets 上/下箭头），点击展开/收起左列，<b>折叠态最小宽度 32px</b>。</p>
+    </div>
+
+    <div class="card">
+        <h2>快捷链接栏验证（可选模块 · 本页已挂载用于演示检验）</h2>
+        <p>本示例<b>已挂载</b>该栏以便检验；正式落库时该段 HTML <b>默认注释掉</b>，看需求取消注释。规则：① 栏首必须有<b>「快捷链接」标题</b>，规格与分类列头一致（&gt;1440px 16px/24px、≤1440px 14px/22px，info4）；② <b>栏内整体左对齐</b>（标题 / 色块 / 卡片同一左缘），<b>整栏靠右</b>——`margin-left: auto` 贴栅格内容区右缘，<b>PC 端距视口右边固定 216px</b>（MB 端跟随 MB 栅格，栏内左对齐）；③ 纯文本项 = <b>灰底按钮块</b>（宽 <b>342px 固定</b> / 高 40px / 圆角 4px / <code>--o-color-fill3</code> 底 / 块内 link 距左 24px + 上下居中）+ <b>内部 OLink medium</b>（components/link.md：整体高 <b>34px</b>、上下 padding <b>5px</b>、左右 padding <b>0px</b>、文字 14px/22px Regular，色 <code>link1</code>，hover 变 <code>link2</code> 并加下划线，按下变 <code>link3</code> 并加下划线；后缀图标 <b>24×24</b>、图文间距 4px）；④ <b>图+文本卡片没有背后的色块</b>（无背景 / 无圆角 / 无内边距），左图右文、<b>图文垂直居中</b>、图文间距 8px，图 <b>121×68</b>，标题 <b>16px/24px</b> info1，描述 <b>12px/18px</b> <b>info3</b>。</p>
+    </div>
+
+    <div class="card">
+        <h2>抽屉式贴合 / 浮层遮挡验证</h2>
+        <p><b>面板与顶导零间距</b>（<code>top: 100%</code>），紧贴顶导底边像抽屉一样展开，<b>上圆角已压平为 0</b>（<code>border-radius: 0 0 4px 4px</code>）——保留 4px 上圆角会在左上 / 右上露出月牙形缺口，视觉上又"裂开"。鼠标从「开发」下移进入面板不会闪烁关闭（无间隙可穿，基类的 <code>::before</code> 4px 热区桥接已关闭）；面板应浮于卡片之上，不被顶导或内容遮挡（顶导容器禁止 overflow:hidden）。</p>
+    </div>
+
+    <div class="card">
+        <h2>顶导阴影 / 层叠层级验证</h2>
+        <p>顶导 <code>.o-nav</code> 有 <code>box-shadow: var(--o-shadow-1)</code>（<code>0 3px 9px 0 rgba(0,18,85,0.078)</code>，一级阴影·浮层，来源 components/navigation.md），<b>且必须可见</b>。⚠️ <b>提顶导 z-index 无效</b>：面板是顶导的后代，而 <code>box-shadow</code> 属于父元素自身绘制的一部分，<b>永远先于一切后代绘制</b>；z-index 只在同一 stacking context 的兄弟之间比较，跨父子无效（实测：顶导 z-index 101 时接缝处仍是纯白）。正解 = <code>.o-nav::after</code> 补偿层（<code>z-index: 102</code>）在顶导内部重画同一道阴影，叠在面板之上。⚠️ <b>补偿层几何必须与顶导本体一致</b>（<code>top: 0</code> + <code>height: 100%</code>）：阴影的锐利度由<b>源盒子高度</b>决定，实测三种高度的接缝处像素——<code>height: 0</code> 完全不渲染（死代码）、<code>height: 1px</code> 被 9px 模糊摊成弥散斑（254，几乎不可见）、<code>height: 100%</code> 才与顶导自身阴影的有效透明度一致（0.055 vs 0.057）。</p>
+    </div>
+</main>
+
+<details class="legend" open>
+    <summary><b>状态图例（分类平铺式）</b><span class="hint">点击收起 / 展开</span></summary>
+    <span class="sw" style="background:transparent;border-bottom:2px solid #5177CA;height:0"></span>条目 hover = Semibold + primary2 #5177CA（<b>无背景、无字重变化</b>）<br>
+    <span class="sw" style="background:transparent;border-bottom:2px solid #002793;height:0"></span>条目按下 = Semibold + primary3 #002793<br>
+    <span class="sw" style="background:transparent;border-bottom:2px solid #999;height:0"></span>条目禁用 = Regular + info4 #999999<br>
+    <b style="color:#002FA7">✕ 条目无选中态</b>（点击即跳走，禁止 .is-selected / primary1）<br>
+    <span class="sw" style="background:transparent;border-bottom:2px solid #002FA7;height:0"></span>触发器选中态 = <b>Regular(400)</b> + primary1 + 2px 指示线（背景透明、无字重变化）<br>
+    触发器 hover / 展开态 = <b>Regular(400)</b> + primary2，无下划线、无背景、<b>不变粗</b>（2026-10-15 用户否决设计稿 Semibold：字重切换肉眼跳动）<br>
+    分类列头 = &gt;1440px 16px/24px · ≤1440px 14px/22px / Regular / info4（无交互）<br>
+    选项标题 = 16px（&gt;1440px）· 14px（≤1440px）/ <b>Semibold 全状态统一</b> / info1<br>
+    条目说明 = 12px/18px Regular / info2（各态不变）<br>
+    <span class="sw" style="background:transparent;border-bottom:2px solid #5177CA;height:0"></span>图+文卡片 hover = 标题变 primary2（与分类条目一致，无背景、无字重变化、图与描述不变）<br>
+    红标签 = OTag fill + danger + small（高 20px / 左右 padding 6px / 圆角 4px / 底 #E60012 白字）<br>
+    <b>字体</b>：全局 HarmonyOS Sans / HarmonyHeiTi（hard-constraints §2 铁律，禁止 PingFang / 系统默认字体）<br>
+    <b>几何</b>：列距 24px · 条目距 24px · 面板 padding 24px 216px · <b>面板与顶导零间距（top: 100%，抽屉式贴合，上圆角压平为 0 0 4px 4px）</b><br>
+    <b>层叠</b>：面板 z-index 100 · 顶导下阴影靠 <code>.o-nav::after</code> 补偿层（z-index <b>102</b>）重画在面板之上——面板是顶导的后代，父级 box-shadow 永远先于后代绘制，<b>提顶导 z-index 无效</b>（实测：z-index 101 也看不到阴影）· 补偿层必须 <code>top: 0</code> + <code>height: 100%</code> 与顶导同高（实测：<code>height: 0</code> 不渲染阴影、<code>height: 1px</code> 被模糊稀释成 254 几乎不可见、同高才复刻出顶导阴影强度）<br>
+    <b>图标</b>：外链（分类条目 + OLink 后缀）24×24 / 上下箭头 16×16 / 更多项目右箭头 24×24，均内联自 references/assets/public icons/ + currentColor<br>
+    <b>更多项目</b> = OButton text + large（高 40px / 水平 padding 0 / 16px-24px / info1 → primary2 → primary3 / 右箭头 24×24）<br>
+    <b>link 色</b>：link1 #002FA7 / link2 #5177CA / link3 #002793（来源 opendesign-tokens/references/tokens-openeuler.md 品牌色·链接色表；link1 = brand-6）<br>
+    <b>快捷链接</b>（可选，本页已挂载演示，正式落库默认注释）：栏内整体左对齐 + 整栏 margin-left:auto 贴栅格右缘 · 纯文本 = 灰底块（宽 342 固定 / 高 40 / 圆角 4 / fill3 / 距左 24）+ OLink M 内层（高 34、上下 padding 5、左右 0、14/22、link1 → hover link2+下划线 → active link3+下划线、后缀图标 24×24）· 图+文卡片无背后色块（图文垂直居中 / 图 121×68 / 标题 16px / 描述 12px info3）<br>
+    面板通栏撑满页面宽度 · padding 对齐栅格（PC 216px / MB 24px）· 单开互斥 · 高度 auto
+</details>
+
+<script>
+document.querySelectorAll('.o-nav__item').forEach(function (item) {
+    var link = item.querySelector('.o-nav__link');
+    if (!link) return;
+    link.addEventListener('click', function (e) {
+        e.preventDefault();
+        var willOpen = item.dataset.open !== 'true';
+        document.querySelectorAll('.o-nav__item[data-open="true"]').forEach(function (i) {
+            i.dataset.open = 'false';
+        });
+        item.dataset.open = String(willOpen);
+        /* 关闭时移出焦点：否则 :focus-within 会立即使面板重新显示，导致点击关不掉 */
+        if (!willOpen) link.blur();
+        /* 选中态（is-current = 当前页）随点击切换：点谁谁成为当前页，单选不撤销 */
+        document.querySelectorAll('.o-nav__item.is-current').forEach(function (i) {
+            i.classList.remove('is-current');
+        });
+        item.classList.add('is-current');
+    });
+});
+
+/* ===== 分类平铺式：MB 端左列分类切换 + 折叠 ===== */
+document.querySelectorAll('.o-nav__dropdown--categorized').forEach(function (panel) {
+    /* 1) 点击左列分类 → 右内容区切换（同一时刻只有一个分类激活） */
+    panel.querySelectorAll('.o-nav__cat-title').forEach(function (title) {
+        title.addEventListener('click', function () {
+            if (window.matchMedia('(min-width: 841px)').matches) return;   // PC 端列头无交互
+            panel.querySelectorAll('.o-nav__cat').forEach(function (c) { c.classList.remove('is-active'); });
+            title.closest('.o-nav__cat').classList.add('is-active');
+        });
+    });
+    /* 2) 导航项过多：左列末项切换箭头 → 展开/收起左列（折叠态最小宽度 32px） */
+    var toggle = panel.querySelector('.o-nav__cat-toggle');
+    if (toggle) {
+        toggle.addEventListener('click', function () { panel.classList.toggle('is-collapsed'); });
+    }
+});
+</script>
+</body>
+</html>

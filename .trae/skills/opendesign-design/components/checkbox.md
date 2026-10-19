@@ -88,6 +88,7 @@ OCheckbox（HORIZONTAL，自适应宽度，固定高度 24px）
 > 🔄 **易混淆组件**：
 > - 与 **ORadio 单选框**：Checkbox 是方形多选，Radio 是圆形单选；Checkbox 选中显示勾号，Radio 选中显示内圈点
 > - 与 **OSwitch 开关**：Switch 是滑动开关，用于二元状态快速切换；Checkbox 是选择控件，支持多选和半选
+> - 与 **OToggle 选择块**：Toggle 是按钮形态的筛选控件（背景/描边区分状态），无勾选框；Checkbox 是方形勾选控件
 
 ---
 

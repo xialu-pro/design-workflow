@@ -20,12 +20,12 @@
 
 ```
 ONavigation Footer PC（1920px × 460px）
-│  background: rgba(18,18,20,1)（始终深色）
+│  background: rgb(18,18,20)（固定深色区·组件特例值，不随主题翻转；禁止用 var(--o-color-fill1)，light 下会变浅灰）
 │  padding: 24px 216px 34px 216px（内容区宽 1488px）
 │
 ├── [顶部说明区] 居中, column, gap: 16px, margin-bottom: 32px
 │   ├── [说明文字] 20px / 28px, Regular, white, 居中
-│   └── [基金会 Logo] 160px × 32px, <img>
+│   └── [基金会 Logo] 160px × 32px, 内联SVG
 │
 ├── [导航列区] 6 列等宽, margin-bottom: 24px
 │   ├── 关于openEuler（成员单位/组织架构/社区章程/贡献看板/社区介绍）
@@ -49,7 +49,7 @@ ONavigation Footer PC（1920px × 460px）
 .footer-section {
     width: 100%;
     padding: 24px 0 34px 0;           /* 上下padding，左右为0 */
-    background: rgba(18, 18, 20, 1);
+    background: rgb(18, 18, 20);      /* 固定深色区·组件特例值，不随主题翻转，禁止用 var(--o-color-fill1) */
 }
 /* 内层内容区 */
 .footer-content {
@@ -66,7 +66,7 @@ ONavigation Footer PC（1920px × 460px）
 .footer-section-mb {
     width: 100%;
     padding: 24px 0 34px 0;
-    background: rgba(18, 18, 20, 1);
+    background: rgb(18, 18, 18);      /* 固定深色区·组件特例值，与 PC 略有差异 */
 }
 .footer-content-mb {
     width: 312px;
@@ -80,12 +80,12 @@ ONavigation Footer PC（1920px × 460px）
 ├── [分隔线] 1487.91px × 2px, rgba(229,229,229) opacity 0.12
 │
 └── [底部信息行] 1487.91px × 78px, space-between
-    ├── [Logo 区] 150px × 68px, <img>
+    ├── [Logo 区] 150px × 68px, 内联SVG
     ├── [版权区] 居中, column
     │   ├── 品牌 | 隐私政策 | 法律声明（14px white）
     │   ├── 版权所有 © 2024 openEuler 保留一切权利（14px white@0.6）
     │   └── 遵循 木兰宽松许可证第2版（MulanPSL2）（14px white@0.6）
-    └── [社交媒体区] 354px × 52px, <img>
+    └── [社交媒体区] 354px × 52px, 内联SVG
 ```
 
 ### 精确数值速查
@@ -109,24 +109,25 @@ ONavigation Footer PC（1920px × 460px）
 
 ### 资源引用
 
-| 用途 | 路径 | 用法 |
-|------|------|------|
-| 基金会 Logo | `references/assets/navigation/footer-pc-基金会logo.svg` | `<img>` |
-| 底部 Logo（含邮箱） | `references/assets/navigation/footer-pc-底部logo.svg` | `<img>` |
-| 社交媒体 | `references/assets/navigation/footer-pc-社交媒体logo.svg` | `<img>` |
+所有 SVG（Logo / 二维码 / 社交媒体图标）统一按 SKILL.md「图标处理规范」处理：**Read 资源文件后逐属性原样内联 `<svg>`**（保留全部属性），禁止 `<img src>` 或凭记忆手绘。
+
+| 用途 | 路径（Read 后逐属性内联） |
+|------|--------------------------|
+| 基金会 Logo | `references/assets/navigation/footer-pc-基金会logo.svg` |
+| 底部 Logo（含邮箱） | `references/assets/navigation/footer-pc-底部logo.svg` |
+| 社交媒体 | `references/assets/navigation/footer-pc-社交媒体logo.svg` |
 
 ### 颜色
 
-| 区域 | 颜色 |
-|------|------|
-| 背景 | rgba(18,18,20,1) |
-| 说明/导航列标题 | rgba(255,255,255,1) |
-| 导航链接/友情链接 | rgba(255,255,255,0.6) |
-| 友情链接标题 | rgba(255,255,255,1) |
-| 底部链接 | rgba(255,255,255,1) |
-| 版权声明 | rgba(255,255,255,0.6) |
-| 分隔线 | rgba(229,229,229) opacity 0.12 |
-| 平台 Logo 背景 | rgba(43,43,47,1), borderRadius 4px |
+页脚为**固定深色区**（不随 light/dark 翻转），深底上的白色系文字无法使用会随主题翻转的 info 系 Token，按下表执行；「特例值」仅限页脚内部使用，禁止扩散：
+
+| 区域 | 值 | 说明 |
+|------|-----|------|
+| 背景（PC） | rgb(18,18,20) | 固定深色·组件特例值（禁止 var(--o-color-fill1)，light 下会翻转） |
+| 背景（MB） | rgb(18,18,18) | 同上，MB 与 PC 略有差异 |
+| 白色文字（说明/列标题/链接/版权） | `var(--o-color-white)` | 基础白；半透明白层级（white@0.6）无独立语义 Token，写 rgb(255,255,255,0.6) 并注释「固定深色区特例」 |
+| 分隔线 | rgba(229,229,229,0.12) | 组件特例值，上游无对应 Token |
+| 平台 Logo 背景 | rgb(43,43,47)，radius 4px | 组件特例值 |
 
 ---
 
@@ -136,14 +137,14 @@ ONavigation Footer PC（1920px × 460px）
 
 ```
 ONavigation Footer Mb（360px × 458px）
-│  background: rgba(18,18,18,1)
+│  background: rgb(18,18,18)
 │
 ├── [顶部说明文字] 14px / 22px, Medium, white, 居中
-├── [基金会 Logo] 150px × 30px, <img>, 居中
+├── [基金会 Logo] 150px × 30px, 内联SVG, 居中
 ├── [分隔线] 312px × 1px, rgba(229,229,229) opacity 0.12
 ├── [底部链接行] 品牌 | 隐私政策 | 法律声明 | 服务状态, 12px white
 ├── [版权声明] 12px, white, 居中
-├── [Logo GROUP] 86px × 34px, <img>, 居中
+├── [Logo GROUP] 86px × 34px, 内联SVG, 居中
 ├── [QR 码区] 243px × 102px
 │   ├── openEuler公众号 78px × 78px
 │   └── openEuler小助手 78px × 78px
@@ -167,13 +168,15 @@ ONavigation Footer Mb（360px × 458px）
 
 ### MB 端资源引用
 
-| 用途 | 路径 | 用法 |
-|------|------|------|
-| 基金会 Logo | `references/assets/navigation/footer-mb-基金会logo.svg` | `<img>` |
-| 底部 Logo | `references/assets/navigation/footer-mb-底部logo.svg` | `<img>` |
-| 二维码 1（公众号） | `references/assets/navigation/footer-mb-二维码1.svg` | `<img>` |
-| 二维码 2（小助手） | `references/assets/navigation/footer-mb-二维码2.svg` | `<img>` |
-| 平台 Logo | `references/assets/navigation/footer-mb-平台logo.svg` | `<img>` |
+同样 Read 后逐属性内联 `<svg>`，禁止 `<img src>` 或凭记忆手绘：
+
+| 用途 | 路径 |
+|------|------|
+| 基金会 Logo | `references/assets/navigation/footer-mb-基金会logo.svg` |
+| 底部 Logo | `references/assets/navigation/footer-mb-底部logo.svg` |
+| 二维码 1（公众号） | `references/assets/navigation/footer-mb-二维码1.svg` |
+| 二维码 2（小助手） | `references/assets/navigation/footer-mb-二维码2.svg` |
+| 平台 Logo | `references/assets/navigation/footer-mb-平台logo.svg` |
 
 ---
 
@@ -182,15 +185,18 @@ ONavigation Footer Mb（360px × 458px）
 | # | 错误 | 正确 |
 |---|------|------|
 | 1 | 页脚 padding 顶部 40px | 顶部 **24px**，底部 34px |
-| 2 | 顶部说明区放邮箱文字 | 放**基金会 Logo img**，邮箱在底部 Logo SVG 内 |
+| 2 | 顶部说明区放邮箱文字 | 放**基金会 Logo（内联 SVG）**，邮箱在底部 Logo SVG 内 |
 | 3 | 导航列标题 16px/weight 600 | **20px/weight 400**（Regular） |
 | 4 | 列名含多余空格："关于 openEuler" | "关于openEuler"（无空格） |
 | 5 | 省略友情链接区 | 分隔线前必须有**友情链接**区 |
-| 6 | 底部 Logo 用自绘 SVG | `<img>` 引用 footer-pc-底部logo.svg |
+| 6 | 底部 Logo 凭记忆手绘 SVG | Read `footer-pc-底部logo.svg` 后逐属性内联 `<svg>` |
 | 7 | 版权顺序：版权文字在上，法律链接在下 | **品牌\|隐私政策\|法律声明在上**，版权文字在下 |
-| 8 | MB 页脚背景与 PC 相同 | MB rgba(18,18,18,1) ≠ PC rgba(18,18,20,1) |
+| 8 | MB 页脚背景与 PC 相同 | MB rgb(18,18,18) ≠ PC rgb(18,18,20) |
 | 9 | MB 顶部说明字重 Regular | MB 为 **Medium**（与 PC 的 Regular 不同） |
 | 10 | MB 页脚缺"服务状态"链接 | MB 比 PC **多**"服务状态"一项 |
+| 11 | 下载列链接文字写"获取 openEuler" | 必须是完整名称 **"获取openEuler操作系统"** |
+| 12 | MB 端版权 / 导航链接用 white@0.6 | MB 端必须用**white 全白** `(255,255,255,1)`（PC 才用 0.6 半透明白） |
+| 13 | MB 二维码 1 / 2 左右颠倒 | `二维码1.svg`=公众号（左），`二维码2.svg`=小助手（右） |
 
 ---
 
@@ -199,14 +205,14 @@ ONavigation Footer Mb（360px × 458px）
 ```
 □ 页脚高度是否为 PC 460px / MB 458px？
 □ 内边距是否为 PC 24px 216px 34px 216px？
-□ 背景色是否为 PC rgba(18,18,20,1) / MB rgba(18,18,18,1)？
+□ 背景色是否为 PC rgb(18,18,20) / MB rgb(18,18,18)？
 □ 导航列标题是否为 20px / 28px, Regular（非 16px/600）？
 □ 导航链接是否为 14px / 22px, white@0.6？
 □ 友情链接区是否未遗漏？
 □ 分隔线是否为 2px（PC）/ 1px（MB），rgba(229,229,229) opacity 0.12？
-□ 底部 Logo 是否用 <img> 引用 SVG（禁止自绘）？
+□ 底部 Logo 是否从 assets Read 后逐属性内联 <svg>（禁止 <img> / 凭记忆手绘）？
 □ 版权顺序是否为：品牌|隐私|法律（上）→ 版权文字（下）？
 □ MB 端是否多"服务状态"链接？
 □ MB 端顶部说明字重是否为 Medium（非 Regular）？
-□ 所有图形资源是否用 <img> 引用（禁止自绘 SVG）？
+□ 所有图形资源（Logo / 二维码 / 社交媒体图标）是否从 assets Read 后逐属性内联 <svg>（禁止 <img> / 凭记忆手绘）？
 ```

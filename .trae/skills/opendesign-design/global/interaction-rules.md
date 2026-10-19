@@ -3,6 +3,8 @@
 # 通用交互规范
 
 > 本文档定义 OpenEuler 设计系统中组件的通用交互规则与禁止组合约束。
+>
+> ⚠️ **真源声明**：本文档内容已并入 [hard-constraints.md](hard-constraints.md)（唯一真源）。两处不一致时，一律以 hard-constraints.md 与 SKILL.md 为准；本文档仅作速查副本维护。
 
 ---
 
@@ -48,11 +50,12 @@
 
 | 场景 | 方式 |
 |------|------|
-| 组件状态图标 | 先 `ls references/assets/<组件名>/`；有 SVG → Read 后内联；无 → CSS 兜底 |
+| 组件状态图标 | 先 `ls references/assets/<组件名>/`；有 SVG → Read 后逐属性内联；无 → 手写线性 SVG（注释「assets 中无资源」）→ CSS 兜底 |
 | 含图标 UI 组件 | 同上 |
-| 独立图标 | 先查 `references/assets/`；无 → 查 icon-keys.md 手写 SVG |
+| 独立图标 | 先查 `references/assets/public icons/`；无 → 手写线性 SVG 兜底 |
 
-**SVG 内嵌方式**：直接将 `<svg>` 标签写入 HTML，不使用 `<img src>`。颜色使用 `currentColor` 继承父元素色值。
+**SVG 内嵌方式**：直接将 `<svg>` 标签写入 HTML，不使用 `<img src>`。颜色使用 `currentColor` 继承父元素色值或 `var(--o-color-*)` 语义 Token。
+**SVG 搬运（强制）**：从 assets 读取时逐属性原样内联（保留 `fill-rule` / `clip-rule` / `opacity` / `transform` 等），禁止仅拷贝 `path` 的 `d` 数据重写标签。完整规则见 SKILL.md「图标处理规范」。
 
 ---
 

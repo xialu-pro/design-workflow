@@ -30,8 +30,8 @@ ODataTable 由两类行单元组合而成：
 
 | 行类型 | 节点名 | 说明 |
 |--------|--------|------|
-| 表头行 | `表头` | 固定在顶部，含列标题、排序/筛选图标，顶部圆角 12px |
-| 普通数据行 | `表格1` / `表格N` | 正常状态，背景近透明，顶部内阴影分隔线 |
+| 表头行 | `表头` | 固定在顶部，含列标题、排序/筛选图标，顶部圆角 4px |
+| 普通数据行 | `表格1` / `表格N` | 正常状态，背景为表格底色 `--o-color-control5`，顶部内阴影分隔线 |
 | 斑马纹 / 悬停行 | `表格3`（示例） | 使用 `--o-color-control2-light` 填充，交替或悬停时应用 |
 | 带复选框行 | `表格N`（含多选框/未选） | 首列以多选框替换纯文字 |
 | 嵌入组件行 | `表格N`（含组件实例） | 单元格内嵌 OSelect / OInput / OButton 等组件，操作组件统一放最右侧列 |
@@ -47,9 +47,9 @@ ODataTable 由两类行单元组合而成：
 ├── autoLayoutPaddingTop/Bottom: 12px
 ├── autoLayoutPaddingLeft/Right: 32px
 ├── autoLayoutItemSpacing: 32px
-├── cornerRadius: 12px（仅左上/右上）
-├── fill: color-fill2（白色/深色模式自动切换）
-├── stroke: color-main2（渐变底边 1px）
+├── cornerRadius: 4px（仅左上/右上）
+├── fill: 按社区区分——昇腾/鲲鹏 = var(--o-color-fill2)（白色背景）；openEuler/openUBMC/openGauss/MindSpore = var(--o-color-control3-light)
+├── stroke: 按社区区分——昇腾/鲲鹏 = color-main2（渐变底边 1px）；openEuler/openUBMC/openGauss/MindSpore = 无底边描边
 │
 ├── [标题1 PARAGRAPH]（463px 自适应宽度，SemiBold 16/24，color-info2）
 ├── [画板152 FRAME]（200×24，标题2 + 排序图标）
@@ -70,7 +70,7 @@ ODataTable 由两类行单元组合而成：
 ├── autoLayoutPaddingLeft/Right: 32px
 ├── autoLayoutItemSpacing: 32px
 ├── effects: INNER_SHADOW y=-1（分隔线，Light: rgba(0,0,0,0.1) / Dark: rgba(255,255,255,0.15)）
-├── fill: rgba(255,255,255,0.01) ≈ 透明（Light）/ rgba(0,0,0,0.01)（Dark）
+├── fill: var(--o-color-control5)（表格背景色，Light/Dark 值由主题 Token 自动切换，禁止硬编码色值）
 │
 ├── [col1 PARAGRAPH]（464px 自适应宽度，Regular 16/24，color-info1）
 ├── [col2 PARAGRAPH]（200px，Regular 16/24，color-info1）
@@ -115,7 +115,8 @@ ODataTable 由两类行单元组合而成：
 
 > 🔍 **识别特征**：
 > - 宽度 1416px，行高固定 48px（表头和数据行一致）
-> - 表头：顶部圆角 12px，底部渐变描边（`--o-color-main2`）
+> - 表格整体背景：`--o-color-control5`（Light/Dark 由主题自动切换）
+> - 表头：顶部圆角 4px；背景/底边按社区区分——昇腾/鲲鹏 = fill2 白底 + main2 渐变底边；openEuler/openUBMC/openGauss/MindSpore = control3-light 底、无底边描边
 > - 数据行：内阴影分隔线（y=-1），无独立边框
 > - 列间距 32px，左右内边距各 32px
 > - 标题文字 SemiBold 16px；内容文字 Regular 16px
@@ -140,8 +141,9 @@ ODataTable 当前设计稿宽度为 1416px（PC 宽幅），适用于 PC 端大�
 
 | 行类型 | 背景填充 | 分隔线效果 | 适用场景 |
 |--------|---------|-----------|---------|
-| 表头 | `--o-color-fill2` | 底部渐变描边 | 固定顶部 |
-| 普通行 | ~透明 | 内阴影 y=-1 | 默认数据行 |
+| 表头（昇腾/鲲鹏） | `--o-color-fill2` | 底部渐变描边（`--o-color-main2`） | 固定顶部 |
+| 表头（openEuler/openUBMC/openGauss/MindSpore） | `--o-color-control3-light` | 无底边描边 | 固定顶部 |
+| 普通行 | `--o-color-control5` | 内阴影 y=-1 | 默认数据行 |
 | 悬浮/斑马纹行 | `--o-color-control2-light` | 内阴影 y=-1 | Hover 或交替色 |
 | 带复选框行 | 同普通行 | 同普通行 | 行选择模式 |
 
@@ -155,8 +157,8 @@ ODataTable 当前设计稿宽度为 1416px（PC 宽幅），适用于 PC 端大�
 | 列内边距（左/右） | 32px | `gap-8` |
 | 列内边距（上/下） | 12px | `gap-3` |
 | 列间距 | 32px | `gap-8` |
-| 表头圆角（左上/右上） | 12px | `radius_control-xl` 附近 |
-| 表头底边描边 | 1px 渐变 | `--o-color-main2` |
+| 表头圆角（左上/右上） | 4px | `radius_control-xs` |
+| 表头底边描边 | 昇腾/鲲鹏：1px 渐变；openEuler/openUBMC/openGauss/MindSpore：无 | `--o-color-main2`（仅昇腾/鲲鹏） |
 | 行分隔线（内阴影） | y=-1，spread=0，radius=0 | — |
 | 操作按钮列宽 | 64px | — |
 | 复选框容器列宽 | 404px（含 checkbox 24 + spacing 16 + text） | — |
@@ -171,16 +173,19 @@ ODataTable 当前设计稿宽度为 1416px（PC 宽幅），适用于 PC 端大�
 
 | 区域 | Light | Dark | Token | RGB |
 |------|-------|------|-------|-----|
-| 背景 | white | dark-fill2 | `--o-color-fill2` | Light: rgb(255,255,255) / Dark: rgb(33,35,39) |
+| 背景（昇腾/鲲鹏） | 随主题自动切换 | 随主题自动切换 | `--o-color-fill2` | — |
+| 背景（openEuler/openUBMC/openGauss/MindSpore） | 随主题自动切换 | 随主题自动切换 | `--o-color-control3-light` | — |
 | 标题文字 | rgba(0,0,0,0.8) | rgba(255,255,255,0.8) | `--o-color-info2` | — |
-| 底部描边 | solid 品牌蓝 | 同 | `--o-color-main2` | rgb(0,47,167) |
+| 底部描边（仅昇腾/鲲鹏） | 随主题自动切换 | 随主题自动切换 | `--o-color-main2` | — |
 | 图标（排序/筛选） | rgba(0,0,0,0.8) | rgba(255,255,255,0.8) | `--o-color-info2` | — |
+
+> **按社区区分**：昇腾/鲲鹏社区表头为 `--o-color-fill2` 白色背景 + `--o-color-main2` 渐变底边；openEuler/openUBMC/openGauss/MindSpore 社区表头为 `--o-color-control3-light` 背景、无底边描边。同名 Token 在各社区主题下对应不同的 RGB 值，随主题自动切换。
 
 #### 数据行
 
 | 区域 | Light | Dark | Token | RGB |
 |------|-------|------|-------|-----|
-| 普通行背景 | rgba(255,255,255,0.01) | rgba(0,0,0,0.01) | — | ≈ 透明 |
+| 表格背景 | rgb(255,255,255) | rgb(36,36,39) | `--o-color-control5` | — |
 | 悬停/斑马纹背景 | rgb(235,241,250) | rgb(40,42,47) | `--o-color-control2-light` | — |
 | 分隔线（内阴影） | rgba(0,0,0,0.1) | rgba(255,255,255,0.15) | `--o-color-control4` / `--o-color-control4-dark` | — |
 | 内容文字 | rgb(0,0,0) | rgb(255,255,255) | `--o-color-info1` | — |
@@ -207,9 +212,9 @@ ODataTable 数据表格（VERTICAL 堆叠）
 │
 ├── 表头 FRAME（1416×48）
 │   GUID: 1370:889（Light）
-│   fill: color-fill2
-│   stroke bottom: color-main2（渐变 1px）
-│   cornerRadius: 12px（左上/右上）
+│   fill: 昇腾/鲲鹏 = var(--o-color-fill2)；openEuler/openUBMC/openGauss/MindSpore = var(--o-color-control3-light)
+│   stroke bottom: 昇腾/鲲鹏 = color-main2（渐变 1px）；openEuler/openUBMC/openGauss/MindSpore = 无
+│   cornerRadius: 4px（左上/右上）
 │   padding: 12/12/32/32px，spacing: 32px
 │   │
 │   ├── [标题1 PARAGRAPH]（1370:890，463px）
@@ -221,7 +226,7 @@ ODataTable 数据表格（VERTICAL 堆叠）
 │
 ├── 表格1 FRAME（1416×48）— 普通行 Light
 │   GUID: 1370:901
-│   fill: rgba(255,255,255,0.01)
+│   fill: var(--o-color-control5)
 │   innerShadow: rgba(0,0,0,0.1) y=-1
 │   padding: 12/12/32/32px，spacing: 32px
 │   │
@@ -245,7 +250,7 @@ ODataTable 数据表格（VERTICAL 堆叠）
 │
 ├── 表格4 FRAME（1416×48）— 普通行 Dark
 │   GUID: 1370:970
-│   fill: rgba(0,0,0,0.01)
+│   fill: var(--o-color-control5)
 │   innerShadow: rgba(255,255,255,0.15) y=-1
 │   text: color-info1 dark（白）
 │   link: color-link1 dark（rgb(84,120,251)）
@@ -320,8 +325,8 @@ ODataTable 数据表格（VERTICAL 堆叠）
 ### 注意事项
 
 - **行间距为 0**：表头与数据行、数据行彼此之间无间距，仅靠内阴影分隔线视觉分隔
-- **表头圆角仅上方**：`cornerRadius` 仅设置左上 + 右上 12px，左下右下为 0
-- **表头底边为渐变描边**：非普通 border，使用 `--o-color-main2` 渐变；数据行分隔线为内阴影（INNER_SHADOW），非描边
+- **表头圆角仅上方**：`cornerRadius` 仅设置左上 + 右上 4px，左下右下为 0
+- **表头底边按社区区分**：昇腾/鲲鹏社区为 `--o-color-main2` 渐变描边（非普通 border）；openEuler/openUBMC/openGauss/MindSpore 社区无底边描边；数据行分隔线为内阴影（INNER_SHADOW），非描边
 - **表头图标颜色/尺寸不可修改**：排序/筛选图标颜色（`--o-color-info2` / `--o-color-link1`）和尺寸（24×24px）由 ODataTable 组件定义，使用实例时不单独覆盖
 - **操作按钮宽度固定 64px（纯文字链接）**：文字居中对齐，使用 `--o-color-link1`，不加下划线；若操作列改用 OButton 实例，列宽需按 OButton 规格调整
 - **操作列始终在最右侧**：无论是文字链接、OButton 还是其他可交互组件，操作列固定放置在最右一列或最右若干列
@@ -339,7 +344,7 @@ ODataTable 数据表格（VERTICAL 堆叠）
 
 | 状态 | 视觉表现 |
 |------|---------|
-| 普通 | 背景透明（~rgba 0.01），分隔线内阴影 |
+| 普通 | 背景为 `--o-color-control5`，分隔线内阴影 |
 | Hover | 背景切换为 `--o-color-control2-light` |
 | 已选中（Checkbox） | 复选框显示 Selected 状态，行背景可搭配浅蓝高亮 |
 | 禁用行 | 文字颜色降级为 `--o-color-info4`（rgba 0.4） |
@@ -362,8 +367,10 @@ ODataTable 数据表格（VERTICAL 堆叠）
 
 | 元素 | 属性 | 推荐变量 Token |
 |------|------|---------------|
-| 表头背景 | fill | `--o-color-fill2` |
-| 表头底边描边 | stroke | `--o-color-main2` |
+| 表格背景 | fill | `--o-color-control5` |
+| 表头背景（昇腾/鲲鹏） | fill | `--o-color-fill2` |
+| 表头背景（openEuler/openUBMC/openGauss/MindSpore） | fill | `--o-color-control3-light` |
+| 表头底边描边（仅昇腾/鲲鹏） | stroke | `--o-color-main2` |
 | 表头标题文字 | fill | `--o-color-info2` |
 | 排序/筛选图标 | fill | `--o-color-info2` |
 | 数据行内阴影（Light） | effectColor | `--o-color-control4` |

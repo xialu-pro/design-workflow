@@ -167,7 +167,7 @@
 | `size=small, state=Enabled, Dark=on, Variant=text` | `71151c5313a15d68708ef951ccb424c9a5286aaa` | `1042:17174` |
 | `size=small, state=Disabled, Dark=on, Variant=text` | `ea173ba9424b4af548dbff8e2fc90575e4ecf335` | `1042:17179` |
 
-### OCheckbox 多选框
+### OCheckbox 复选框
 
 | 变体 | componentKey | node_id |
 |------|-------------|---------|

@@ -22,7 +22,9 @@
 > | 中间菜单区 | [OTab 标签页](./tab.md) | 使用 OTab `text` 变体（medium 尺寸），菜单项的样式、交互状态（默认/Hover/Active）均遵循 OTab 规则 |
 > | 右侧操作区 · 搜索框 | [OSearch 搜索框](./search.md) | 使用 OSearch `small` 尺寸变体，搜索框的样式、交互（Focus/清除/建议面板）均遵循 OSearch 规则 |
 > | 右侧操作区 · 源码下拉 | [ODropdown 下拉菜单](./dropdown.md) | 使用 ODropdown `small` 尺寸 `text` 变体，无背景无描边，下拉触发与面板交互均遵循 ODropdown 规则 |
-> | 右侧操作区 · 其他图标 | 内置图标插槽 | 国际化、主题切换、用户头像等为独立图标插槽，通过 CSS mask 着色适配主题 |
+> | 右侧操作区 · 其他图标 | 内置图标插槽 | 国际化、主题切换、用户头像等为独立图标插槽，HTML 实现时从 assets Read 后逐属性原样内联 `<svg>`（详见楼层模板「资源引用」节） |
+
+> ⚠️ **导航操作图标内联规则（强制）**：国际化 / 深浅模式 / 用户头像等操作图标取自 `references/assets/navigation/header-pc-*.svg`。采用内联 SVG（以 `currentColor` 适配深浅主题）时，**必须把源文件每个 `<path>` 的 `d` / `fill` / `fill-opacity` / `fill-rule` 逐字完整复制**：保留全部子路径（月牙、人形的「外轮廓 + 内部镂空」是同一 path 内用 `Z` 连接的多段子路径，缺一即变实心块），禁止截取部分 path 或凭印象重绘；内联时把 `fill="rgb(0,0,0)" fill-opacity="0.8"` 对应为 `fill="currentColor" fill-opacity="0.8"`。OSearch / ODropdown 内部功能图标仍按各组件规范用 `<img>` 引用，二者不冲突。
 
 顶部导航支持 PC 端宽屏和移动端两种布局，均提供 Light/Dark 主题切换；底部页脚为深色通栏样式，包含站点地图、版权信息和社交媒体入口。
 
@@ -494,7 +496,7 @@ ONavigation Footer Mb（SYMBOL）
 | 元素 | 状态 | 视觉表现 |
 |------|------|---------|
 | 菜单项 | 默认 | 文字黑色（Light）/ 白色（Dark），padding-bottom 24px 留激活线空间 |
-| 菜单项 | Hover | 文字变主色（brand color） |
+| 菜单项 | Hover | 文字变 `primary2`（#5177CA） |
 | 菜单项 | Active（当前页） | 底部 2px 指示线（品牌蓝），文字颜色加深 |
 | 搜索框 | 默认 | 背景 + 占位文字 + 搜索图标 |
 | 搜索框 | Focus | 边框高亮，显示光标 |
@@ -607,7 +609,7 @@ ONavigation Footer Mb（SYMBOL）
 |------|---|
 | 图标尺寸 | 24×24px |
 | 图标资源 | `header-pc-头像.svg`（位于 `references/assets/navigation/`） |
-| 使用方式 | CSS mask（可着色） |
+| 使用方式 | HTML 生成时从 assets Read 后逐属性内联 `<svg>`（详见楼层模板资源引用节） |
 | 点击行为 | 跳转至登录页面 |
 
 > 📌 **参考位置**：PC 顶导布局> 顶导左侧 Logo 区域是**可替换插槽**。本 skill 已自带 **openEuler 默认 Logo 的 4 个 SVG 变体**（见下方「默认 Logo 资源」），与 ONavigation Symbol 内置 Logo 视觉一致；调用方也可用自家品牌的 SVG / PNG 切图替换。本节定义默认资源、自定义资源要求、目标尺寸、主题适配与 Pixso 操作流程。
@@ -622,23 +624,25 @@ ONavigation Footer Mb（SYMBOL）
 
 本 skill 自带 2 个 PC Logo SVG 和 4 个顶导 Icon SVG，位于 [`references/assets/navigation/`](../references/assets/navigation/)，覆盖 PC 顶导 Logo 亮色/暗色变体及全部顶导操作图标（移动端暂无入仓资源）。
 
-#### PC Logo（SVG，`<img>` 引用）
+#### PC Logo（SVG，HTML 生成时逐属性内联）
 
 | 文件 | 适用变体 | 尺寸 | 颜色 |
 |---|---|---|---|
 | [`header-pc-light logo.svg`](../references/assets/navigation/header-pc-light logo.svg) | PC 顶导 `Dark=off`（`1303:10846`）| 136×32 | 蓝 mark + 黑字 |
 | [`header-pc-dark logo.svg`](../references/assets/navigation/header-pc-dark logo.svg) | PC 顶导 `Dark=on`（`1303:10896`）| 136×32 | 白 mark + 白字 |
 
-#### 顶导 Icon SVG（CSS mask 着色，见 Part H）
+#### 顶导 Icon SVG（HTML 生成时逐属性内联）
 
 | 文件 | 用途 | 尺寸 | Light 色 | Dark 色 |
 |---|---|---|---|---|
 | [`header-pc-search icon.svg`](../references/assets/navigation/header-pc-search icon.svg) | 搜索框图标 | 16×16 | `rgba(0,0,0,.4)` (**`--o-color-info4`**) | `rgba(255,255,255,.4)` (**`--o-color-info4-dark`**) |
-| [`header-pc-语言切换 icon.svg`](../references/assets/navigation/header-pc-语言切换 icon.svg) | 国际化切换 | 20×20 | `rgba(0,0,0,.65)` (**`--o-color-info3`**) | `rgba(255,255,255,.85)` (**`--o-color-info1-dark`**) |
-| [`header-pc-深浅模式.svg`](../references/assets/navigation/header-pc-深浅模式.svg) | 主题切换 | 20×20 | `rgba(0,0,0,.65)` (**`--o-color-info3`**) | `rgba(255,255,255,.85)` (**`--o-color-info1-dark`**) |
-| [`header-pc-头像.svg`](../references/assets/navigation/header-pc-头像.svg) | 用户/登录 | 20×20 | `rgba(0,0,0,.65)` (**`--o-color-info3`**) | `rgba(255,255,255,.85)` (**`--o-color-info1-dark`**) |
+| [`header-pc-语言切换 icon.svg`](../references/assets/navigation/header-pc-语言切换 icon.svg) | 国际化切换 | 24×24 | `rgb(0,0,0)` @80% = **`--o-color-info2`**（`#333333`） | `rgba(255,255,255,.85)` (**`--o-color-info1-dark`**) |
+| [`header-pc-深浅模式.svg`](../references/assets/navigation/header-pc-深浅模式.svg) | 主题切换 | 24×24 | `rgb(0,0,0)` @80% = **`--o-color-info2`**（`#333333`） | `rgba(255,255,255,.85)` (**`--o-color-info1-dark`**) |
+| [`header-pc-头像.svg`](../references/assets/navigation/header-pc-头像.svg) | 用户/登录 | 24×24 | `rgb(0,0,0)` @80% = **`--o-color-info2`**（`#333333`） | `rgba(255,255,255,.85)` (**`--o-color-info1-dark`**) |
 
-> ✅ PC Logo SVG 已按主题备齐两套；Icon SVG 通过 CSS mask + background-color 控制颜色，无需准备两份文件。
+> ⚠️ **已修正（2026-10-14）**：本表原将国际化/主题切换/用户三个图标标为 info3（`rgba(0,0,0,.65)` / `#666666`）且尺寸标 20×20，均与实际资源文件不符——三个 SVG 的实际填充为 `fill="rgb(0,0,0)"` + `fill-opacity="0.8"`（80% 黑 = `#333333` = **info2**），viewBox 均为 24×24。**图标颜色与尺寸以 `references/assets/navigation/` 资源文件为准，本表为辅。**
+>
+> ✅ PC Logo SVG 已按主题备齐两套；顶导操作图标在 HTML 生成时从 assets Read 后逐属性内联（SKILL.md「图标处理规范」），颜色用 `currentColor` 或语义 Token 适配深浅主题。
 
 ### 自定义 Logo 输入资源
 
@@ -704,12 +708,11 @@ ONavigation Footer Mb（SYMBOL）
 > 以下 8 个 SVG 为**"整节点粒度"资源**——它们是**不可分割的整体图片**，内部已包含完整的布局结构。
 >
 > ### 🚫 绝对禁止：
-> - ❌ 用 `<img>` 引用后再用 HTML/CSS 拆分其内部元素（如把 Logo 和邮箱分开）
-> - ❌ 把平台Logo组(232×49)拆成5个独立div再分别设置尺寸
-> - ❌ 自行实现这些SVG内部的布局逻辑
+> - ❌ 把整节点 SVG 拆成多个 HTML 元素分别实现（如把 Logo 和邮箱拆成两个元素、把平台 Logo 组拆成 5 个 div）
+> - ❌ 凭记忆手写 path 模拟这些图形的外观
 >
 > ### ✅ 正确做法：
-> - ✅ 直接 `<img src="...footer-mb-底部logo.svg">` 整体引用
+> - ✅ 直接内联该 SVG 文件的完整内容（保留全部 `<path>` 与 `fill-rule` / `clip-rule` / `transform` / `opacity` 属性）
 > - ✅ 仅设置外层容器的 width/height 匹配规范尺寸
 >
 > ### ⛔ 违规后果：
@@ -744,283 +747,16 @@ ONavigation Footer Mb（SYMBOL）
 
 ## Part H：HTML 页面实现参考
 
-> 本节记录在 HTML 页面中实现 ONavigation 导航栏和页脚时的正确结构、CSS 值与资源路径，作为后续 HTML 生成的基准。所有数值均经设计稿核对，与 Part A/B 规格完全对应。
-
----
-
-### 资源路径（相对 HTML 文件根目录）
-
-| 用途 | 路径 | 用法 |
-|---|---|---|
-| PC 顶导 Light Logo | `skills/opendesign-design/references/assets/navigation/header-pc-light logo.svg` | `<img>`（SVG） |
-| PC 顶导 Dark Logo | `skills/opendesign-design/references/assets/navigation/header-pc-dark logo.svg` | `<img>`（SVG） |
-| 顶导搜索图标 | `skills/opendesign-design/references/assets/navigation/header-pc-search icon.svg` | CSS mask |
-| 顶导国际化图标 | `skills/opendesign-design/references/assets/navigation/header-pc-语言切换 icon.svg` | CSS mask |
-| 顶导主题切换图标 | `skills/opendesign-design/references/assets/navigation/header-pc-深浅模式.svg` | CSS mask |
-| 顶导用户图标 | `skills/opendesign-design/references/assets/navigation/header-pc-头像.svg` | CSS mask |
-| PC 页脚 基金会 Logo | `skills/opendesign-design/references/assets/navigation/footer-pc-基金会logo.svg` | `<img>`（SVG） |
-| PC 页脚 底部 Logo（含邮箱） | `skills/opendesign-design/references/assets/navigation/footer-pc-底部logo.svg` | `<img>`（SVG） |
-| PC 页脚 社交媒体 | `skills/opendesign-design/references/assets/navigation/footer-pc-社交媒体logo.svg` | `<img>`（SVG） |
-
-> ⚠️ Logo 和页脚图片均用 `<img>` 直接引用；4 个顶导 Icon SVG 用 **CSS mask** 着色（见下方 CSS 片段），**禁止用自绘 SVG 路径模拟**。
-
----
-
-### PC 顶导 CSS 关键值
-
-```css
-.nav-right  { display: flex; align-items: center; gap: 20px; }  /* ⚠️ gap=20 不是 16 */
-.icon-btn   { width: 24px; height: 24px; }
-
-/* OSearch small 变体：背景白色(**`--o-color-fill2`**)，描边 `rgba(0,0,0,.25)`(grey-14@0.25) */
-.nav-search { width: 160px; height: 32px;
-              background: rgb(255,255,255);            /* ⚠️ 不是 rgba(0,0,0,.04) */
-              border: 1px solid rgba(0,0,0,.25);       /* ⚠️ 不是 rgba(0,0,0,.12) */
-              border-radius: 4px; }
-.nav-search span { font-size: 14px; line-height: 22px; color: rgba(0,0,0,.4); (**`--o-color-info4`**) }
-
-/* ODropdown text 变体：无背景无描边无Padding，颜色 --o-color-info1 = rgba(0,0,0,.85) */
-.nav-btn    { padding: 0; border: none; background: transparent;
-              color: rgba(0,0,0,.85);                  /* ⚠️ 不是 #002FA7 */
-              font-size: 14px; line-height: 22px;
-              display: flex; align-items: center; gap: 4px; }
-```
-
-### 顶导 Icon CSS mask
-
-```css
-/* Icon SVG 通过 CSS mask + background-color 控制 Light/Dark 颜色，无需准备两份文件 */
-.nav-icon {
-  display: inline-block;
-  border: none; background-color: rgba(0,0,0,.65); cursor: pointer; padding: 0;
-  -webkit-mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
-}
-.nav-icon-search {
-  width: 16px; height: 16px;
-  background-color: rgba(0,0,0,.4);
-  -webkit-mask-image: url('skills/opendesign-design/references/assets/navigation/header-pc-search icon.svg');
-  mask-image:         url('skills/opendesign-design/references/assets/navigation/header-pc-search icon.svg');
-}
-.nav-icon-lang {
-  width: 20px; height: 20px;
-  -webkit-mask-image: url('skills/opendesign-design/references/assets/navigation/header-pc-语言切换 icon.svg');
-  mask-image:         url('skills/opendesign-design/references/assets/navigation/header-pc-语言切换 icon.svg');
-}
-.nav-icon-theme {
-  width: 20px; height: 20px;
-  -webkit-mask-image: url('skills/opendesign-design/references/assets/navigation/header-pc-深浅模式.svg');
-  mask-image:         url('skills/opendesign-design/references/assets/navigation/header-pc-深浅模式.svg');
-}
-.nav-icon-user {
-  width: 20px; height: 20px;
-  -webkit-mask-image: url('skills/opendesign-design/references/assets/navigation/header-pc-头像.svg');
-  mask-image:         url('skills/opendesign-design/references/assets/navigation/header-pc-头像.svg');
-}
-/* Dark mode：切换 background-color 即可变色，无需换图 */
-.dark .nav-icon                { background-color: rgba(255,255,255,.85); }
-.dark .nav-icon-search         { background-color: rgba(255,255,255,.4); }
-```
-
-### PC 顶导 HTML 骨架
-
-```html
-<header class="nav">
-  <div class="nav-left">
-    <!-- Logo：固定 136×32，用 img 引用 PNG，禁止内联自绘 -->
-    <a class="logo" href="#">
-      <img src="skills/opendesign-design/references/assets/navigation/header-pc-light logo.svg"
-           width="136" height="32" alt="openEuler">
-    </a>
-    <!-- 导航菜单：7 项，顺序固定 -->
-    <nav class="nav-menu">
-      <a>下载</a><a>开发</a><a>文档</a><a>学习</a><a>支持</a><a>社区</a><a>动态</a>
-    </nav>
-  </div>
-  <!-- ⚠️ 顺序：搜索 → 源码(含箭头) → 国际化 → 主题切换 → 用户 -->
-  <div class="nav-right">
-    <div class="nav-search">
-      <span class="nav-icon nav-icon-search"></span>
-      <span>搜索</span>
-    </div>
-    <button class="nav-btn">
-      源码
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M4 6l4 4 4-4" stroke="#002FA7" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
-    <span class="nav-icon nav-icon-lang" role="button" aria-label="语言切换"></span>
-    <span class="nav-icon nav-icon-theme" role="button" aria-label="主题切换"></span>  <!-- ⚠️ 不可省略 -->
-    <span class="nav-icon nav-icon-user" role="button" aria-label="用户"></span>
-  </div>
-</header>
-```
-
----
-
-### PC 页脚 CSS 关键值
-
-```css
-.footer {
-  background: rgba(18,18,20,1); (**`--o-color-footer-bg-pc`**)
-  min-height: 460px;
-  padding: 24px 216px 34px;   /* ⚠️ 顶部 24px，不是 40px */
-}
-/* 顶部说明区：居中列布局 */
-.footer-intro { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: 32px; }
-.footer-intro-text { font-size: 20px; line-height: 28px; color: rgba(255,255,255,1); (**`--o-color-white`**) text-align: center; }
-
-/* 导航列：6 列等宽，⚠️ 标题 20px Regular，不是 16px/600 */
-.footer-nav   { display: flex; margin-bottom: 24px; }
-.footer-col   { flex: 1; }
-.footer-col-title { font-size: 20px; line-height: 28px; font-weight: 400; color: rgba(255,255,255,1); (**`--o-color-white`**) margin-bottom: 16px; }
-.footer-col a { font-size: 14px; line-height: 22px; color: rgba(255,255,255,.6); (**`--o-color-info3`**) }
-
-/* 友情链接：在导航列之后、分隔线之前 */
-.footer-links { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 0; margin-bottom: 24px; }
-.footer-links-title { font-size: 12px; font-weight: 200; color: rgba(255,255,255,1); (**`--o-color-white`**) margin-right: 8px; }
-.footer-links a { font-size: 12px; color: rgba(255,255,255,.6); (**`--o-color-info3`**) padding: 0 8px; }
-
-/* 分隔线 */
-.footer-divider { height: 2px; background: rgba(229,229,229,1); (**`--o-color-grey-1`**) opacity: .12; }
-
-/* 底部信息行：Logo（150×68）| 版权（居中）| 社交媒体（354×52） */
-.footer-bottom { display: flex; align-items: center; justify-content: space-between; height: 78px; }
-.footer-logo   { width: 150px; height: 68px; }          /* ⚠️ 含邮箱，整体 68px 高 */
-.footer-social { width: 354px; height: 52px; }          /* ⚠️ 含二维码+平台 Logo 两行 */
-
-/* 版权：⚠️ 顺序：品牌/隐私/法律声明（上）→ 版权文字（下） */
-.footer-copy { text-align: center; display: flex; flex-direction: column; gap: 4px; }
-.footer-copy-links { font-size: 14px; color: rgba(255,255,255,1); }
-.footer-copy p     { font-size: 14px; color: rgba(255,255,255,.6); }
-```
-
-### PC 页脚 HTML 骨架
-
-```html
-<footer class="footer">
-
-  <!-- 1. 顶部说明 + 基金会 Logo -->
-  <div class="footer-intro">
-    <p class="footer-intro-text">openEuler 是由开放原子开源基金会（OpenAtom Foundation）孵化及运营的开源项目</p>
-    <!-- ⚠️ 基金会 Logo 用 img，不是文字或自绘 SVG；⚠️ 邮箱不在此处 -->
-    <img src="skills/opendesign-design/references/assets/navigation/footer-pc-基金会logo.svg"
-         width="160" height="32" alt="OpenAtom Foundation">
-  </div>
-
-  <!-- 2. 导航列（6 列）-->
-  <div class="footer-nav">
-    <div class="footer-col">
-      <div class="footer-col-title">关于openEuler</div>   <!-- ⚠️ 无空格 -->
-      <a>成员单位</a><a>组织架构</a><a>社区章程</a><a>贡献看板</a><a>社区介绍</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">新闻与资讯</div>
-      <a>新闻</a><a>博客</a><a>白皮书</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">获取与下载</div>
-      <a>获取openEuler操作系统</a><a>最新社区发行版</a><a>商业发行版</a><a>软件中心</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">支持与服务</div>
-      <a>FAQ</a><a>联系我们</a><a>反馈问题</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">互动与交流</div>
-      <a>邮件列表</a><a>活动</a><a>论坛</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">贡献与成长</div>
-      <a>SIG中心</a><a>贡献攻略</a><a>课程中心</a>   <!-- ⚠️ 无空格 -->
-    </div>
-  </div>
-
-  <!-- 3. 友情链接（⚠️ 不可省略） -->
-  <div class="footer-links">
-    <span class="footer-links-title">友情链接</span>
-    <a>木兰开源社区</a><span>/</span><a>鲲鹏社区</a><span>/</span>
-    <a>鲲鹏小智</a><span>/</span><a>鹏城实验室</a><span>/</span>
-    <a>InfoQ</a><span>/</span><a>开源社</a><span>/</span>
-    <a>中科微澜</a><span>/</span><a>Authing</a><span>/</span>
-    <a>openGauss</a><span>/</span><a>昇思MindSpore</a><span>/</span><a>Ebaina</a>
-  </div>
-
-  <!-- 4. 分隔线 -->
-  <div class="footer-divider"></div>
-
-  <!-- 5. 底部信息行 -->
-  <div class="footer-bottom">
-    <!-- Logo + 邮箱：整体用 150×68 img，邮箱已内嵌在 SVG 里 -->
-    <div class="footer-logo">
-      <img src="skills/opendesign-design/references/assets/navigation/footer-pc-底部logo.svg"
-           width="150" height="68" alt="openEuler">
-    </div>
-
-    <!-- 版权：⚠️ 品牌/隐私/法律声明在上，版权文字在下 -->
-    <div class="footer-copy">
-      <div class="footer-copy-links">品牌<span>|</span>隐私政策<span>|</span>法律声明</div>
-      <p>版权所有 © 2024 openEuler 保留一切权利</p>
-      <p>遵循 木兰宽松许可证第2版（MulanPSL2）</p>
-    </div>
-
-    <!-- 社交媒体：含二维码行+平台 Logo 行，整体用 354×52 img -->
-    <div class="footer-social">
-      <img src="skills/opendesign-design/references/assets/navigation/footer-pc-社交媒体logo.svg"
-           width="354" height="52" alt="社交媒体">
-    </div>
-  </div>
-
-</footer>
-```
-
----
-
-### 常见错误清单（已踩坑）
-
-| # | 错误 | 正确 |
-|---|------|------|
-| 1 | 顶导 Logo 用自绘六边形 SVG + 文字 | `<img>` 引用 `header-pc-light logo.svg`（136×32） |
-| 2 | 导航菜单 6 项，含"开始" | 7 项：下载/开发/文档/学习/支持/社区/动态 |
-| 3 | `nav-left` gap=48px，align=center | gap=40px，align=**flex-end** |
-| 4 | 页脚 padding 顶部 40px | 顶部 **24px**，底部 34px |
-| 5 | 顶部说明区放邮件图标+邮箱文字 | 放**基金会 Logo img**（160×32），邮箱在底部 Logo SVG 内 |
-| 6 | 列标题 16px/weight 600 | **20px/weight 400**（Regular） |
-| 7 | 列名含多余空格："关于 openEuler"、"SIG 中心" | "关于openEuler"、"SIG中心"（无空格） |
-| 8 | 链接文字："获取 openEuler" | "获取openEuler**操作系统**"（完整名称） |
-| 9 | 省略友情链接区 | 分隔线前必须有**友情链接**区 |
-| 10 | 底部 Logo 用自绘白色六边形 SVG | `<img>` 引用 `footer-pc-底部logo.svg`（150×68） |
-| 11 | 版权顺序：版权文字在上，法律链接在下 | **品牌\|隐私政策\|法律声明在上**，版权文字在下 |
-| 13 | 右侧顺序：搜索→国际化→用户→源码 | 搜索→**源码**→国际化→**主题切换**→用户 |
-| 14 | 源码 height 32px，无下拉箭头 | height **24px**，含下拉箭头 16×16 |
-| 15 | 主题切换图标缺失 | 必须有，24×24px，位于国际化与用户之间 |
-| 16 | nav-right gap 16px | gap **20px** |
-| 17 | 搜索框背景 `rgba(0,0,0,.04)`，描边 `.12` | OSearch small：背景 **`rgb(255,255,255)`**（white/--o-color-fill2），描边 **`rgba(0,0,0,.25)`**（grey-14@0.25） |
-| 18 | 源码按钮蓝色描边 pill，颜色 `#002FA7` | ODropdown **text 变体**：无背景无描边，颜色 **`rgba(0,0,0,.85)`**（--o-color-info1），padding=0 |
-| 19 | 外层 `.header` 设 `align-items: flex-end` | 必须设 **`center`**，否则右侧操作区也底部对齐 |
-| 20 | Logo 在 flex-end 容器中被拉到底部 | Logo 必须加 **`align-self: center`** 覆盖父级 |
-| 21 | Tab 菜单垂直居中，下划线不贴底 | 菜单必须加 **`align-self: flex-end`** 贴底 |
-| 22 | 搜索框无 border 无 background 不可见 | 必须设 **`border: 1px solid rgba(0,0,0,.25)`** + **`background-color: #FFFFFF`** |
-| 23 | 搜索框用 flex 布局导致内容错位 | Light 模式必须用 **`position: relative`** + 子元素 **`position: absolute`** |
-| 24 | "源码"文字与箭头换行 | `width: auto` + **`white-space: nowrap`** |
-| 25 | 右侧图标用自绘内联 SVG path | 必须用 **`<img>` 引用 `references/assets/navigation/`** 资源文件 |
-| 26 | CSS 样式被覆盖不生效 | 关键对齐属性使用**内联 style + !important** |
-| 27 | **使用非蓝色作为主色调** | 品牌色必须是 **#002FA7**（Light）/ **rgb(110,148,243)**（Dark） | 2026实战案例 |
-| 28 | **用CSS渐变/内联SVG模拟Logo** | 必须用 `<img src="...header-pc-light logo.svg">` 引用真实资源 | 2026实战案例 |
-| 29 | **ODropdown箭头用16px** | 箭头固定 **24×24px**，不随size变化 | dropdown.md 第297行 |
-| 30 | **ODropdown圆角用4px或缺失** | 必须是 **100px** 全圆角（胶囊形外观） | dropdown.md 第153行 |
-| 31 | **text变体Hover添加背景色** | text变体Hover **只有文字颜色变化，绝对无背景** | dropdown.md 第37行 |
-| 32 | **省略菜单项交互状态** | 必须完整实现 Hover(#F0F5FF) / Active(#E6EDFF) / Selected态 | dropdown.md 第91行 |
-| 33 | **猜测control2-light的值** | 官方定义为 **#F0F5FF**（极浅蓝），不是灰色！查dropdown-demo.html | 2026实战案例 |
-| 34 | **OSearch缺少描边或状态机错误** | small尺寸必须有1px inside描边，Focus时变为brand-6蓝色 | search.md 状态矩阵 |
-| 35 | **移动端版权/链接用0.6透明度** | 移动端必须用**white全白** `(255,255,255,1)`，不是 `rgba(255,255,255,.6)` | 颜色规格表⚠️差异 |
-| 36 | **拆分整节点SVG**（底部Logo、平台Logo组） | 直接整体引用 `<img>`，禁止用HTML/CSS拆分内部元素 | Part G整节点概念 |
-| 37 | **QR码1/2左右颠倒** | `二维码1.svg`=公众号(左)，`二维码2.svg`=小助手(右) | Part C.3资源表 |
-| 38 | **CSS!important顺序错误**（媒体查询在前，基础样式在后） | 基础样式→媒体查询（后定义胜出） | H.1 CSS优先级规则 |
+> 🔴 **HTML 实现规范以楼层模板为唯一真源**——楼层模板是自包含生成单元，含精确数值速查 / 踩坑记录 / 楼层自检清单，并已按 HTML 生产返工多轮修正：
+>
+> | 实现对象 | 规范文档（生成 HTML 时读取） |
+> |---|---|
+> | PC / MB 顶导（Header） | [floors/navigation.md](../floors/navigation.md) |
+> | 顶导菜单项下拉面板 · 平铺式 | [floors/navigation-dropdown.md](../floors/navigation-dropdown.md) |
+> | 顶导菜单项下拉面板 · 分类平铺式 | [floors/navigation-dropdown-categorized.md](../floors/navigation-dropdown-categorized.md) |
+> | PC / MB 页脚（Footer） | [floors/footer.md](../floors/footer.md) |
+>
+> 本文件 Part A~G 提供**设计视角**规格（变体 / 布局树 / 颜色 / 字体 / 资源入仓清单），供设计稿还原与资源核对使用；**HTML 生成请以楼层模板为准**。图形资源文件清单见 [Appendix C](#appendix-c资源引用完整清单resource-checklist) 与楼层模板「资源引用」节。
 
 ---
 
@@ -1130,9 +866,9 @@ body.mobile-view {
 | # | 禁止事项 | 正确做法 | 违规等级 | 典型错误案例 |
 |---|---------|---------|---------|-------------|
 | **Z-1** | 使用非openEuler品牌色作为主色调 | 主色调必须是 **#002FA7 (rgb(0,47,167))** [Light] / **rgb(110,148,243)** [Dark] | 🔴 **致命** | 使用橙色#E6A23C、绿色等非蓝色系颜色 |
-| **Z-2** | 使用内联SVG/CSS渐变/path模拟Logo或图标 | 必须使用 `<img>` 标签引用 `references/assets/navigation/` 目录下的真实SVG文件 | 🔴 **致命** | 用CSS渐变画六边形Logo、手写SVG path |
+| **Z-2** | 使用 CSS 渐变 / path 模拟 Logo 或图标，或引用不存在的资源 | 必须从 `references/assets/navigation/` 读取真实 SVG 文件后**逐属性原样内联**（保留 `fill-rule` / `clip-rule` / `opacity` / `transform` / `fill-opacity`），详见 SKILL.md「图标处理规范」 | 🔴 **致命** | 用CSS渐变画六边形Logo、手写SVG path、伪造资源路径 |
 | **Z-3** | 自定义修改子组件(OSearch/ODropdown)的核心规格 | 严格遵循对应组件Skill文档的所有规范，不得擅自修改尺寸/颜色/间距/状态机 | 🔴 **致命** | OSearch去掉描边、ODropdown改圆角为4px |
-| **Z-4** | 省略或伪造资源引用路径 | 所有图标/Logo必须明确写出相对路径，且文件必须真实存在 | 🔴 **致命** | 不写src属性、使用假路径 |
+| **Z-4** | 省略或伪造资源引用 | 所有 Logo / 图标必须来自 `references/assets/navigation/`（或 `public icons/`）真实文件，路径与文件名须与实际资源一致 | 🔴 **致命** | 引用不存在的文件、凭记忆编造文件名 |
 | **Z-5** | 使用错误的Token值或猜测未验证的颜色值 | 所有Token值必须来自官方示例代码(dropdown-demo.html等)或明确的规范文档 | 🔴 **致命** | control2-light写成#FFFFFF或rgba(0,0,0,0.04) |
 
 ### ✅ 强制要求的行为（Mandatory Requirements）
@@ -1140,7 +876,7 @@ body.mobile-view {
 | # | 要求项 | 具体内容 | 参考位置 | 验证方法 |
 |---|--------|---------|---------|---------|
 | **R-1** | **品牌色系统一致性** | primary1 = #002FA7, primary1-dark = rgb(110,148,248), 全局统一使用蓝色系 | [button.md](./button.md) Part B, [Appendix A](#appendix-aonavigation-完整token速查表) | 搜索代码中所有color值，确保无橙/红/绿 |
-| **R-2** | **资源完整性** | PC顶导至少需引用8个SVG：Logo(Light+Dark) + 搜索图标 + 清除图标 + 下拉箭头 + 国际化 + 主题切换 + 用户头像 | [Part F](#part-flogo-自定义仅顶导), [Part G](#part-g页脚图形资源已入仓) | 检查所有`<img>`和`mask-image`的src |
+| **R-2** | **资源完整性** | PC顶导至少需内联 8 个 SVG：Logo(Light+Dark) + 搜索图标 + 清除图标 + 下拉箭头 + 国际化 + 主题切换 + 用户头像 | [Part F](#part-flogo-自定义仅顶导), [Part G](#part-g页脚图形资源已入仓) | 核对所有内联 `<svg>` 是否来自真实资源文件（禁止 `<img>` / 手写 path） |
 | **R-3** | **OSearch完全合规** | small尺寸(32px高) + 1px inside描边 + Enabled/Actived状态机 + 16×16px图标 | [search.md](./search.md) 状态矩阵表, [Appendix B](#appendix-b子组件交互状态矩阵快速参考) | 对照search.md逐项检查 |
 | **R-4** | **ODropdown完全合规** | text变体 + small尺寸(28px高) + 100px圆角 + 24×24px箭头 + 无背景Hover + 完整面板交互 | [dropdown.md](./dropdown.md) 交互状态机, [Appendix B] | 对照dropdown.md逐项检查 |
 | **R-5** | **交互状态完整性** | 必须实现所有状态：Default/Hover/Focus/Active/Selected/Disabled，每个状态有明确视觉反馈 | 各组件Skill的"交互状态矩阵"章节 | 测试每个状态的视觉效果 |
@@ -1193,17 +929,19 @@ body.mobile-view {
 | Token名称 | Light模式 | Dark模式 | RGB精确值 | 使用场景 | 来源 |
 |---------|-----------|----------|-----------|---------|------|
 | `--o-color-primary1` | **#002FA7** | rgb(73,122,248) | rgb(0,47,167) → rgb(73,122,248) | 主品牌色：Active态文字、Focus描边、选中态 | button.md, dropdown-demo.html |
-| `--o-color-primary2` | #0047D9 | — | rgb(0,71,217) | Hover加深态（次要强调） | dropdown-demo.html |
-| `--o-color-primary3` | #1A5FE5 | — | rgb(26,95,229) | Press/Active按下态（强反馈） | dropdown-demo.html |
+| `--o-color-primary2` | **#5177CA** | — | rgb(81,119,202) | 顶导菜单项 Hover 态文字色 | opendesign-tokens（上游真源，见下方消歧） |
+| `--o-color-primary3` | #002793 | — | rgb(0,39,147) | Press/Active 按下态 | opendesign-tokens |
 | `--o-color-primary4` | #B3CFFF | — | rgb(179,207,255) | Disabled禁用态（弱化显示） | dropdown-demo.html |
 
 **视觉特征**：
 ```
-primary1 (#002FA7): 深邃的品牌蓝 - 用于最重要的交互反馈
-primary2 (#0047D9): 中等蓝色   - 用于Hover次要反馈  
-primary3 (#1A5FE5): 明亮蓝色   - 用于Press物理按压感
+primary1 (#002FA7): 深邃的品牌蓝 - 用于最重要的交互反馈（选中态文字 + 指示线）
+primary2 (#5177CA): 中等蓝色   - 顶导菜单项 Hover 文字色
+primary3 (#002793): 深蓝色     - 用于Press物理按压感
 primary4 (#B3CFFF): 极浅蓝色   - 用于Disabled禁用态
 ```
+
+> ⚠️ **primary2 色值消歧（2026-10-15 修正，防取错值）**：本附录旧版曾把 `--o-color-primary2` 记作 **#0047D9**（来源 dropdown-demo.html），与上游 Token 真源 `opendesign-tokens/references/tokens-openeuler.md` 的 **#5177CA**（rgb 81,119,202）不一致。已按「颜色必须用语义 Token、以上游真源为准」原则统一为 **#5177CA**。若在其他位置看到 #0047D9，按废弃值处理；引用时一律写 `var(--o-color-primary2)`，禁止把任一色值写死进 CSS。
 
 ### A.2 文字色系（Text Colors）
 
@@ -1444,12 +1182,14 @@ OSearch建议项Hover背景:
 - Padding(text)：上下5px，左右**0px**
 - 图标间距：4px
 
+> 🔴 **适用边界（2026-10-15 补）**：本节只描述顶导右侧「源码」按钮（`.o-nav__source`）及其面板。**顶导菜单项**（`.o-nav__item` / `.o-nav__link`）挂载的下拉面板**不适用本节**——其面板选项状态以 [floors/navigation-dropdown.md](../floors/navigation-dropdown.md) §4.2 为唯一真源，两边规则已对齐：**hover 只换背景、文字色不变；按下态仅一瞬间（松开恢复）；无持久选中态；全状态 Regular(400)**。禁止把本节的 primary1 文字 hover / Semibold / Selected 规则搬到顶导菜单项面板上。
+
 **触发按钮状态矩阵**：
 
 | 状态 | 按钮背景 | 按钮文字色 | 按钮图标色 | 面板显示 | 视觉特征 |
 |-----|---------|-----------|-----------|---------|---------|
 | **Default(默认)** | **透明**<br>(无背景！) | info1<br>黑/白 | info1<br>与文字一致 | ❌ 隐藏 | 纯文字+下箭头 |
-| **Hover(悬浮)** | **透明**<br>(**无背景！**) | **primary1 蓝**<br>#002FA7 | **primary1 蓝** | — | 仅文字变色，背景保持透明 |
+| **Hover(悬浮)** | **透明**<br>(**无背景！**) | **primary2 蓝**<br>#5177CA | **primary2 蓝** | — | 仅文字变色，背景保持透明（色值对齐 dropdown.md text 变体与 floors 导航楼层，2026-10-15 统一） |
 | **Click/Active(点击)** | 透明 | info1 | info1 | ✅ **显示** | 面板从下方滑出 |
 | **Expanded(展开)** | 透明 | info1 | info1 | ✅ 显示 | 箭头旋转180° |
 | **Disabled(禁用)** | 透明 | info4@灰<br>rgba(0,0,0,0.4) | info4@灰 | ❌ 隐藏 | 整体置灰 |
@@ -1463,15 +1203,16 @@ OSearch建议项Hover背景:
 | **收起** | 不可见 | — | — | — | — |
 | **展开** | white<br>(#FFFFFF) | 按钮下方**4px**处 | DROP_SHADOW<br>x=0 y=6 blur=24<br>rgba(18,20,23,0.08) | **4px**<br>(radius_control-xs) | **4px**<br>(四周) |
 
-**面板内菜单项状态矩阵**：
+**面板内菜单项状态矩阵**（2026-10-15 与 floors 顶导下拉面板选项规则统一：hover 只换背景、无持久选中态、全状态 Regular(400)）：
 
 | 菜单项状态 | 触发条件 | 背景色 | 文字颜色 | 字重 | 其他效果 |
 |-----------|---------|--------|---------|------|---------|
 | **Default(默认)** | 初始渲染 | 透明/无 | info1<br>黑/白 | Regular(400) | — |
-| **Hover(悬浮)** | 鼠标进入 | **#F0F5FF**<br>(**极浅蓝！**) | **primary1 蓝**<br>#002FA7 | Regular(400) | cursor:pointer |
-| **Active/Press(按下)** | 鼠标按下 | **#E6EDFF**<br>(**浅蓝**) | primary1 蓝 | Semibold(600) | scale(0.98)微缩 |
-| **Selected(选中)** | 点击选择 | rgba(0,47,167,<br>**0.08**) | primary1 蓝 | **Medium(500)**<br>加粗 | 持续显示直到面板关闭 |
+| **Hover(悬浮)** | 鼠标进入 | **#F0F5FF**<br>(**极浅蓝！**) | **info1（保持不变）** | Regular(400) | cursor:pointer；⛔ 只换背景，文字色不变 |
+| **Active/Press(按下)** | 鼠标按下 | **#E6EDFF**<br>(**浅蓝**) | **primary1 蓝**<br>#002FA7 | Regular(400) | ⛔ 无 scale 微缩；**仅按下瞬间**，松开即恢复 |
 | **Disabled(禁用)** | disabled属性 | 透明 | info4@灰 | Regular(400) | cursor:not-allowed |
+
+> ⛔ **无 Selected 持久选中态**（2026-10-15 用户裁决）：选项点击即跳走/关闭面板，不存在「停留在某一项」的状态——原 `rgba(0,47,167,0.08)` + Medium(500) 的 Selected 行**作废删除**。按下态文字 primary1 + 背景 #E6EDFF 仅在按住的瞬间存在，松开即恢复默认。同规则见 [floors/navigation-dropdown.md](../floors/navigation-dropdown.md) §4.2。
 
 **关键CSS实现要点**：
 ```css
@@ -1503,29 +1244,30 @@ OSearch建议项Hover背景:
     padding: 4px;
 }
 
-/* 菜单项 - 核心交互 */
+/* 菜单项 - 核心交互（2026-10-15 与 floors 面板选项规则统一） */
 .o-dropdown__item:hover {
-    background: #F0F5FF;       /* 极浅蓝色Hover背景 */
-    color: var(--o-color-primary1-light);
+    background: #F0F5FF;       /* 极浅蓝色Hover背景；⛔ 文字色保持不变，只换背景 */
 }
 
 .o-dropdown__item:active {
-    background: #E6EDFF;       /* 浅蓝色Active背景 */
-    transform: scale(0.98);
+    background: #E6EDFF;       /* 浅蓝色Active背景；仅按下瞬间，松开即恢复 */
+    color: var(--o-color-primary1-light);
+    /* ⛔ 无 transform: scale() 微缩；⛔ 全状态 Regular(400)，禁止切 Semibold/Medium */
 }
 
-.o-dropdown__item.selected {
-    background: rgba(0, 47, 167, 0.08);  /* 选中态浅蓝 */
-    font-weight: 500;
-}
+/* ⛔ 已删除 .selected 规则（2026-10-15 用户裁决）：选项点击即跳走/关闭面板，
+   无持久选中态——原 rgba(0,47,167,0.08) + font-weight:500 作废 */
 ```
 
 **常见错误清单（本次实战总结）**：
 - ❌ 箭头用了16px → 必须是**24×24px**
 - ❌ 圆角是4px或缺失 → 必须是**100px**
 - ❌ text变体Hover加了背景 → 必须**只有文字变色**
+- ❌ 触发按钮 Hover 文字用了 primary1/其他蓝 → 必须是 **primary2（#5177CA）**（2026-10-15 与 floors 导航楼层统一）
 - ❌ 菜单项Hover背景用了灰色 → 必须是**#F0F5FF极浅蓝**
-- ❌ 缺少Selected状态 → 必须实现**选中后的持续反馈**
+- ❌ 菜单项 Hover 时文字也变色 → ⛔ **只换背景，文字保持 info1**（2026-10-15 与 floors 面板选项规则统一）
+- ❌ 加了 Selected 持久选中态（rgba(0,47,167,0.08) + 加粗）→ ⛔ **无持久选中态**，选项点击即跳走/关闭面板（2026-10-15 用户裁决）
+- ❌ 按下态切 Semibold/Medium 字重或加 scale 微缩 → ⛔ 全状态 **Regular(400)**、无微缩，按下只换背景+文字 primary1，松开即恢复
 - ❌ 面板位置偏移 >4px → 必须精确**4px**
 
 ---
@@ -1538,22 +1280,22 @@ OSearch建议项Hover背景:
 
 ### C.1 PC顶导必需资源（8个）
 
-| # | 文件名 | 相对于HTML的路径 | 尺寸 | 使用位置 | 引用方式 |
-|---|--------|----------------|------|---------|---------|
-| 1 | `header-pc-light logo.svg` | `../references/assets/navigation/header-pc-light logo.svg` | 136×32px | Logo区(Light模式) | `<img src="...">` |
-| 2 | `header-pc-dark logo.svg` | `../references/assets/navigation/header-pc-dark logo.svg` | 136×32px | Logo区(Dark模式) | `<img src="...">` |
-| 3 | `header-pc-search icon.svg` | `../references/assets/navigation/header-pc-search icon.svg` | 16×16px | OSearch搜索图标 | CSS mask 或 `<img>` |
-| 4 | `icon-搜索.svg` | `../references/assets/public icons/icon-搜索.svg` | 16×16px | OSearch备选图标 | `<img>` |
-| 5 | `icon-关闭.svg` | `../references/assets/public icons/icon-关闭.svg` | 16×16px | OSearch清除按钮 | `<img>` (仅Actived显示) |
-| 6 | `icon-下箭头.svg` | `../references/assets/public icons/icon-下箭头.svg` | 24×24px | ODropdown下拉箭头 | `<img>` |
-| 7 | `header-pc-语言切换 icon.svg` | `../references/assets/navigation/header-pc-语言切换 icon.svg` | 20×20px | 国际化按钮 | CSS mask 或 `<img>` |
-| 8 | `header-pc-深浅模式.svg` | `../references/assets/navigation/header-pc-深浅模式.svg` | 20×20px | 主题切换按钮 | CSS mask 或 `<img>` |
-| 9 | `header-pc-头像.svg` | `../references/assets/navigation/header-pc-头像.svg` | 20×20px | 用户头像 | CSS mask 或 `<img>` |
+| # | 文件名 | 路径（相对 skill 根） | 尺寸 | 使用位置 |
+|---|--------|----------------|------|---------|
+| 1 | `header-pc-light logo.svg` | `references/assets/navigation/header-pc-light logo.svg` | 136×32px | Logo区(Light模式) |
+| 2 | `header-pc-dark logo.svg` | `references/assets/navigation/header-pc-dark logo.svg` | 136×32px | Logo区(Dark模式) |
+| 3 | `header-pc-search icon.svg` | `references/assets/navigation/header-pc-search icon.svg` | 16×16px | OSearch搜索图标 |
+| 4 | `icon-搜索.svg` | `references/assets/public icons/icon-搜索.svg` | 16×16px | OSearch备选图标 |
+| 5 | `icon-关闭.svg` | `references/assets/public icons/icon-关闭.svg` | 16×16px | OSearch清除按钮 |
+| 6 | `icon-下箭头.svg` | `references/assets/public icons/icon-下箭头.svg` | 24×24px | ODropdown下拉箭头 |
+| 7 | `header-pc-语言切换 icon.svg` | `references/assets/navigation/header-pc-语言切换 icon.svg` | 24×24px | 国际化按钮 |
+| 8 | `header-pc-深浅模式.svg` | `references/assets/navigation/header-pc-深浅模式.svg` | 24×24px | 主题切换按钮 |
+| 9 | `header-pc-头像.svg` | `references/assets/navigation/header-pc-头像.svg` | 24×24px | 用户头像 |
 
-**引用方式说明**：
-- **推荐方式**：Logo用`<img src="...">`直接引入
-- **Icon两种方式均可**：CSS mask（支持动态着色）或`<img>`（简单直接）
-- **禁止方式**：❌ 内联SVG path、❌ CSS渐变模拟、❌ Unicode字符替代
+**引用方式说明**（以 SKILL.md「图标处理规范」为准）：
+- 所有 SVG 一律 **Read 资源文件后逐属性原样内联 `<svg>`**（保留 `fill-rule` / `clip-rule` / `opacity` / `transform` / `fill-opacity`）
+- **禁止方式**：❌ `<img src>` 引用、❌ CSS mask、❌ CSS 渐变模拟、❌ Unicode 字符替代
+- 各资源在顶导中的具体位置与颜色 Token 见楼层模板「资源引用」节
 
 ### C.2 PC页脚必需资源（5个）
 

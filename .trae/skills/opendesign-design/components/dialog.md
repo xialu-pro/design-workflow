@@ -112,7 +112,7 @@ ODialog（OVERLAY，全屏覆盖）
 > - **OButton 触发**：通过按钮 click 事件打开对话框
 > - **表单组件**：form 类型中配合 OInput、OSelect、OTextarea、ORadio、OCheckbox
 > - **OMessage 反馈**：操作完成后用 OMessage 展示成功/失败提示
-> - **OTable 操作**：表格中的「删除」「编辑」操作触发 confirm 类型对话框
+> - **ODataTable 操作**：表格中的「删除」「编辑」操作触发 confirm 类型对话框
 > - **OStep 向导**：多步骤流程中使用 dialog 作为每个步骤的操作容器
 > - **OLoading 加载**：loading 状态下在内容区显示 OLoading 组件
 

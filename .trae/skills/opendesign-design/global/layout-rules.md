@@ -3,6 +3,8 @@
 # 栅格 / 断点 / 间距规范
 
 > 本文档从 `hard-constraints.md` 中提取栅格、断点与间距相关规则，作为布局设计的独立速查手册。
+>
+> ⚠️ **真源声明**：[hard-constraints.md](hard-constraints.md) 为唯一真源，本文档仅作速查副本；两处不一致时以 hard-constraints.md 为准。
 
 ---
 

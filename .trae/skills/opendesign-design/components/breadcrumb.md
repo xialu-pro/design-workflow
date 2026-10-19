@@ -114,7 +114,7 @@ OBreadcrumb (HORIZONTAL auto-layout, gap=4)
 
 | 元素 | Token | Dark=off（浅色） | Dark=on（深色） |
 |------|-------|-----------------|-----------------|
-| 导航层级文字 | `--o-color-info3` | `rgba(var(--o-grey-14), 0.6)` | `rgba(var(--o-grey-1), 0.6)` |
+| 导航层级文字 | `--o-color-info3` | `rgb(var(--o-grey-14) / 0.6)` | `rgb(var(--o-grey-1) / 0.6)` |
 | 当前页面文字 | `--o-color-primary1` | `rgb(var(--o-brand-6))` | `rgb(var(--o-brand-6))` |
 | 分隔图标（右箭头） | `--o-color-info3` | 继承父层颜色 | 继承父层颜色 |
 
@@ -145,9 +145,10 @@ OBreadcrumb (HORIZONTAL auto-layout, gap=4)
 ## 设计注意事项
 
 1. **层级数量**：默认展示 5 个导航层级 + 1 个当前页面，可根据实际层级删减中间层级项
-2. **分隔符**：使用「右箭头」图标（Icon/右箭头，24×24）作为层级间的分隔符，位于每个层级项的右侧
+2. **分隔符**：使用「右箭头」图标（Icon/右箭头，24×24）作为层级间的分隔符，位于每个层级项的右侧。分隔符必须使用图标，禁止以 `/`、`>` 等文字符号代替；图标资源路径：`references/assets/public icons/icon-右箭头.svg`，HTML 中经 CSS mask 渲染并着色 `--o-color-info3`
 3. **当前页面**：始终位于最右侧，使用 SemiBold 加粗 + 蓝色高亮，不带分隔箭头
 4. **深色适配**：Dark=on 时文字颜色自动切换，无需额外修改
+5. **页面位置**：面包屑通常位置为上距离导航 32px，下距离主内容区域 24px
 
 ---
 

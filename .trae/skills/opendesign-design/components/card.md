@@ -3,6 +3,7 @@
 # OCard 卡片 · 设计 Skill
 
 > 组件集合节点：`1042:21386` · 组件名：OCard 卡片 · 变体总数：8（2 type × 2 layout × 2 Dark）
+> 另含 Web 实现侧扩展 type：`full-cover`（全幅封面，详见 Part B「full-cover 规格」）
 
 ---
 
@@ -10,14 +11,15 @@
 
 ### 组件概览
 
-**OCard 卡片**：用于承载和展示内容的容器组件，通过卡片边界划分内容区域，提升页面视觉层次感。支持封面卡片和图标卡片两种类型，水平/垂直两种布局，可选头部、内容区、底部三段式结构。适用于信息展示、列表项、内容分组等场景。
+**OCard 卡片**：用于承载和展示内容的容器组件，通过卡片边界划分内容区域，提升页面视觉层次感。支持封面卡片（`cover` / `full-cover`）和图标卡片（`icon`）三种类型，水平/垂直两种布局，可选头部、内容区、底部三段式结构。适用于信息展示、列表项、内容分组等场景。
 
 ---
 
 ### 适用场景
 
-- ✅ **封面卡片**：产品展示、图文卡片、新闻列表项，封面图突出视觉吸引力
-- ✅ **图标卡片**：功能入口、快捷操作、统计卡片，图标辅助语义传达
+- ✅ **封面卡片（cover）**：产品展示、图文卡片、新闻列表项，封面图突出视觉吸引力
+- ✅ **全幅封面卡片（full-cover）**：产品能力卡、运营入口卡，封面铺满整卡、文字叠于封面上层，视觉冲击更强
+- ✅ **图标卡片（icon）**：功能入口、快捷操作、统计卡片，图标辅助语义传达
 - ✅ **信息展示**：用户信息卡、订单信息卡、商品信息卡等
 - ✅ **列表项**：卡片式列表布局，每个列表项为独立卡片
 - ✅ **内容分组**：页面中不同内容模块的边界标识
@@ -30,6 +32,7 @@
 **type（卡片类型）**
 - `cover` — 封面卡片，头部包含封面图片区域，视觉吸引力强，适合产品展示、图文卡片
 - `icon` — 图标卡片，头部包含图标区域，语义传达清晰，适合功能入口、统计卡片
+- `full-cover` — 全幅封面卡片，封面图作为卡片自身背景**铺满整卡**，文字内容直接叠在封面上层，适合产品能力卡、运营入口卡
 
 **layout（布局方式）**
 - `horizontal` — 水平布局，卡片内容横向排列，适合侧边栏卡片、列表项横向展示
@@ -38,6 +41,10 @@
 **Dark（主题）**
 - `off` — 浅色模式（默认）
 - `on` — 深色模式，背景色自动切换为对应深色值
+
+> 🔑 **`cover` 与 `full-cover` 的核心区别**：
+> - `cover`：封面图是卡片**内部的一个区域**（位于 Header），与文字分区并列，封面自带内边距与内层圆角
+> - `full-cover`：封面图**就是卡片背景本身**，铺满整卡、不占独立 Header 区、不设内层圆角（外圆角即封面圆角），文字层整块叠在封面上层
 
 ---
 
@@ -122,9 +129,89 @@ OCard（HORIZONTAL，自适应宽高）
 
 | 变体属性 | 可选值 | 默认值 | 视觉差异 |
 |---------|--------|--------|---------|
-| type | `cover` / `icon` | `cover` | 封面图片 / 图标 |
+| type | `cover` / `full-cover` / `icon` | `cover` | 分区封面图 / 全幅封面图（铺满整卡）/ 图标 |
 | layout | `horizontal` / `vertical` | `vertical` | 水平排列 / 垂直排列 |
 | Dark | `off` / `on` | `off` | 浅色模式 / 深色模式 |
+
+---
+
+### full-cover 规格（全幅封面卡片）
+
+> 🖼 **定义**：封面图作为卡片自身背景铺满整卡，文字内容层整块叠在封面上层。
+> 封面**不占独立 Header 区、不设内层圆角**（外圆角即封面圆角）。
+
+**布局规格**
+
+| 规格项 | 档位 | Token | 默认基准 | 当前 openEuler 页面实现 |
+|--------|------|-------|---------|------------------------|
+| 卡片圆角 | 外档 | `radius_control-l` | 4px | 16px |
+| 封面填充 | — | 铺满整卡（`background-size:cover`） | — | — |
+| 封面内层圆角 | — | 无（继承卡片外圆角） | — | — |
+| 卡内元素圆角 | 内档 | `radius_control-s` | 4px | 8px |
+| 内容层内边距 | — | 上 28px · 左右 24px · 下 24px | — | — |
+| 悬浮阴影 | — | `shadow-2` | `shadow-2` | `shadow-2` |
+
+> 🔲 **圆角取值遵循上文「圆角基准说明」**：卡片取**外档**、卡内元素取**内档**，两者保持「外大一档 / 内小一档」的分层关系；
+> 具体 px 以社区 token 为准（默认基准 4px）。表中「当前 openEuler 页面实现」为 `opendesign-home.html`
+> 「最新上线」楼层的实际渲染值，该页圆角为页面级指定值（外 16px / 内 8px），非组件默认值。
+
+**文字规格**（沿用全局字体样式映射）
+
+| 层级 | 字号 | 行高 | 字重 | 颜色 |
+|------|------|------|------|------|
+| 卡片标题 | `font_size-h3`（22px） | `line_height-h3`（30px） | bold | `--o-color-info1` |
+| 卡片正文 | `font_size-text1`（16px） | `line_height-text1`（24px） | regular | `--o-color-info3` |
+| 徽标（NEW/HOT） | `font_size-tip2`（12px） | 16px | regular | `--o-color-white` |
+
+**结构示意**
+
+```
+OCard（full-cover，VERTICAL）
+│  cornerRadius: 外档（radius_control-l，默认基准 4px）
+│  background: 封面图铺满整卡（无独立内圆角）
+│
+└── [内容层 FRAME]（叠在封面上层，padding 28/24/24）
+    ├── [Head 行]
+    │   ├── [图标槽] 32px / 圆角内档（radius_control-s）/ fill2 底 + primary1 图标
+    │   ├── [标题文字] font_size-h3 / Bold / info1
+    │   └── [徽标] 高 20px / 圆角 100px / primary1 底 + 白字
+    ├── [正文文字] font_size-text1 / Regular / info3
+    └── [内容区]（可选，如界面示意）
+          fill2 底 / 圆角内档（radius_control-s）/ shadow-1
+```
+
+**代码基准**（来自 opendesign-home.html「最新上线」楼层，圆角为该页指定值）
+
+```css
+.oc-card--full-cover{
+  display:flex;flex-direction:column;
+  padding:28px 24px 24px;border-radius:16px;      /* 外档：radius_control-l（该页指定 16px） */
+  background-image:var(--o-cover);background-size:cover;  /* 封面铺满整卡 */
+}
+.oc-card--full-cover__icon{width:32px;height:32px;border-radius:8px;}   /* 内档：radius_control-s（该页指定 8px） */
+.oc-card--full-cover__title{font-size:var(--o-r-font_size-h3);font-weight:600;color:var(--o-color-info1);}
+.oc-card--full-cover__desc{font-size:var(--o-r-font_size-text1);font-weight:400;color:var(--o-color-info3);}
+.oc-card--full-cover__visual{border-radius:8px;background-color:var(--o-color-fill2);box-shadow:var(--o-shadow-1);}
+```
+
+> ⚠️ **封面明度硬约束**：文字直接叠在封面上，封面必须保证与文字色的对比度达标（WCAG AA）。
+> 浅色/柔和彩底封面 → 文字用 `info1` / `info3`；深色封面 → 文字必须切换到
+> `--o-color-info1-inverse` / `--o-color-info3-inverse`（白色系）。禁止黑字压深底。
+
+---
+
+### 圆角基准说明
+
+> 🔲 **默认基准 4px**：card.md 内所有圆角一律按 **4px** 描述（对应 `radius_control-m` 档），这是 OpenDesign 的默认基准规范。
+> **实际生效值由各社区 token 决定**，不同社区对 `radius_control-*` 各档的取值不同：
+>
+> | 社区 | `xs` | `s` | `m` | `l` |
+> |------|------|-----|-----|-----|
+> | openEuler / Kunpeng | 4px | 4px | 4px | 4px |
+> | openUBMC / MindSpore / Ascend / openGauss | 4px | 8px | 12px | 16px |
+>
+> 落地时**以社区 token 为准**，card.md 中的 4px 仅表示「默认基准档位」，不代表所有社区都必须渲染为 4px。
+> 凡涉及具体社区页面，圆角取值需回查该社区的 `opendesign-tokens` 定义。
 
 ---
 
@@ -202,6 +289,10 @@ OCard（HORIZONTAL，自适应宽高）
 ---
 
 ## Part C：交互状态规格
+
+> 📐 **字号基准（唯一权威值）**：卡片标题 **22px（`font_size-h3`）/ Bold**、正文 **16px（`font_size-text1`）/ Regular**，
+> 与 Part D「字体样式映射」一致。下文各交互表中的「22px / 16px」即这两个 Token 的 Desktop 基准值，
+> 三处（Part C / Part D 字体映射 / Part D 变量绑定）不得再出现其他数字。
 
 ### 交互状态总览
 
@@ -290,6 +381,36 @@ OCard（HORIZONTAL，自适应宽高）
 
 ---
 
+### 全幅封面卡片交互规格（full-cover）
+
+**默认状态**
+
+| 元素 | 规格项 | Token 值 | 说明 |
+|------|--------|----------|------|
+| 封面（卡片背景） | 缩放比例 | 100% | 铺满整卡 |
+| 标题文字 | 字号/字重 | 22px (Semibold) | 一级标题样式 |
+| 标题文字 | 颜色 | `--o-color-info1` | 默认标题颜色 |
+| 内容文字 | 字号/字重 | 16px (Regular) | 正文样式 |
+| 内容文字 | 颜色 | `--o-color-info3` | 默认内容颜色 |
+
+**悬浮/按下状态**
+
+| 元素 | 规格项 | Token 值 | 说明 |
+|------|--------|----------|------|
+| 封面（卡片背景） | 缩放比例 | 105% | **变化**：微放大效果 |
+| 标题文字 | 字号/字重 | 22px (Semibold) | 保持不变 |
+| 标题文字 | 颜色 | `--o-color-info1` | 保持不变 |
+| 内容文字 | 字号/字重 | 16px (Regular) | 保持不变 |
+| 内容文字 | 颜色 | `--o-color-info3` | 保持不变 |
+| 卡片阴影 | effects | `shadow-2` | **变化**：悬浮时显示阴影 |
+
+> 💡 **交互反馈**：full-cover 的封面即卡片背景，放大必须通过内层封面元素 `transform:scale(1.05)` 实现
+> （容器 `overflow:hidden` 固定尺寸），**禁止直接 scale 卡片容器**。
+> 若卡片有且只有一种交互行为（如整卡跳转），**不得内嵌操作按钮**——整卡作为 `<a>` 链接，
+> 悬浮反馈只通过阴影 `shadow-2` 体现，避免与封面放大叠加造成视觉过载。
+
+---
+
 ### 交互状态 Token 汇总表
 
 | 卡片类型 | 状态 | 标题颜色 | 内容颜色 | 特殊元素变化 |
@@ -300,6 +421,8 @@ OCard（HORIZONTAL，自适应宽高）
 | **复合卡片** | hover/pressed | `--o-color-info1` | `--o-color-info3` | 主按钮：`primary1` 填充 + 白字 |
 | **图文卡片** | default | `--o-color-info1` | `--o-color-info3` | 图片：100% |
 | **图文卡片** | hover/pressed | `--o-color-primary1` | `--o-color-info3` | 图片：105% + 标题变色 |
+| **全幅封面卡片** | default | `--o-color-info1` | `--o-color-info3` | 封面：100% |
+| **全幅封面卡片** | hover/pressed | `--o-color-info1` | `--o-color-info3` | 封面：105% + 阴影 shadow-2 |
 
 ---
 
@@ -852,8 +975,8 @@ Hover 时：
 
 | 规格项 | 值 | 说明 |
 |--------|-----|------|
-| 字号 | `14px` | 固定值，不随卡片尺寸变化 |
-| 行高 | `22px` | 保持与正文字体一致 |
+| 字号 | `font_size-tip1`（14px） | 固定值，不随卡片尺寸变化，始终小于正文 text1 |
+| 行高 | `22px` | 固定值，保持与 tip1 行高一致 |
 | 字重 | `400` (Regular) | 正常字重，非粗体 |
 | 颜色 | `--o-color-info3` | 次要信息颜色 (rgba(0,0,0,.6)) |
 | 图标间距 | `8px` | 统计项内图标与文字的间距 |
@@ -878,7 +1001,8 @@ Hover 时：
 ```
 
 **注意事项**：
-- 数据统计文字**禁止使用**其他字号（如 12px、13px、16px）
+- 数据统计文字**禁止使用**其他字号（如 12px、13px、18px、20px），且不得放大到与正文 `text1`（16px）同级
+- 数据统计区域为**辅助信息区**，其 `tip1`（14px）规格不受"正文 16px"约束，是有意降级的一档
 - **必须使用** `--o-color-info3` 颜色 Token，确保视觉层级正确
 - 当统计项包含图标时，图标与文字间距为 **8px**
 - 多个独立统计项之间保持 **16px** 间距
@@ -928,11 +1052,15 @@ Hover 时：
 
 | 使用场景 | 字号 Token | 行高 Token | 字重 Token | 字号值 | 行高值 |
 |---------|-----------|-----------|-----------|-------|-------|
-| Header 标题 | `font_size-text1` | `line_height-text1` | `font_weight-bold` | 16px | 24px |
-| Body 正文 | `font_size-tip1` | `line_height-tip1` | `font_weight-regular` | 14px | 22px |
-| Footer 按钮 | `font_size-tip1` | `line_height-tip1` | `font_weight-regular` | 14px | 22px |
+| Header 标题 | `font_size-h3` | `line_height-h3` | `font_weight-bold` | 22px | 30px |
+| Body 正文 | `font_size-text1` | `line_height-text1` | `font_weight-regular` | 16px | 24px |
+| Footer 按钮 | `font_size-text1` | `line_height-text1` | `font_weight-regular` | 16px | 24px |
 
 字体族：`font_family`（HarmonyOS / HarmonyHeiTi）
+
+> **基准说明**：上表为 Desktop（≥1440px）基准值。`h3` / `text1` 均为响应式 Token，
+> 在 Laptop / Pad 断点下会按各自的响应式梯度降档（见 `styles/tokens.md`），
+> 卡片内文字只需绑定 Token，不写死 px。
 
 ---
 
@@ -958,20 +1086,56 @@ OCard（FRAME，自适应宽高）
 │   │     └── [图标 Icon INSTANCE]
 │   │           fill: color-primary1
 │   │
-│   └── [标题文字 PARAGRAPH]
-│         font: font_family Bold | font_size-text1
+│  └── [标题文字 PARAGRAPH]
+│         font: font_family Bold | font_size-h3
 │         fill: color-info1
 │
 ├── [Body 内容区 FRAME]（自适应宽高）
 │   autoLayoutPadding: 见内边距规格
 │   └── [内容节点...]
-│         fill: color-info2
+│         font: font_family Regular | font_size-text1
+│         fill: color-info3
 │
 └── [Footer 底部 FRAME]（自适应宽/固定宽）
     autoLayoutPadding: 见内边距规格
     autoLayoutDirection: HORIZONTAL
     └── [操作按钮 OButton INSTANCE...]
 ```
+
+**type=full-cover 层级结构**（封面即卡片背景）
+
+```
+OCard（full-cover，FRAME，自适应宽高）
+│  cornerRadius: 外档（radius_control-l，默认基准 4px）
+│  background: 封面图铺满整卡（无独立内层圆角）
+│  overflow: hidden（供封面 hover 缩放裁剪）
+│
+└── [内容层 FRAME]（叠于封面上层）
+    autoLayoutPadding: 28px 24px 24px
+    autoLayoutDirection: VERTICAL
+    │
+    ├── [Head 行 FRAME]（HORIZONTAL）
+    │   ├── [图标槽 FRAME] 32px / cornerRadius 内档（radius_control-s）/ fill: color-fill2
+    │   │     └── [图标 Icon] fill: color-primary1
+    │   ├── [标题文字 PARAGRAPH]
+    │   │     font: font_family Bold | font_size-h3
+    │   │     fill: color-info1
+    │   └── [徽标 FRAME] 高 20px / cornerRadius 100px / fill: color-primary1
+    │         └── [徽标文字] font_size-tip2 / fill: color-white
+    │
+    ├── [正文文字 PARAGRAPH]
+    │     font: font_family Regular | font_size-text1
+    │     fill: color-info3
+    │
+    └── [内容区 FRAME]（可选，如界面示意）
+          cornerRadius: 内档（radius_control-s）
+          fill: color-fill2
+          effects: shadow-1
+```
+
+> 📌 **结构要点**：full-cover 没有独立 Header 图片节点——封面挂在卡片根节点的 background 上，
+> 所有内容（图标/标题/徽标/正文/内容区）都排在同一个「内容层」里，靠 padding 与封面边缘保持距离。
+> 圆角取「外档 / 内档」两档（默认基准均为 4px，实际按社区 token），形成外大一档、内小一档的层次。
 
 ---
 
@@ -987,13 +1151,19 @@ OCard（FRAME，自适应宽高）
 | type=icon, layout=vertical, Dark=on | `730ae95ca65d8dbe6c3c72776d98d3cca249ef39` | `1042:21423` |
 | type=icon, layout=horizontal, Dark=off | `e2a10a804dc8cb9ab507d237c712f65c7cf12f5e` | `1042:21399` |
 | type=icon, layout=horizontal, Dark=on | `e9916f1e7742eeeba207639563416798817546ad` | `1042:21408` |
+| type=full-cover, layout=vertical, Dark=off | 待补充（Pixso 未建节点） | 待补充 |
+| type=full-cover, layout=vertical, Dark=on | 待补充（Pixso 未建节点） | 待补充 |
+
+> **说明**：`full-cover` 为 Web 实现侧新增的 type 取值（Pixso 尚无对应组件节点），
+> 落地时以 `cover` 节点为基底改造：把封面图从 Header 区移到卡片根节点 background，
+> 去掉 Header 独立 padding 与封面内层圆角即可。补齐节点后回填本表。
 
 ---
 
 ### Pixso 操作速查
 
 1. **插入组件**：组件面板搜索「OCard」，拖入画布
-2. **切换类型**：右侧面板 → type 属性 → 选择 `cover` / `icon`
+2. **切换类型**：右侧面板 → type 属性 → 选择 `cover` / `icon`（`full-cover` 需按上文说明手工改造）
 3. **切换布局**：右侧面板 → layout 属性 → 选择 `horizontal` / `vertical`
 4. **切换主题**：右侧面板 → Dark 属性 → 选择 `off` / `on`
 5. **设置宽度**：拖拽卡片边缘或设置容器宽度约束
@@ -1017,6 +1187,10 @@ OCard（FRAME，自适应宽高）
 - ⚠️ **Footer 操作按钮排列顺序（硬约束）**：Footer 内多个元素并排时，**操作按钮（OButton / 链接）必须排在左侧，辅助信息（版本号、日期、meta 等）排在右侧**。禁止将操作按钮放在右侧，无论 justify-content 如何设置。
 - ⚠️ **Footer 左右边距须与 Body 对齐（硬约束）**：Footer 的左右内边距必须与 Body 保持一致——在"容器 8px + Body 额外 8px = 总计 16px"的模型下，Footer 也需要额外 `padding: 0 8px`，使操作按钮与正文文字左右对齐。禁止 Footer 左右无内边距导致内容顶到容器边缘。
 - ⚠️ **Footer 操作按钮使用 OButton medium text 变体（硬约束）**：卡片 Footer 内的操作按钮必须使用 **OButton size=medium, Variant=text**。关键规格：高度 32px、padding=0（无水平内边距）、文字色 `grey-14`（Light: `rgb(0,0,0)` **黑色**）、无背景无边框。**禁止使用品牌蓝 `#002FA7` / `--o-color-primary1` 作为 text 变体文字色**——蓝色是 outline/solid 变体的颜色，text 变体始终为黑色。
+- ⚠️ **full-cover 封面即背景，不设内层圆角（硬约束）**：full-cover 的封面铺满整卡并直接作为卡片 background，圆角只由卡片根节点的**外档**（`radius_control-l`）统一裁剪。禁止给封面再包一层带**内档**（`radius_control-s`）圆角的容器——那会退化成普通 `cover` 的"分区封面"语义。
+- ⚠️ **full-cover 圆角分层（硬约束）**：full-cover 卡内元素（图标槽、界面示意区、内容区）统一取**内档**（`radius_control-s`），比卡片外圆角低一档，形成「外大一档 / 内小一档」的层次。两档默认基准均为 4px，实际取值按社区 token（见「圆角基准说明」）。
+- ⚠️ **full-cover 单交互禁内嵌按钮（硬约束）**：当卡片有且只有一种交互行为（如整卡跳转）时，整卡即为 `<a>` 链接，**不得再内嵌操作按钮**；悬浮反馈只通过 `shadow-2` 体现。
+- ⚠️ **full-cover 文字对比度（硬约束）**：文字叠在封面上，封面明度必须与文字色匹配——浅色/柔和彩底用 `info1`/`info3`，深色封面必须切换 `info1-inverse`/`info3-inverse`。
 
 ---
 
@@ -1049,7 +1223,7 @@ OCard（FRAME，自适应宽高）
 | 悬浮阴影 | effects | `shadow-2` |
 | 圆角 | cornerRadius | `radius_control-m`（4px） |
 | 标题文字 | fill | `--o-color-info1` |
-| 内容文字 | fill | `--o-color-info2` |
+| 内容文字 | fill | `--o-color-info3` |
 | 图标颜色 | fill | `--o-color-primary1` |
 | 图标背景 | fill | `--o-color-primary1-light` |
 | 图标尺寸 | width/height | `icon_size-l`（32px） |
@@ -1057,9 +1231,9 @@ OCard（FRAME，自适应宽高）
 | Body 内边距 | autoLayoutPadding | 待确认 |
 | Footer 内边距 | autoLayoutPadding | 待确认 |
 | 区域间距 | autoLayoutItemSpacing | 待确认 |
-| 标题字号 | fontSize | `font_size-text1`（16px） |
+| 标题字号 | fontSize | `font_size-h3`（22px） |
 | 标题字重 | fontWeight | `font_weight-bold` |
-| 正文字号 | fontSize | `font_size-tip1`（14px） |
+| 正文字号 | fontSize | `font_size-text1`（16px） |
 
 ---
 

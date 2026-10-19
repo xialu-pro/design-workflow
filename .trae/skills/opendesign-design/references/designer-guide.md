@@ -13,14 +13,11 @@
 ```
 你的产出物是什么？
 │
-├─ "我要在 Pixso 里做可编辑的设计稿"
+├─ "我要一个能在浏览器打开的 HTML 页面原型"
 │   → 使用 opendesign-design skill（你正在这里）
-│   → 需要 Pixso 桌面端 + MCP 连接
+│   → 生成的 HTML 遵循 CodeGen 工程规范（--o-* 语义 Token、BEM、响应式 Token）
 │
-├─ "我要一个能在浏览器打开的网页原型"
-│   → 使用 opendesign-design skill，选模式 B（HTML 网站）
-│
-└─ "我要直接出生产级代码"
+└─ "我要直接出生产级 Vue 代码"
     → 使用 opendesign-codegen skill
     → 需要目标仓库已使用 @opensig/opendesign
 ```
@@ -131,6 +128,8 @@ AI 会声称读了所有文件，但一次性处理太多规范，细节必然�
 | 楼层 | 模板文件 | 典型用途 |
 |------|---------|---------|
 | 导航 | [floors/navigation.md](../floors/navigation.md) | 页面顶部导航栏 |
+| 导航下拉面板 · 平铺式 | [floors/navigation-dropdown.md](../floors/navigation-dropdown.md) | 顶导菜单项展开的平铺式下拉面板（**必须与导航楼层搭配生成**；全套导航统一 `.o-nav__*` 命名，无需映射） |
+| 导航下拉面板 · 分类平铺式 | [floors/navigation-dropdown-categorized.md](../floors/navigation-dropdown-categorized.md) | 顶导菜单项展开的分类平铺式下拉面板（多列 + 列头 + 条目说明 + 快捷链接栏，**必须与导航楼层搭配生成**；与平铺式共享 `.o-nav__dropdown` 基类，可混挂同一顶导） |
 | Banner | [floors/banner.md](../floors/banner.md) | 首页/栏目页顶部横幅 |
 | 卡片栅格 | [floors/card-grid.md](../floors/card-grid.md) | 功能展示、产品列表、特性介绍 |
 | 图文特色 | [floors/feature-section.md](../floors/feature-section.md) | 左图右文/左文右图特色介绍 |
@@ -215,7 +214,16 @@ AI 会声称读了所有文件，但一次性处理太多规范，细节必然�
 👤 设计师：确认，先做导航楼层
 
 🤖 AI：[读取 floors/navigation.md + components/navigation.md]
-     [生成导航楼层 HTML]
+     [生成顶导骨架 HTML]
+
+🤖 AI：顶导骨架已完成。请选择下拉面板样式：
+       ① 平铺式——垂直列表，选项独占一行
+       ② 分类平铺式——多列 + 列头 + 条目说明 + 快捷链接栏
+
+👤 设计师：选 ② 分类平铺式
+
+🤖 AI：[读取 floors/navigation-dropdown-categorized.md + floors/navigation-dropdown.md]
+     [一并生成全套导航：顶导 + 下拉面板]
      [自检通过]
 
 👤 设计师：继续做 Banner 楼层

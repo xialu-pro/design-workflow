@@ -27,7 +27,7 @@
 ### 变体说明
 
 **show（显示模式）**
-- `All` — 完整模式，显示页码、跳转器、每页条数选择器和数据统计，适合后台管理系统
+- `All` — 完整模式，显示数据统计、每页条数选择器、页码和跳转器，适合后台管理系统
 - `Simple` — 简约模式，仅显示页码和总条数，适合前台展示页面
 
 **Dark（主题）**
@@ -42,24 +42,25 @@
 
 ### 布局结构
 
-> 🧩 **布局结构**：分页整体水平排列（HORIZONTAL Auto Layout），由 Pager Ctrl（页码区）、Jumper Ctrl（跳转区）和数据区组成，各区域间距 24px。
+> 🧩 **布局结构**：分页整体水平排列（HORIZONTAL Auto Layout），从左到右依次为：数据区（总条数 + 每页条数选择器）→ Pager Ctrl（页码区，左右箭头夹页码）→ Jumper Ctrl（跳转区，"前往" + 输入框），各区域间距 24px。整体右对齐放置于表格/列表底部（线上站点实践）。
 
 **show=All 模式**
 
 ```
 OPagination（HORIZONTAL，自适应宽度，固定高度 32px）
+├── [数据 FRAME]（HORIZONTAL，自适应宽度）
+│   ├── [Total Label]（总条数统计，如"共 × 条"，最左）
+│   └── [Pagesize Ctrl]（每页条数下拉选择器，含下箭头图标）
 ├── [Pager Ctrl FRAME]（HORIZONTAL，gap 8px，自适应宽度）
 │   ├── [左箭头 FRAME]（32×32，含图标 INSTANCE 24×24）
 │   ├── [页码按钮 FRAME]（32×32，多个）
+│   │   ├── 悬浮态：背景 color-primary2，文字白色（white），圆角 4px
 │   │   ├── 选中态：背景 brand-6，文字白色，圆角 4px
 │   │   └── 常态：背景透明，文字 info1，无圆角
 │   └── [右箭头 FRAME]（32×32，含图标 INSTANCE 24×24）
-├── [Jumper Ctrl FRAME]（HORIZONTAL，gap 8px，固定宽度 100px）
-│   ├── [输入框 + 页码跳转]
-│   └── [页文字]
-└── [数据 FRAME]（HORIZONTAL，自适应宽度）
-│   ├── [Pagesize Ctrl]（每页条数下拉选择器，含下箭头图标）
-│   └── [Total Label]（总条数统计）
+└── [Jumper Ctrl FRAME]（HORIZONTAL，gap 8px，最右）
+    ├── [前往 Label]（跳转前缀文字）
+    └── [页码输入框]
 ```
 
 **show=Simple 模式**
@@ -151,6 +152,14 @@ OPagination（HORIZONTAL，自适应宽度，固定高度 32px）
 | 线框 | `--o-color-control1` | `--o-color-control1` | 箭头按钮默认线框 |
 | 文字/图标 | `--o-color-info1` | `--o-color-info1` | 一级文字色 |
 
+#### 页码悬浮状态
+
+| 区域 | Light 模式 Token | Dark 模式 Token | 说明 |
+|------|-----------------|----------------|------|
+| 背景 | `--o-color-primary2` | `--o-color-primary2` | brand-4：rgb(81,119,202) → rgb(42,72,158) |
+| 文字 | `white` | `white` | 与选中态同一白色 |
+| 圆角 | `radius_control-xs`（4px） | 同 | 与选中态一致 |
+
 #### 禁用箭头
 
 | 区域 | Light 模式 Token | Dark 模式 Token | 说明 |
@@ -235,6 +244,18 @@ OPagination（HORIZONTAL，自适应宽度，固定高度 32px）
 OPagination（HORIZONTAL，自适应宽度，固定高 32px）
 │  autoLayoutItemSpacing: 24px | autoLayoutPadding: 0
 │
+├── [数据 FRAME]（HORIZONTAL，自适应宽度）
+│   ├── [Total Label PARAGRAPH]（"共 × 条"）
+│   │     font: font_size-tip1 | fill: color-info1
+│   └── [Pagesize Ctrl FRAME]（每页条数下拉选择器）
+│         fill: color-fill2（默认/悬浮/激活）/ color-control4-light（禁用）
+│         stroke: color-control1（默认）/ color-control2（悬浮）/ color-control3（激活）/ color-control4（禁用）
+│         ├── [每页条数 PARAGRAPH]
+│         │     font: font_size-tip1 | fill: color-info1（默认/悬浮）/ color-info4（禁用）
+│         └── [图标 Icon/下箭头 INSTANCE]（24×24）
+│               fill: color-info2（默认/悬浮/激活）/ color-info4（禁用）
+│               激活时：垂直翻转
+│
 ├── [Pager Ctrl FRAME]（HORIZONTAL，gap 8px）
 │   │
 │   ├── [左箭头 FRAME]（32×32）
@@ -244,6 +265,11 @@ OPagination（HORIZONTAL，自适应宽度，固定高 32px）
 │   │           fill: color-info1（默认）/ color-info4（禁用）/ color-primary1（悬浮）
 │   │
 │   ├── [页码按钮 FRAME]（32×32，多个）
+│   │     ├── 悬浮态：
+│   │     │     fill: color-primary2 | cornerRadius: 4px（radius_control-xs）
+│   │     │     └── [页码数字 PARAGRAPH]
+│   │     │           font: font_size-tip1 | fill: white
+│   │     │
 │   │     ├── 未选中态：
 │   │     │     fill: transparent | cornerRadius: 0
 │   │     │     └── [页码数字 PARAGRAPH]
@@ -254,38 +280,23 @@ OPagination（HORIZONTAL，自适应宽度，固定高 32px）
 │   │     │     └── [页码数字 PARAGRAPH]
 │   │     │           font: font_size-tip1 | fill: white
 │   │
+│   ├── [省略号 PARAGRAPH]（可选，超出页数时显示）
+│   │     font: font_size-tip1 | fill: color-info1
+│   │
 │   └── [右箭头 FRAME]（32×32）
-│   │     fill: transparent
-│   │     stroke: color-control1（默认）/ color-control4（禁用）/ color-control2（悬浮）
-│   │     └── [展示类/图标 Icon/右箭头 INSTANCE]（24×24）
-│   │           fill: color-info1（默认）/ color-info4（禁用）/ color-primary1（悬浮）
-│   │
-│   └── [省略号 PARAGRAPH]（可选，超出页数时显示）
-│         font: font_size-tip1 | fill: color-info1
+│         fill: transparent
+│         stroke: color-control1（默认）/ color-control4（禁用）/ color-control2（悬浮）
+│         └── [展示类/图标 Icon/右箭头 INSTANCE]（24×24）
+│               fill: color-info1（默认）/ color-info4（禁用）/ color-primary1（悬浮）
 │
-├── [Jumper Ctrl FRAME]（HORIZONTAL，gap 8px，宽度 100px）
-│   ├── [页码输入框 FRAME]
-│   │     fill: color-fill2（默认/悬浮/选中）/ color-control4-light（禁用）
-│   │     stroke: color-control1（默认）/ color-primary2（悬浮）/ color-primary1（选中）/ color-control4（禁用）
-│   │     ├── [输入框数字]
-│   │     │     fill: color-info1（默认/悬浮/选中）/ color-info4（禁用）
-│   │     └── [text PARAGRAPH]（"跳转"）
-│   │           font: font_size-tip1 | fill: color-info1
-│   └── [页 PARAGRAPH]
-│         font: font_size-tip1 | fill: color-info1
-│
-└── [数据 FRAME]（HORIZONTAL，自适应宽度）
-│   ├── [Pagesize Ctrl FRAME]（每页条数下拉选择器）
-│   │     fill: color-fill2（默认/悬浮/激活）/ color-control4-light（禁用）
-│   │     stroke: color-control1（默认）/ color-control2（悬浮）/ color-control3（激活）/ color-control4（禁用）
-│   │     ├── [每页条数 PARAGRAPH]
-│   │     │     font: font_size-tip1 | fill: color-info1（默认/悬浮）/ color-info4（禁用）
-│   │     └── [图标 Icon/下箭头 INSTANCE]（24×24）
-│   │           fill: color-info2（默认/悬浮/激活）/ color-info4（禁用）
-│   │           激活时：垂直翻转
-│   │
-│   └── [Total Label PARAGRAPH]（"共 × 条"）
-│         font: font_size-tip1 | fill: color-info1
+└── [Jumper Ctrl FRAME]（HORIZONTAL，gap 8px）
+    ├── [前往 Label PARAGRAPH]（跳转前缀文字）
+    │     font: font_size-tip1 | fill: color-info1
+    └── [页码输入框 FRAME]
+          fill: color-fill2（默认/悬浮/选中）/ color-control4-light（禁用）
+          stroke: color-control1（默认）/ color-primary2（悬浮）/ color-primary1（选中）/ color-control4（禁用）
+          └── [输入框数字]
+                fill: color-info1（默认/悬浮/选中）/ color-info4（禁用）
 ```
 
 ---
@@ -334,7 +345,7 @@ OPagination（HORIZONTAL，自适应宽度，固定高 32px）
 |------|------|---------|
 | 页码按钮 | 默认 | 背景：透明，文字：`--o-color-info1` |
 | 页码按钮 | 选中 | 背景：`--o-color-primary1`（brand-6），文字：`white`，圆角：4px |
-| 页码按钮 | 悬浮 | 背景：`--o-color-primary2`（brand-4），文字：`--o-color-info1` |
+| 页码按钮 | 悬浮 | 背景：`--o-color-primary2`（brand-4），文字：`white`，圆角：4px |
 | 左/右箭头 | 默认 | 线框：`--o-color-control1`，图标：`--o-color-info1`，尺寸：32×32px |
 | 左/右箭头 | 禁用 | 线框：`--o-color-control4`，图标：`--o-color-info4`，透明度 40% |
 | 左/右箭头 | 悬浮 | 线框：`--o-color-control2`，图标：`--o-color-primary1` |
@@ -375,6 +386,8 @@ OPagination（HORIZONTAL，自适应宽度，固定高 32px）
 | 选中页码背景 | fill | `--o-color-primary1` |
 | 选中页码文字 | text color | `white` |
 | 未选中页码文字 | text color | `--o-color-info1` |
+| 悬浮页码背景 | fill | `--o-color-primary2` |
+| 悬浮页码文字 | text color | `white` |
 | 禁用箭头图标 | fill | `--o-color-info4` |
 | 禁用箭头线框 | stroke | `--o-color-control4` |
 | 默认箭头线框 | stroke | `--o-color-control1` |
@@ -412,7 +425,7 @@ OPagination（HORIZONTAL，自适应宽度，固定高 32px）
 
 ### 设计提示
 
-- 分页组件通常置于内容区域底部，与上方内容间距建议 16-24px
+- 分页组件通常置于内容区域底部，与上方内容间距建议 16-24px；整体右对齐放置于表格/列表底部（线上站点实践）
 - 页码按钮宽度固定，避免因页码数字位数差异导致宽度不一致
 - 页码输入框有四种交互状态：默认（control1 线框 + fill2 填充）、悬浮（primary2 线框）、选中（primary1 线框）、禁用（control4 线框 + control4-light 填充 + info4 文字）
 - 页码输入框建议限制输入数字范围，避免用户输入超出页码范围的值

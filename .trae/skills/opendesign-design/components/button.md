@@ -10,7 +10,7 @@
 
 ### 组件概览
 
-**OButton 按钮**：触发一个操作或跳转，是页面中最常见的交互入口。通过外观（实心/描边/文字）和尺寸传达操作的重要程度，通过禁用状态表达不可操作。
+**OButton 按钮**：触发一个操作或跳转，是页面中最常见的交互入口。通过外观（实心/描边/文字）和尺寸传达操作的重要程度，通过禁用状态表达不可操作。图标规则：单个按钮至多 1 个图标——左侧图标（占位符号位，可替换为任意业务图标）与右侧浮层图标（表示继续/跳转/下一步）二选一互斥，禁止同时使用；无图标需求时不放置图标。
 
 ---
 
@@ -52,9 +52,12 @@
 
 ```
 OButton（HORIZONTAL，自适应宽度，固定高度）
+│  ⚠️ 图标互斥：单个按钮至多 1 个图标——左侧图标（占位符号位）与右侧浮层图标二选一，禁止同时使用
 ├── [浮层图标 INSTANCE]（绝对定位，靠右，16×16 或 24×24，可选）
+│     使用场景：表示继续/跳转/下一步
 └── [内容容器 FRAME]（HORIZONTAL，gap 8px，自适应宽高）
     ├── [图标 Icon/占位符号 INSTANCE]（固定 16×16 / 24×24，可选）
+    │     使用场景：可替换为任意业务图标（如下载/添加/搜索等操作语义）
     └── [text PARAGRAPH]（自适应宽，固定行高）
 ```
 
@@ -222,10 +225,13 @@ OButton（HORIZONTAL，自适应宽，固定高）
 │  fill: color-primary1（solid Enabled）/ color-primary4（solid Disabled）/ 无（outline/text）
 │  stroke: color-primary1（outline Enabled）/ color-primary4（outline Disabled）/ 无（solid/text），strokeWeight: 1px INSIDE
 │
+│  ⚠️ 图标互斥：单个按钮至多 1 个图标——左侧图标（占位符号位）与右侧浮层图标二选一，禁止同时使用
 ├── [浮层图标 INSTANCE]（绝对定位，靠右，icon_size_control-m 或 icon_size_control-xs，可选）
+│     使用场景：表示继续/跳转/下一步
 │
 └── [内容容器 FRAME]（HORIZONTAL，gap 8px，自适应宽高）
     ├── [图标 Icon/占位符号 INSTANCE]（固定尺寸，可选）
+    │     使用场景：可替换为任意业务图标（如下载/添加/搜索等操作语义）
     │     fill: white（solid）/ color-primary1（outline Enabled）/ grey-14（text Enabled）
     └── [text PARAGRAPH]（自适应宽，固定行高）
           font: font_family Regular | font_size-text1 or font_size-tip1
@@ -267,6 +273,7 @@ OButton（HORIZONTAL，自适应宽，固定高）
 - `text` 变体水平内边距为 0，宽度完全由内容决定，无最小宽度约束——不适合用于需要固定宽度的布局
 - 内部图标层为占位符（Icon/占位符号），替换时进入实例修改图标内容，不要直接绑定外部图标组件
 - 按钮宽度默认随文字自适应，如需固定宽度需手动覆盖 Auto Layout 的自适应规则
+- **图标互斥**：单个按钮至多 1 个图标——左侧图标（占位符号位，可替换为任意业务图标）与右侧浮层图标（表示继续/跳转/下一步）二选一，禁止同时使用
 
 ---
 
