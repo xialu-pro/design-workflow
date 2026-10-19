@@ -106,6 +106,12 @@ cp -R .trae/skills/<skill-name> .agents/skills/    # Codex（OpenCode 亦兼容�
 
 路由 A 依赖 [opendesign-design](.trae/skills/opendesign-design/SKILL.md) skill（OpenDesign 设计系统规范与硬约束），已随本仓库分发（`.trae/skills/opendesign-design/`），按上述方式安装即可，无需外部获取。
 
+**opendesign-design 更新机制**（该 skill 迭代频繁）：
+
+- **单向流动**：上游（atomgit `openeuler/opendesign-skills`）→ 本仓库 `.trae/skills/opendesign-design/` → 团队成员（`git pull`）。仓库副本是路由 A 的**唯一执行基准**，成员不要自行从 atomgit 另装副本（多副本 = 版本漂移）
+- **维护者职责**：上游有更新时同步副本进仓库（合并其 CHANGELOG），并在主 [CHANGELOG.md](CHANGELOG.md) 登记一条"同步 opendesign-design@日期"后 push
+- **成员职责**：开始路由 A 前按提示 `git pull`——design-draft-generator 会执行**版本三查**（副本一致性 / 远端新鲜度 / 上游同步状态），使用版本记入交接物清单，确保每次路由 A 用的都是可追溯的版本
+
 各 skill 的全局安装路径、验证方式见其 SKILL.md 的"安装方式"章节。
 
 ## 使用

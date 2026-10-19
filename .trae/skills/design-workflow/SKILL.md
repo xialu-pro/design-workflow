@@ -41,7 +41,7 @@ cp -R <SKILL_SOURCE> .agents/skills/    # Codex（OpenCode 亦兼容此路径）
 
 **依赖**：本 skill 编排以下 skill，需一并安装（通常位于同一 skills 目录）：
 - `requirement-doc-generator`（阶段 1 执行者）
-- `design-draft-generator`（阶段 2 执行者；路由 A 另需 `opendesign-design`，从 atomgit 获取）
+- `design-draft-generator`（阶段 2 执行者；路由 A 依赖 `opendesign-design`，随仓库分发，进入前须过版本三查——见其 3A 第 1 步）
 - `adversarial-reviewer`（阶段 3 · 对抗评审 subagent）
 - `visual-reviewer`（阶段 4 · 视觉一致性测试员 subagent）
 - `functional-reviewer`（阶段 4 · 功能测试员 subagent）
@@ -124,7 +124,7 @@ flowchart TD
 
 **编排职责**：
 1. 传递阶段 1 的上下文：PRD 路径、功能编号索引、用户已确认的范围边界
-2. 路由判定必须由用户确认（design-draft-generator 第 2 步会询问"是否使用 OpenDesign 设计系统"，用 → A、不用 → B），判定结果与依据（含用户答复）登记进交接物清单；路由 A 需先确认 `opendesign-design` 已安装
+2. 路由判定必须由用户确认（design-draft-generator 第 2 步会询问"是否使用 OpenDesign 设计系统"，用 → A、不用 → B），判定结果与依据（含用户答复）登记进交接物清单；路由 A 需先通过 opendesign-design **版本三查**（仓库副本一致性 / 远端新鲜度 / 上游同步状态，以 `.trae/skills/opendesign-design/` 为唯一基准），使用版本记入交接物
 3. 路由 A：等待用户确认"楼层规划 + 组件清单"两份预消化材料后再继续（沿用其 skill 内置确认步骤）
 4. 路由 B：N > 1 时确认方案数量与信息架构（沿用其 skill 内置确认步骤）
 5. 产出后登记设计稿路径进交接物清单
@@ -187,7 +187,7 @@ flowchart TD
 |--------|---------|------|
 | PRD 路径 + 版本 + 模式 | 阶段 1 完成 | `docs/PRD_[主题]_[YYYYMMDD].md`，轻量版 v0.x / 详细版 v1.0 |
 | 功能编号索引 | 阶段 1 完成 | PRD-001 名称 / PRD-002 名称…（阶段 2-3 的可溯基准，轻量→详细升级后编号不变） |
-| 路由判定记录 | 阶段 2 判定后 | 路由 A/B + 判定依据（含用户对"是否使用设计系统"的答复） |
+| 路由判定记录 | 阶段 2 判定后 | 路由 A/B + 判定依据（含用户对"是否使用设计系统"的答复）；路由 A 另登记 opendesign-design 使用版本（`last_update`）与校验结论 |
 | 预消化材料 / 简报 | 阶段 2 确认后 | 楼层规划 + 组件清单（A）；设计简报（B） |
 | 设计稿路径 | 阶段 2 完成 | `design/prototype_*.html` 清单 |
 | 评审报告 | 阶段 3 完成 | `reports/Review_Design_[主题]_[YYYYMMDD].md` 路径 + 7 项检查结果 + 修复记录 |

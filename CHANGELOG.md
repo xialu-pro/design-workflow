@@ -2,9 +2,24 @@
 
 设计工作流（design-workflow 及各 skill）的版本演进记录。每次更新必须在此登记一条。
 
-格式约定：`[日期] 版本号 | 修改主题`，正文写清改了什么、为什么改、影响哪些 skill。版本号规则：流程结构或判定逻辑变化 → 主版本号 +1；局部规则/模板调整 → 次版本号 +1。当前版本 **v2.1**。
+格式约定：`[日期] 版本号 | 修改主题`，正文写清改了什么、为什么改、影响哪些 skill。版本号规则：流程结构或判定逻辑变化 → 主版本号 +1；局部规则/模板调整 → 次版本号 +1。当前版本 **v2.2**。
 
 ---
+
+## v2.2 · 2026-10-19 · opendesign-design 版本保障机制
+
+**背景**：opendesign-design skill 迭代频繁（上游 atomgit openeuler/opendesign-skills），需保障设计师走路由 A 时调用的是最新版。
+
+**机制：仓库副本唯一真源 + 路由 A 前置版本三查**
+- **单一真源**：本仓库 `.trae/skills/opendesign-design/` 是路由 A 唯一执行基准；上游更新由维护者统一同步进仓库（合并 CHANGELOG + 主 CHANGELOG 登记），成员 `git pull` 获得最新；禁止成员自行从 atomgit 另装副本（多副本 = 版本漂移）
+- **版本三查**（design-draft-generator 3A 第 1 步，前置必做）：
+  1. 一致性——SKILL.md `last_update` 与其 CHANGELOG 最新条目日期比对（防半截同步）
+  2. 新鲜度——`git fetch` 后比对远端，落后提示 `git pull`
+  3. 上游同步——WebFetch 上游 CHANGELOG 比对；上游更新建议先同步，用户坚持继续须记录风险声明；网络不可达降级注明
+- 使用版本（`last_update`）与校验结论登记进交接物清单（design-workflow 路由判定记录）
+- README 安装章节新增"opendesign-design 更新机制"（维护者/成员职责）
+
+- 影响：design-draft-generator / design-workflow 的 SKILL.md + README.md
 
 ## v2.1 · 2026-10-19 · README 补同步
 

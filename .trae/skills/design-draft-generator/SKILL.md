@@ -32,7 +32,7 @@ cp -R <SKILL_SOURCE> .agents/skills/    # Codex（OpenCode 亦兼容此路径）
 
 **验证安装**：Claude Code 会话输入 `/` 查看 skills 列表；OpenCode 由 agent 通过原生 skill 工具按需加载；Codex 用 `/skills` 查看，或提示词中 `$design-draft-generator` 显式调用。
 
-**路由 A 依赖**：使用设计系统看护流程（路由 A）需同时安装 `opendesign-design` skill，从 atomgit 获取：`https://atomgit.com/openeuler/opendesign-skills/tree/master/skills/opendesign-design`，按上述相同方式安装。
+**路由 A 依赖**：`opendesign-design` skill **随本仓库分发**（`.trae/skills/opendesign-design/`），该仓库副本是路由 A 的**唯一执行基准**。上游（atomgit `openeuler/opendesign-skills`）更新由仓库维护者统一同步进仓库（同步时合并其 CHANGELOG，并在主 CHANGELOG 登记一条"同步 opendesign-design@日期"），成员 `git pull` 即获得最新版。**禁止**成员自行从 atomgit 另装副本替代仓库副本——多副本会产生版本漂移，路由 A 的版本校验一律以仓库副本为准。
 
 **注意**：目录名必须与 frontmatter `name` 一致（`design-draft-generator`）；修改后未生效时重启对应 CLI。
 
@@ -115,7 +115,11 @@ cp -R <SKILL_SOURCE> .agents/skills/    # Codex（OpenCode 亦兼容此路径）
 
 本 skill 不重复设计系统规范，职责是把 PRD 预消化为 opendesign-design 的输入：
 
-1. 检查环境中是否已安装 opendesign-design skill；未安装时提示从 atomgit 获取：`https://atomgit.com/openeuler/opendesign-skills/tree/master/skills/opendesign-design`
+1. **版本校验（前置必做，一律以仓库副本 `.trae/skills/opendesign-design/` 为基准，三查）**：
+   - **一致性**：读 SKILL.md frontmatter 的 `last_update` 与 `CHANGELOG.md` 最新条目日期——不一致说明同步不完整（半截拷贝），提示修复后再生成
+   - **新鲜度**：`git fetch origin` 后执行 `git diff --stat origin/main -- .trae/skills/opendesign-design/`，落后远端 → 提示先 `git pull` 再重跑校验
+   - **上游同步**：WebFetch 上游仓库（`https://atomgit.com/openeuler/opendesign-skills`）中 opendesign-design 的 CHANGELOG，比对 `last_update`；上游更新 → 提示"上游有新版，建议由维护者同步本仓库后再生成"，用户明确选择按当前版本继续时记录风险声明（新版可能含 ⚠️ 破坏性约束变更，按旧版生成的稿子需复核）；网络不可达 → 降级为"无法核对上游"，按仓库副本继续并在交接物注明
+   - 校验结果（使用的 `last_update` + 用户决定）登记进交接物清单
 2. 从 PRD 提炼以下材料并输出，交由用户确认：
    - **目标社区与 Token 来源**：明确目标社区（openEuler / openGauss / openUBMC / 鲲鹏 / 昇腾…）及其主题 Token 文件。各社区主题色不同（如 openGauss 紫、openEuler 蓝），禁止默认 openEuler；无法从 PRD 判断时询问用户
    - **站点框架基准**：路由 A 属于页面级增改、不动整站框架——导航与页脚必须按社区线上站点实际结构还原（抓取线上页面提取主导航项名称/顺序/链接与页脚分组/链接，导航为 JS 渲染时用 curl 拉原始 HTML），仅新增入口高亮；新增导航入口的位置作为待确认项输出；抓取不到时向用户索要，禁止编造。**新建社区走 A 时无线上站点可抓取**，站点框架（导航/页脚结构）作为待确认项与用户共同确定（可参考设计系统默认框架或同类社区结构），同样禁止编造
@@ -186,5 +190,5 @@ cp -R <SKILL_SOURCE> .agents/skills/    # Codex（OpenCode 亦兼容此路径）
 - **requirement-doc-generator**：上游，产出轻量 PRD（默认）或详细 PRD；本 skill 消费 PRD 产出设计稿——详细先行模式回填原型路径，轻量模式在 DEMO 定稿后反向升级详细 PRD
 - **design-workflow**：编排器，把 requirement-doc-generator（阶段 1）与本 skill（阶段 2-3）串成端到端流水线（PRD 生成 → 确认门 → 设计稿 → 对抗评审 → 回填闭环）；独立使用本 skill 时不经过该编排
 - **adversarial-reviewer**：下游，3B-5 对抗评审的执行者（独立上下文派发）；本 skill 的"设计纲领"与"质量标准"是其评审规范来源
-- **opendesign-design**：下游，路由 A 的执行者（Pixso 设计稿生产，含 Token 硬约束与逐楼层工作流）
+- **opendesign-design**：下游，路由 A 的执行者（Pixso 设计稿生产，含 Token 硬约束与逐楼层工作流）；以本仓库 `.trae/skills/opendesign-design/` 副本为唯一执行基准，进入前须通过 3A 第 1 步的版本三查
 - **opendesign-tokens**：路由 B 不强制其 Token 约束，但涉及已有主题的产品时建议参考其品牌色保持一致性
