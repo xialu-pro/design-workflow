@@ -31,7 +31,8 @@
 |---|---|
 | 基类共享 | 两份模板的面板都挂 `.o-nav__dropdown` 基类——面板定位（`top: calc(100% + 4px)`、居中触发器）、显隐三规则（hover / focus-within / data-open）、4px 热区桥接、单开互斥 `:has()`、MB 左对齐、交互 JS **全部由本文件定义**，分类平铺式模板只写修饰类与内部结构，禁止重复定义 |
 | 修饰类 | 分类平铺式追加 `.o-nav__dropdown--categorized`，用复合选择器 `.o-nav__dropdown.o-nav__dropdown--categorized` 覆盖布局（flex-direction / gap / padding / width） |
-| 混挂互斥 | 同一顶导内两种样式可混挂（如「开发」挂分类平铺式、「下载」挂平铺式），单开互斥规则指向基类，**同时覆盖两者**，无需另写 |
+| 🔴 **样式二选一（硬规则，2026-10-19 用户纠错后新增）** | **同一套导航（同一顶导）只允许使用一种下拉面板样式**——要么全部平铺式，要么全部分类平铺式。🔴 **禁止在同一顶导内混用两种样式**（如「开发」挂分类平铺式、「下载」挂平铺式）——两种样式的宽度 / 边距 / 定位 / 圆角 / 条目交互规则完全不同（平铺式居中触发器 auto 宽 + 4px 间距 + hover 色块；分类平铺式通栏 216px + 零间距抽屉 + hover 只改文字色），混用会导致同一页面出现两种几何逻辑与两种 hover 反馈，视觉与交互割裂。样式由用户在生成前二选一确定（SKILL.md 导航楼层门禁第 2 步），AI 禁止自行挑选、禁止按菜单项逐个挑选。⚠️ 判断样式要看整套导航的信息结构（有条目说明文案 + 两个以上分类 → 分类平铺式；纯菜单名列表、无描述、无分组 → 平铺式），同一导航通常只适配其中一种，**不存在逐个菜单项分配样式的混搭结论** |
+| 混挂的技术后果 | 若强行混挂：定位与显隐仍可工作（两者共享基类，单开互斥 `:has()` 指向基类 `.o-nav__dropdown`，会同时覆盖两种面板），但面板几何与交互态会按各自修饰类分叉，产生上述割裂。**「技术上能跑」不等于「允许」** |
 | 漏基类后果 | 分类平铺式若只挂修饰类不挂基类，定位/显隐/互斥全部失效 |
 
 > 🚨 **生成后必须实测，不许"写完就交"**：本楼层的踩坑表（§九）里每一条——面板闪烁关闭、选项 hover 色不对、高度被写死裁切、面板溢出视口——**都只有渲染出来才看得见**。交付前至少：① 无头浏览器截图，宽度覆盖 **1920 / 1440 / 1200 / 840 / 600** 五档；② hover 与点击锁定态各截一次（只截默认态会漏掉全部交互样式问题）；③ 顶导与面板交界处取一列像素确认阴影渐变存在（纯白 = 阴影没画出来，修法见 floors/navigation.md §顶导阴影）。⚠️ 尤其注意：**父级 `z-index` 盖不住自己的后代、`height: 0` 不渲染 `box-shadow`**，这两条反直觉特性只能靠实测发现。
@@ -66,11 +67,11 @@ ONavigation 顶导（见 floors/navigation.md，高 72px）
 │                       │  left: 50% + transform: translate(-50%, …)（水平居中于触发器）
 │                       │  width: auto（内容撑开，不超过 1488px）
 │                       │  background: var(--o-color-fill2)
-│                       │  border-radius: 4px
+│                       │  border-radius: var(--o-radius_control-xs)
 │                       │
 │                       └── [选项容器 × N]（垂直排列，一项一行，width: 100%）
 │                            height: 40px（>1440px）/ 32px（841~1440px）
-│                            padding: 0 12px | border-radius: 4px
+│                            padding: 0 12px | border-radius: var(--o-radius_control-xs)
 │                            background: transparent（仅交互态填充）
 │                            16px / 24px | color: var(--o-color-info2)
 │                            └─ hover / 点击态时色块撑满整行（左右各让出面板 padding 4px）
@@ -158,7 +159,7 @@ ONavigation 顶导（见 floors/navigation.md，高 72px）
 | 规格项 | 值 | 来源 |
 |--------|---|------|
 | 面板与顶导间距 | 4px | dropdown.md 展开面板规格 |
-| 面板圆角 | 4px | dropdown.md |
+| 面板圆角 | `var(--o-radius_control-xs)`（openEuler 4px，随目标社区 token） | dropdown.md |
 | 面板背景 | `var(--o-color-fill2)` | dropdown.md |
 | 面板阴影 | `0 6px 24px rgba(18,20,23,0.08)` | dropdown.md DROP_SHADOW |
 | 面板内边距 | **4px（上下左右均 4px）** | 用户确认 |
@@ -170,7 +171,7 @@ ONavigation 顶导（见 floors/navigation.md，高 72px）
 | 选项文本左右内边距 | 12px | 待确认 |
 | 选项字号 / 行高 | 16px / 24px（>1440px）· 12px / 18px（841~1440px）· 14px / 22px（MB） | 用户确认 |
 | 选项文字色 | `var(--o-color-info2)` | 设计稿标注 `#000000 80%` |
-| 选项圆角 | 4px | — |
+| 选项圆角 | `var(--o-radius_control-xs)`（openEuler 4px，随目标社区 token） | — |
 | 选项 hover 背景 | `var(--o-color-control2-light)`（`#F0F5FF` 极浅蓝） | 用户确认 |
 | 选项 hover 文字色 | `var(--o-color-info2)`（**保持不变**） | 用户确认 |
 | 选项点击态背景 | `var(--o-color-control3-light)`（`#E6EDFF` 浅蓝） | 用户确认 |
@@ -285,7 +286,7 @@ ONavigation 顶导（见 floors/navigation.md，高 72px）
 | 选项容器宽度 | 100% | 100% | 100% |
 | 选项文本左右内边距 | 12px | 12px | 12px |
 | 选项字号 / 行高 | 16px / 24px | 12px / 18px | 14px / 22px |
-| 选项圆角 | 4px | 4px | 4px |
+| 选项圆角 | `var(--o-radius_control-xs)` | 同 PC（随目标社区 token） | 同 PC |
 | 面板水平定位 | 居中触发器 | 居中触发器（同 PC） | 左对齐 `left: 0` |
 
 > **面板内边距四边均 4px、gap 0、容器高度 40px/32px** 已由用户确认（2026-10-14）。
@@ -353,7 +354,7 @@ ONavigation 顶导（见 floors/navigation.md，高 72px）
     height: auto;                               /* ⚠️ 禁止写死高度 */
     padding: 4px;                               /* ⭐ 四边均 4px → 色块左右自然让出 4px */
     background: var(--o-color-fill2);
-    border-radius: 4px;
+    border-radius: var(--o-radius_control-xs);  /* 档位圆角，值随目标社区 token */
     box-shadow: 0 6px 24px rgba(18, 20, 23, 0.08);  /* 组件特例值，来源 dropdown.md */
     opacity: 0;
     visibility: hidden;
@@ -399,7 +400,7 @@ ONavigation 顶导（见 floors/navigation.md，高 72px）
     height: 40px;                               /* ⭐ >1440px 固定 40px */
     flex: none;                                 /* 禁止被 flex 压缩 */
     padding: 0 12px;                            /* 文本左右内边距 */
-    border-radius: 4px;
+    border-radius: var(--o-radius_control-xs);  /* 档位圆角，值随目标社区 token */
     background: transparent;                    /* ⭐ 默认透明 */
     font-size: 16px;
     line-height: 24px;
@@ -522,7 +523,7 @@ document.querySelectorAll('.o-nav__item').forEach((item) => {
 
 ```
 □ 面板与顶导间距是否为 4px？
-□ 面板圆角是否为 4px？
+□ 面板圆角是否为 var(--o-radius_control-xs)（值随目标社区 token）？
 □ 面板背景是否为 var(--o-color-fill2)？
 □ 面板阴影是否为 0 6px 24px rgba(18,20,23,0.08)（组件特例值）？
 □ 面板是否 height: auto（禁止写死高度）？

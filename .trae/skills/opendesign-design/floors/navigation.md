@@ -29,7 +29,7 @@
 | **平铺式** | [floors/navigation-dropdown.md](navigation-dropdown.md) | 垂直列表、选项独占一行、无分类标题 |
 | **分类平铺式** | [floors/navigation-dropdown-categorized.md](navigation-dropdown-categorized.md) | 多列平铺：分类列头 + 列内条目（标题 + 说明）+ 快捷链接栏 |
 
-菜单项展开的下拉面板规格（面板几何、选项、自适应规则、交互 JS）以对应模板为准；**触发器状态（默认/Hover/展开/选中/禁用）以本文件为唯一真源**——两份下拉模板不定义、不重定义任何顶导与触发器样式。本文件的「踩坑记录」「自检清单」同样适用于面板生成。同一顶导内两种样式**可混挂**（如「开发」挂分类平铺式、「下载」挂平铺式）：两份模板的面板共享 `.o-nav__dropdown` 基类，单开互斥规则同时覆盖两者。
+菜单项展开的下拉面板规格（面板几何、选项、自适应规则、交互 JS）以对应模板为准；**触发器状态（默认/Hover/展开/选中/禁用）以本文件为唯一真源**——两份下拉模板不定义、不重定义任何顶导与触发器样式。本文件的「踩坑记录」「自检清单」同样适用于面板生成。同一顶导内两种样式**二选一、禁止混挂**（全导航统一使用用户选定的那一种，见 SKILL.md「导航楼层专属门禁」）：两份模板的面板共享 `.o-nav__dropdown` 基类，单开互斥规则同时覆盖两者。
 
 ### 生成前必读（缺一不可；第 2 项在用户确认面板样式后读取）
 
@@ -160,7 +160,9 @@ Logo 和 Tab 同在 `.o-nav__left` 内，但需要对齐方式不同：
 .o-nav__link {
     display: flex;
     align-items: center;
-    height: 48px;                /* 菜单项高 48px（宽由文字撑开，auto） */
+    /* 菜单项总高由行高 24 + padding-bottom 24 + 指示线 border 2 = 50px 自然撑起，
+       禁止写显式 height（踩坑 #20：border-box 下显式高度与内容撑高打架——
+       旧骨架 height:48px 与 24+24+2=50 存在 2px 语义歧义，2026-10-29 验证轮修正删除） */
     padding: 0 4px 24px;         /* 左右各 4px；底部 24px 留给选中指示线 */
     font-size: 16px;
     line-height: 24px;
@@ -170,7 +172,7 @@ Logo 和 Tab 同在 `.o-nav__left` 内，但需要对齐方式不同：
     white-space: nowrap;
     /* ⛔ 绝对禁止 border-radius：菜单项所有状态背景一律透明（Part C），
        圆角无任何视觉效果，却会把 border-bottom 指示线两端裁成圆弧缺口。
-       border-radius: 4px 只属于 .o-nav__search，禁止搬到菜单项上 */
+       搜索框圆角（var(--o-radius_control-xs)）只属于 .o-nav__search，禁止搬到菜单项上 */
     border-bottom: 2px solid transparent;   /* 默认透明指示线 */
     transition: color .2s ease, border-color .2s ease;
 }
@@ -196,7 +198,7 @@ Logo 和 Tab 同在 `.o-nav__left` 内，但需要对齐方式不同：
 .o-nav__right { display: flex; align-items: center; gap: 20px; }
 .o-nav__search {
     position: relative; width: 160px; height: 32px;
-    border: 1px solid var(--o-color-control1); border-radius: 4px;
+    border: 1px solid var(--o-color-control1); border-radius: var(--o-radius_control-xs); /* 档位圆角，值随目标社区 token */
     background: var(--o-color-fill2); overflow: hidden; cursor: text;
 }
 .o-nav__search span {           /* 占位文字：在搜索图标【右侧】left = 16px 左内边距 + 16px 图标 + 8px gap = 40px */
@@ -239,11 +241,11 @@ Logo 和 Tab 同在 `.o-nav__left` 内，但需要对齐方式不同：
 | 操作图标尺寸 | 24px × 24px | navigation.md |
 | 菜单文字字号 | 16px / 24px | 硬约束 §2（常规正文） |
 | 源码/搜索占位字号 | 14px / 22px | 硬约束 §2（提示文本1） |
-| **顶导阴影** | **`var(--o-shadow-1)`（`0 3px 9px 0 rgba(0,18,85,0.078)`）** | components/navigation.md |
+| **顶导阴影** | **`var(--o-shadow-1)`（`0 3px 8px rgb(var(--o-grey-13) / 0.08)`）** | opendesign-tokens 真源（旧值 `0 3px 9px 0 rgba(0,18,85,0.078)` 为 openEuler 稿残留，2026-10-29 验证轮修正） |
 | **顶导 z-index** | **100**（整体浮于页面内容之上） | 本文档 |
 | **阴影补偿层（`.o-nav::after`）z-index** | **102**（必须 > 面板的 100，否则阴影被面板整条盖住） | ⚠️ 本文档（2026-10-15 用户验收两次打回后补充） |
 
-> ⛔ **菜单项禁止 `border-radius`**：顶导菜单项所有状态背景一律透明（见 Part C），圆角没有任何视觉效果；但 `border-radius` 会把选中态的 `border-bottom` 指示线**两端裁成圆弧缺口**，导致指示线不是一根完整直线。规范中 `border-radius: 4px` 只属于**搜索框**（`.o-nav__search`），禁止搬到菜单项上。
+> ⛔ **菜单项禁止 `border-radius`**：顶导菜单项所有状态背景一律透明（见 Part C），圆角没有任何视觉效果；但 `border-radius` 会把选中态的 `border-bottom` 指示线**两端裁成圆弧缺口**，导致指示线不是一根完整直线。规范中搜索框圆角（`var(--o-radius_control-xs)`）只属于**搜索框**（`.o-nav__search`），禁止搬到菜单项上。
 
 ### 资源引用
 
@@ -343,7 +345,7 @@ Logo 和 Tab 同在 `.o-nav__left` 内，但需要对齐方式不同：
     --o-color-primary1: #002FA7;          /* 品牌蓝：选中指示线、选中态文字 */
     --o-color-primary2: #5177CA;          /* 品牌蓝次级：菜单项 hover 文字色（两种面板样式一致） */
     --o-color-white: #FFFFFF;
-    --o-shadow-1: 0 3px 9px 0 rgba(0,18,85,0.078);  /* 顶导 boxShadow */
+    --o-shadow-1: 0 3px 8px rgb(var(--o-grey-13) / 0.08);  /* 顶导 boxShadow（Token 真源；旧 9px / rgba(0,18,85,…) 为 openEuler 稿残留，2026-10-29 修正） */
 }
 ```
 

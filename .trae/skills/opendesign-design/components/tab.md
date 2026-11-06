@@ -127,7 +127,7 @@ OTab button Group（HORIZONTAL，固定高度，内边距 4px）
 
 ### 响应式行为
 
-参照 [栅格规范](../SKILL.md#数据资源) 中的断点定义，OTab 无自动断点响应式行为。尺寸通过 `size` 变体手动控制，深色模式通过 `Dark` 变体手动切换。移动端（360px）推荐使用 `small` 尺寸 `text` 变体。
+参照 [栅格规范](../SKILL.md#数据资源) 中的断点定义，OTab 无自动断点响应式行为。尺寸通过 `size` 变体手动控制，深色模式通过 `Dark` 变体手动切换。小屏两档（601~840px / 340~600px）推荐使用 `small` 尺寸 `text` 变体。
 
 ---
 
@@ -329,13 +329,15 @@ OTab button Group（HORIZONTAL，自适应宽，固定高）
 
 ### text 变体交互状态
 
+> 🔴 **hover / press 一律不改字重**（字重只由「是否选中」决定：非选中恒 Regular、选中恒 SemiBold）。原因见下方「交互行为说明 · Hover」。下表为 2026-10-20 用户裁决后的修订版。
+
 | 交互状态 | 标签类型 | 字号 | 字重 | 色值 | 下划线 |
 |---------|---------|------|------|------|--------|
 | Default | 非选中 | 18px | Regular | `--o-color-info2` | 无 |
 | Default | 选中 | 18px | **SemiBold** | `--o-color-primary1` | 2px 高, `--o-color-primary1` |
-| Hover | 非选中 | 18px | **SemiBold** | `--o-color-primary2` | 无 |
+| Hover | 非选中 | 18px | Regular（不变） | `--o-color-primary2` | 无 |
 | Hover | 选中 | 18px | **SemiBold** | `--o-color-primary1` | 2px 高, `--o-color-primary1` |
-| Press | 非选中 | 18px | **SemiBold** | `--o-color-primary3` | 2px 高, `--o-color-primary3` |
+| Press | 非选中 | 18px | Regular（不变） | `--o-color-primary3` | 2px 高, `--o-color-primary3` |
 | Press | 选中 | 18px | **SemiBold** | `--o-color-primary3` | 2px 高, `--o-color-primary3` |
 | Actived | 非选中 | 18px | **SemiBold** | `--o-color-primary1` | 2px 高, `--o-color-primary1` |
 | Actived | 选中 | 18px | **SemiBold** | `--o-color-primary1` | 2px 高, `--o-color-primary1` |
@@ -355,9 +357,34 @@ OTab button Group（HORIZONTAL，自适应宽，固定高）
 ### 交互行为说明
 
 - **Default（默认）**：标签的基础显示态，非选中项使用常规字重和 info 色；选中项使用 SemiBold 字重、品牌主色和底部指示线
-- **Hover（悬浮）**：鼠标悬停时，文字颜色提升至 primary2（较浅的品牌色），字重加粗为 SemiBold 提示可交互性；选中项保持 primary1 不变
-- **Press（按下）**：鼠标按下瞬间，颜色加深至 primary3（深品牌色）；text 变体此时显示同色下划线；button 变体增加 fill2 背景色
+- **Hover（悬浮）**：鼠标悬停时，文字颜色提升至 primary2（较浅的品牌色），**字重保持不变**；选中项保持 primary1 不变
+- **Press（按下）**：鼠标按下瞬间，颜色加深至 primary3（深品牌色）；text 变体此时显示同色下划线；button 变体增加 fill2 背景色；**字重保持不变**
 - **Actived（选中）**：当前激活标签的稳定态，使用最强的视觉强调（primary1 + 指示线/背景）；同一时刻仅一个标签处于此状态
-- **Disabled（禁用）**：不可交互状态，退化为 info4 弱化色，字重恢复 Regular，移除所有指示器和特殊背景
+- **Disabled（禁用）**：不可交互状态，退化为 info4 弱化色，字重恢复 Regular，移除所有指示器的可见性和特殊背景。**⚠️ 禁用是终态：hover / press 对禁用项一律不得生效**（含不变色、不出现指示器）——详见下方 🔴 段
+  - **「移除指示器」指视觉不可见，不是移出布局**：small 档为竖向 56×56（`::after` 为 16px 短线 + `margin-top: 4px`，在文档流内占位），禁用项若写 `display: none` 会连占位一起删掉，导致该页签在 `justify-content: center` 下只剩文字、垂直居中，**文字比同排其他页签低一截**（实测错位约 10px）。正确写法：`.otab__item:disabled::after { visibility: hidden; }`——保留 16px + 4px 占位，文字与其他页签顶对齐/同位；对 large / medium（指示器绝对定位、不占文档流）无副作用。⛔ 禁用 `.otab__item:disabled::after { display: none; }`。
+
+> 🔴 **为什么 hover / press 禁止改字重（2026-10-20 用户裁决，已升级为 [hard-constraints.md](../global/hard-constraints.md) §2.1 全局字重铁律）**：
+> 原 Part C 曾规定「Hover 非选中 → SemiBold」，该条已作废。理由三条：
+> 1. **设计语义错误**：字重在本组件中只承担「是否选中」一个语义（非选中 Regular / 选中 SemiBold）。hover 是瞬态提示，让它也加粗 = 把「选中」的视觉标识稀释成「鼠标随便划过一下也长这样」，用户无法从字重判断当前在哪一档。
+> 2. **实测会引起文字跳动**：页签宽度由文字撑开（auto）、选中指示器为全宽，字重一切换文字 advance width 就变——实测拉丁/数字混排标签 "Docs v1.2" 400→600 宽 +1.91px、"Blog" +1.03px，下划线随之变宽、后续页签被推挤位移（纯中文等宽全角字形差值 0px，所以只在英文标签上暴露，更容易被漏掉）。
+> 3. **已多次复现**：navigation.md 踩坑 #17（顶导触发器）、navigation-dropdown-categorized.md 踩坑 #30（分类条目）各自独立立过同一条禁令，但本组件 Part C 一直没改，导致每处引用 tab.md 的生成都重新踩一次。用户最终裁决：**这是全局规范，不是 Tab 的局部约定**——字重只随「是否选中」变化，hover / press / focus / 展开态一律不碰。
+>
+> **正确写法**：hover / press 只改 `color`（+ press 的同色下划线），一条 `font-weight` 都不写；且 Press 规则特异性必须 ≥ Hover 规则（按下时鼠标必然同时处于 hover，否则 Press 色会被 Hover 色盖掉）——例如 `.otab__item:active:not(.is-active), .otab__item.is-active:active { color: var(--o-color-primary3); }`。
+
+> 🔴 **为什么 hover / press 必须带 `:not(:disabled)` 限定（2026-10-20 用户裁决，已升级为 [hard-constraints.md](../global/hard-constraints.md) §2.2 禁用态铁律）**：
+> 原 Part C 列了 Disabled 状态，却**从未规定 hover / press 要排除禁用项**，导致禁用页签被鼠标划过时依然变色。实测（无头 Chrome）：禁用项 hover → `primary2`、press → `primary3` 且指示器背景变色——**与「禁用」的语义完全相反**。
+>
+> **根因是特异性**：`.otab__item:hover:not(.is-active)` = **(0,3,0)**，而 `.otab__item:disabled` 仅 **(0,2,0)**——禁用规则被 hover 规则直接盖掉。`:not()` 会继承其参数的特异性，所以每加一个 `:not(.xxx)` 就抬高一级，很容易在不知不觉中越过禁用规则。
+>
+> **正确写法**：hover / press 规则一律补 `:not(:disabled)`，让交互态**从选择器层面就不匹配禁用元素**：
+> ```css
+> .otab__item:hover:not(.is-active):not(:disabled) { color: var(--o-color-primary2); }
+> .otab__item:active:not(.is-active):not(:disabled),
+> .otab__item.is-active:active:not(:disabled) { color: var(--o-color-primary3); }
+> .otab__item:active:not(:disabled)::after { background: var(--o-color-primary3); }
+> .otab__item:disabled { font-weight: 400; color: var(--o-color-info4); cursor: not-allowed; }
+> .otab__item:disabled::after { visibility: hidden; }  /* 视觉移除但保留占位：small 档竖排时禁用项文字与其他页签对齐；⛔ 禁写 display: none（会删掉 16px+4px 占位，文字低一截） */
+> ```
+> 另一条路是把禁用规则写成 `.item:disabled:hover, .item:disabled:active`（0,3,0）硬压，但**首选前者**——语义更直白（"禁用项没有交互态"），且不必为每种交互态补一条禁用规则。参考实现见 `references/examples/dropdown-demo.html`（`:hover:not(.disabled)`）。
 
 > **注意**：text 变体的下划线仅在 Actived 和 Press 状态下的非选中标签上出现（表示正在操作的目标）；button 变体的背景色仅在 Press 和 Actived 状态下生效

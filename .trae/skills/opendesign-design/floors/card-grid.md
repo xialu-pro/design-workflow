@@ -82,7 +82,7 @@
 
 ```
 OCard（自适应宽高）
-│  cornerRadius: 4px
+│  cornerRadius: var(--o-radius_control-m)（openEuler 4px / Ascend 12px——按目标社区 Token，2026-10-29 修正写死值）
 │  fill: --o-color-fill2
 │  padding: 8px
 │
@@ -105,12 +105,13 @@ OCard（自适应宽高）
 
 ```
 OCard（自适应宽高）
-│  cornerRadius: 4px
+│  cornerRadius: var(--o-radius_control-m)（openEuler 4px / Ascend 12px——按目标社区 Token）
 │  fill: --o-color-fill2
-│  padding: 24px 32px
-│  gap: 16px
+│  padding 与内部间距：按 card.md「icon 变体五档分档表」取值（2026-10-23 修订口径：
+│    容器 padding 五档 24/24/16/12/12，图标→标题 12px 不分档、标题→描述 8px 分段 margin 直读，
+│    禁止容器统一 gap——旧文「padding: 24px 32px / gap: 16px」为已废止口径，2026-10-29 修正）
 │
-├── [图标容器] 32px × 32px, 圆角 4px
+├── [图标容器] 32px × 32px（≤1200px 档 24px）, 圆角 --o-radius_control-xs
 │   fill: --o-color-primary1-light
 │   └── [图标] fill: --o-color-primary1
 │
@@ -171,7 +172,7 @@ OCard（自适应宽高）
 □ 楼层标题（及描述）是否水平居中对齐（Banner 以下楼层）？
 □ 标题到内容间距是否为间距 7（PC 40px / MB 12px）？
 □ 卡片间距是否为 PC 32px / MB 12px？
-□ 卡片圆角是否为 4px？
+□ 卡片圆角是否为目标社区 --o-radius_control-m 值（openEuler 4px / Ascend 12px）？
 □ 封面图比例是否为 16:9（禁止竖图）？
 □ Footer 按钮是否左对齐？
 □ Footer 按钮是否为 OButton medium text 变体？
@@ -181,3 +182,37 @@ OCard（自适应宽高）
 □ 所有间距是否来自硬约束白名单？
 □ 所有字号/行高是否成对且来自白名单？
 ```
+
+---
+
+## 七、生成前必读（SKILL.md 第四步要求，2026-10-29 验证轮补齐）
+
+| 必读项 | 文件 | 说明 |
+|---|---|---|
+| 卡片内部样式唯一真源 | [components/card.md](../components/card.md) | 封面 / 图标 / 文字 / Footer 的全部内部规格以 card.md 为准，本模板只定义楼层级架构 |
+| icon 变体分档表 | card.md「icon 变体」 | 容器 padding 与内部间距的五档取值（本模板 §二 旧固定值口径已废止） |
+| 楼层容器四件套 | 本模板 §一 | PC 1488/216/padding 0 · MB 312/24/padding 0 |
+| Footer / Tag（可选） | [components/button.md](../components/button.md) · [components/tag.md](../components/tag.md) | 卡片 Footer 按钮与 Tag 的规格 |
+
+## 八、已确认清单（用户历轮确认过的规格，优先级高于本模板正文旧值）
+
+| # | 规格 | 确认轮次 |
+|---|------|---------|
+| 1 | 卡片圆角按目标社区 `--o-radius_control-m`（openEuler 4px / Ascend 12px），不写死 4px | 2026-10-29 验证轮（features 楼层裁定） |
+| 2 | 图标卡容器 padding / 内部间距按 card.md 五档分档表，禁止容器统一 gap | 2026-10-23 card.md 修订（本模板 §二 旧口径同步废止，2026-10-29 修正） |
+| 3 | 3 列卡片的卡片标题取 h3（22px/30px，Semibold 600）——hard-constraints §2「三级标题（≤ 3 列）」 | 2026-10-29 验证轮（原「< 3 列」空档修正） |
+| 4 | 楼层标题颜色规范未定义时取 `--o-color-info1`（推断值，产物标注「需确认」） | 2026-10-29 验证轮 |
+
+## 九、冲突声明
+
+- 本模板与 [components/card.md](../components/card.md) 冲突时：**卡片内部样式以 card.md 为准**（本模板曾滞后于 card.md 2026-10-23 修订，2026-10-29 已同步；再遇冲突按 SKILL.md「规则冲突裁决」停下报告）
+- 本模板与 [global/hard-constraints.md](../global/hard-constraints.md) 冲突时：按 SKILL.md「规则冲突裁决」执行——hard-constraints 优先，发现冲突停下向用户报告
+- 旧文「卡片圆角 4px」「icon 卡 padding: 24px 32px / gap: 16px」为已废止口径（2026-10-29 修正），禁止按旧稿落笔
+
+## 十、踩坑记录（已验证错误，禁止再犯）
+
+| # | 坑 | 禁令 |
+|---|---|---|
+| 1 | 模板滞后：card.md 已废止的旧口径（统一 padding / gap）在本模板残留，生成侧按旧稿落笔 | 生成前对照 card.md 分档表，模板旧值一律不采信 |
+| 2 | 圆角写死 4px，Ascend / Mindspore 等递进圆角社区生成错误圆角 | 圆角一律走目标社区 `--o-radius_control-m` |
+| 3 | 3 列卡片的标题档位在 §2 表找不到（原「< 3 列」未覆盖），生成侧自行降档到四级标题 | 3 列取 h3 22px/30px（已确认清单 #3） |

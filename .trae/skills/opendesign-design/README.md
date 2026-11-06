@@ -10,7 +10,7 @@ opendesign-design/
 ├── CHANGELOG.md                      ← 更新日志
 ├── README.md                         ← 本文件
 ├── components/                       ← 27 个组件设计规范（每个组件一个 .md）
-├── floors/                           ← 7 个楼层模板（每个楼层一个 .md）
+├── floors/                           ← 8 个楼层模板（每个楼层一个 .md）
 ├── global/
 │   ├── hard-constraints.md           ← 变量映射硬约束 + 组件组合规则（唯一真源）
 │   ├── interaction-rules.md          ← 通用交互规范（速查副本，真源 hard-constraints）
@@ -19,7 +19,8 @@ opendesign-design/
 │   └── qa-checklist/
 │       └── component-html-qa-checklist.md  ← HTML 实现质量保证清单
 └── references/
-    ├── designer-guide.md             ← 设计师使用指南
+    ├── designer-guide.md             ← 设计师使用指南（输入清单 + 交互方式）
+    ├── page-brief-template.md        ← 页面需求单与楼层工单格式（确认载体）
     ├── examples/                     ← HTML 示例文件
     └── assets/                       ← SVG 图标资源（按组件名分子目录）
 ```
@@ -38,13 +39,14 @@ opendesign-design/
 |------|------|----------|------|
 | **必加载** | `global/` | 每次调用起手式 | hard-constraints.md 为设计系统"宪法"（唯一真源）；interaction-rules / layout-rules 为其速查副本 |
 | **按需加载** | `components/` | 用户确认涉及组件后 | 仅读取本次需要的组件规范文档 |
-| **按需加载** | `floors/` | 涉及楼层级复合组件时 | 7 个楼层模板（导航 / 导航下拉面板·平铺式 / 导航下拉面板·分类平铺式 / Banner / 卡片栅格 / 图文特色 / 页脚） |
-| **纯参考** | `references/` | 需要时查阅 | SVG 资源、HTML 示例 — 不参与 AI 调度决策 |
+| **按需加载** | `floors/` | 涉及楼层级复合组件时 | 8 个楼层模板（导航 / 导航下拉面板·平铺式 / 导航下拉面板·分类平铺式 / Banner / 卡片栅格 / 通用楼层卡片模块 / 图文特色 / 页脚） |
+| **按需加载** | `references/page-brief-template.md` | 第一步 / 第三步输出确认草稿时 | 页面需求单与楼层工单格式（确认载体，含快捷通道校验规则） |
+| **纯参考** | `references/` 其余 | 需要时查阅 | SVG 资源、HTML 示例 — 不参与 AI 调度决策 |
 
 ### 典型工作流
 
 1. **起手式**：读取 `global/hard-constraints.md`，锁定设备断点和合法取值白名单
-2. **确认组件**：向用户列出本次涉及的组件清单，确认后逐一读取 `components/{name}.md`
+2. **确认需求单与楼层工单**：第一步输出页面需求单草稿供用户确认（或走快捷通道校验用户贴入的需求单）；每层开工前输出楼层工单（组件选型 + 内容素材 + 验收点），确认后逐一读取 `components/{name}.md`
 3. **生成 HTML**：严格按规范文档和硬约束白名单生成，使用 `--o-*` 语义 Token，遵循 CodeGen 工程标准
 4. **查阅参考**：需要图标时从 `references/assets/` 读取 SVG 资源
 
@@ -71,5 +73,6 @@ opendesign-design/
 
 - [SKILL.md](SKILL.md) — 总调度入口与完整工作流
 - [global/hard-constraints.md](global/hard-constraints.md) — 硬性约束（最高优先级）
+- [references/page-brief-template.md](references/page-brief-template.md) — 页面需求单与楼层工单格式
 - [global/component-doc-spec.md](global/component-doc-spec.md) — 组件文档编写规范
 - [CHANGELOG.md](CHANGELOG.md) — 更新日志

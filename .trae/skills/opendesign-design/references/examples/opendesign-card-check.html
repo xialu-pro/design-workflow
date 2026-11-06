@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OCard 卡片 · 规范验收实例（card.md 全变体 × 五档断点）</title>
+<style>
+/* ===== 验收页外壳（非组件本体，仅用于并排查看五档）===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'HarmonyOS Sans', 'HarmonyHeiTi', sans-serif;
+    background: #E8E8EA;
+    color: #000;
+    padding: 24px 24px 64px;
+}
+.page-head { max-width: 1400px; margin: 0 auto 24px; }
+.page-head h1 { font-size: 20px; line-height: 28px; font-weight: 600; }
+.page-head p { font-size: 13px; line-height: 22px; color: #333; margin-top: 4px; }
+.toolbar {
+    max-width: 1400px; margin: 0 auto 24px; display: flex; align-items: center; gap: 16px;
+    background: #fff; border-radius: 4px; padding: 12px 16px; font-size: 13px; line-height: 22px;
+}
+.toolbar label { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+.toolbar .hint { color: #666; }
+details.legend { max-width: 1400px; margin: 0 auto 24px; background: #fff; border-radius: 4px; padding: 12px 16px; }
+details.legend summary { font-size: 13px; line-height: 22px; cursor: pointer; font-weight: 600; }
+details.legend h4 { font-size: 13px; line-height: 22px; margin: 16px 0 4px; }
+details.legend table { border-collapse: collapse; margin: 8px 0; font-size: 12px; line-height: 20px; }
+details.legend th, details.legend td { border: 1px solid #DEDEDE; padding: 4px 10px; text-align: center; white-space: nowrap; }
+details.legend th { background: #F3F3F5; font-weight: 600; }
+details.legend td:first-child, details.legend th:first-child { text-align: left; }
+details.legend .notes { font-size: 12px; line-height: 20px; color: #333; margin: 8px 0; }
+details.legend .notes li { margin-left: 18px; }
+.bp { margin: 0 auto 32px; }
+.bp__inner { width: max-content; margin: 0 auto; }
+.bp__label {
+    margin: 0 0 8px; font-size: 13px; line-height: 22px; font-weight: 600;
+    display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap;
+}
+.bp__label span { font-weight: 400; color: #444; }
+.bp__frame { background: #fff; padding: 0; border-radius: 4px; overflow-x: auto; }
+.bp__frame iframe { display: block; border: 0; }
+</style>
+</head>
+<body>
+
+<div class="page-head">
+    <h1>OCard 卡片 · 规范验收实例</h1>
+    <p>对应规范：skills/opendesign-design/components/card.md ｜ 覆盖 type（cover / full-cover / icon）× layout（horizontal / vertical）× Dark（off / on）全变体 ｜ 五档断点同页并排渲染，每帧为真实视口宽度（媒体查询按帧宽生效）。勾选工具栏开关后，每张卡片左上角显示浏览器实测 padding / 间距，可与下方规格表逐格核对。</p>
+</div>
+
+<div class="toolbar">
+    <label><input type="checkbox" id="guides"> 显示实测标注（读取实际 computed padding / 间距）</label>
+    <span class="hint">标注值为浏览器实测像素，与 card.md 规格表逐格核对。</span>
+</div>
+
+<details class="legend">
+    <summary>规格速查与验收说明（点击展开 / 收起）</summary>
+
+    <h4>验收说明（使用前必读）</h4>
+    <ul class="notes">
+        <li>每帧 iframe 为真实视口宽度（1920 / 1440 / 1080 / 740 / 360），卡片内边距、字号、文本行数上限均按该档媒体查询<b>真实生效</b>，非模拟。</li>
+        <li><b>架构口径</b>：封面类卡片（cover / full-cover）与图标卡均为「封面区 + 内容区 + 操作区（可选）」三段式，差异只在<b>交互模式</b>——<b>单跳转</b>（整卡即链接、无操作区）与<b>多交互</b>（操作区放 OButton 按钮组）。</li>
+        <li>卡片宽度按楼层规则：≥601px 四列等分（348px / ≈293.2px / 242px / 157px）；<b>340~600px 按 floor-card.md 禁止四列</b>（内容容器仅 312px，四列只有 69px/卡不可用），取两列平铺、卡宽 150px（card.md 最窄卡宽，文字可用宽 126px）。</li>
+        <li><b>容器 padding 按封面位置分方向（单层口径）</b>：vertical 封面在上 → 容器 <b>上/左/右 8、下 0</b>（Body 在下方，底部留白由 Body 下接管）；horizontal 封面在左 → 容器 <b>只留左 8，上/右/下全 0</b>（Body 在右方，右侧留白由 Body 右接管），封面的上/下 8px 内缩由<b>封面自身 margin</b> 承担。⚠️ horizontal 容器上/下<b>不能</b>跟着 vertical 写 8——封面与内容区在垂直方向并排，那 8px 会同时压在内容区上，使「标题→卡顶」「按钮底→卡底」都变成 32 而非 24。因此 horizontal 的「标题/描述 → 卡片 左/右」= <b>32/24</b>（左侧叠加、右侧直读），与 vertical 的 32/32 不同，见表 3b。</li>
+        <li>⚠️ <b>文档内部冲突点 1</b>：Part C「复合卡片交互规格」写"主操作按钮由描边变为 primary1 实心填充"，与「注意事项 · Footer 硬约束」"Footer 按钮必须 OButton medium text（黑字、无底无边框）"矛盾。本页按<b>硬约束</b>以 text 变体实现，请裁决。</li>
+        <li>⚠️ <b>文档内部冲突点 2</b>：「颜色 Token 映射」shadow-2 = <code>0 2px 24px rgba(0,0,0,.15)</code>，与上游 openeuler-token 的 shadow-2（<code>0 6px 18px rgba(0,18,85,.12)</code>，floors/floor-card.md 采用）不一致。本页按 <b>card.md 表现值</b>实现，请裁决。</li>
+        <li>⚠️ <b>文档内部冲突点 3（水平布局封面尺寸，2026-10-21 已裁定）</b>：「封面图片规格」表称水平布局图片高度「自适应（跟随卡片高度）」，而「水平布局特殊规则」示例 CSS 为<b>固定宽 + aspect-ratio</b>（高度由比例决定、不随卡片拉伸，且标注为关键约束）。裁定口径：<b>封面既不定宽也不定高</b>——<b>高度 = 内容列高度</b>（文本高度 + Body/Footer padding），<b>宽度 = 高度 × 16/9 反推</b>；与 vertical 互为镜像（vertical 宽铺满→高反推，horizontal 高铺满→宽反推）。窄档回退：列高反推值超过「卡内容宽 − 文字列最小可用宽 160px」时按封顶值收、高度随之按 16:9 缩（601~840 / 340~600 两档触发，≥841 三档不受影响）。⚠️ 纯 CSS 无法落地：grid auto 轨道「列高→封面宽→列宽→列高」是循环依赖，Chrome 只迭代一次不收敛（封面矮 24px 且内容撑爆卡底），故由页面脚本 <code>fitHCovers()</code> 按实测列高回填。请回写规范时一并订正「固定 120px」表述。</li>
+        <li>⚠️ <b>文档内部冲突点 4（描述 → 操作区间距）</b>：内边距表给出 Body = 24/24/24/24、又注明「Footer padding 与 Body 同构（上/右/下/左 同值）」，两者叠加会使「描述文字底 → Footer 按钮」= <b>48px</b>，视觉明显偏宽（直读值表亦未给该项）。本页修正为 <b>24px</b>：<b>带操作区的卡片</b> Body 下归 0，由 Footer 上内边距单独承担该间距；<b>无操作区的单跳转卡</b> Body 下保持 24px，作为「描述文字底 → 卡片底」的底部留白。请回写规范时裁决。</li>
+        <li>✅ <b>裁定 A（操作区是灵活可选的，2026-10-21）</b>：cover + vertical 与 cover + horizontal <b>默认无操作区</b>（整卡单跳转）；需要多交互时再把 Footer 加在现有位置（内容区下方 / 右侧列尾部）。Footer 不是必选段，规范应把它标为「可选」而非默认存在。</li>
+        <li>✅ <b>裁定 B（≤600px 一律去掉操作区，2026-10-21）</b>：<b>所有类型</b>（cover / icon / full-cover）、<b>两种布局</b>（vertical / horizontal）在 340~600px 档一律不显示 Footer，卡片退化为纯展示。注意 <code>:has(.ocard__footer)</code> 在 footer 被 <code>display:none</code> 时<b>仍然命中</b>，必须显式把 Body 下内边距恢复为该档原值（12px），否则「描述底→卡底」会被压成 0。</li>
+        <li>✅ <b>裁定 C（≤840px：cover + horizontal 一排只放一张，2026-10-21）</b>：601~840px 档四列卡宽仅 157px，双列宽 330px 时封面已要 241.8px、文字列被压到极限，故水平卡在该档独占一行。实现要点：flex 行里必须写 <code>flex: 0 0 100%</code>，只写 <code>width: 100%</code> 会被 flex-shrink 收缩回 (676−16)/2 = 330px，两张卡仍并排（已实测踩坑）。floor-card.md 目前只有「≤5 / >5 卡」的列数规则，缺 horizontal 专项规则，需回写。</li>
+        <li>✅ <b>裁定 D（≤840px 一律去掉 icon 卡操作区，2026-10-23）</b>：<b>icon 类型</b>在 601~840px 与 340~600px 两档均不显示 Footer（比 cover 的 ≤600px 更严）。同时 icon 从本日起<b>改为按断点分档</b>（原「容器 24/32、间距不分档」口径废止），分档值见表 4a。</li>
+        <li>✅ <b>裁定 E（icon 卡间距分档，2026-10-23）</b>：icon 容器 padding 24/24/16/12/12、描述→操作区 16/12/8/无/无、按钮间距 32/32/24、图标槽 32/32/24/24/24；「图标→标题」与「标题区→描述」五档一致（12 / 8）。实现要点：<b>不要用容器统一 flex gap</b>——「标题区→描述」8 与「描述→操作区」16/12/8 两个值不同，统一 gap 会同时作用于 Header→Body 与 Body→Footer 两处、无法分别表达，须分段用 margin 直读。</li>
+        <li>✅ <b>裁定 F（full-cover 整卡保持图片比例，2026-10-23）</b>：full-cover 的定义是「卡片内部整个图片填充」，因此<b>整张卡片</b>遵守封面固定比例规则（规则 5）——<b>16:9（默认）或 3:1（超宽形态）</b>；<b>宽度按栅格定</b>（可跨 1~N 列），<b>高度 = 宽度 ÷ 比例</b>（<code>aspect-ratio</code> 反推），禁止内容撑高、禁止写死高度。连带修正：① 内容层（padding 28/24/24 + 标题 ≤2 行 + 描述 ≤3 行）必须在该比例高度内放得下——最窄档跨整行 312px → 16:9 高 175.5px ≥ 内容层 144px（28+32+12+48+24）；② ≤600px 两列平铺档 full-cover 必须<b>跨满整行</b>，单列 150px 只能推出 84px 高、容不下内容层；③ 旧版「full-cover 内容区（界面示意）」节点已移除（第十七轮），高度不再由内容决定。</li>
+        <li>✅ <b>裁定 G（full-cover 图标与 Tag 非必选 + Tag 遵循 tag.md，2026-10-23）</b>：full-cover 内容层四类节点中<b>只有标题与正文必选</b>——图标槽非必选、标题后的 Tag 非必选。Tag 本体<b>必须调用 OTag 组件</b>（<code>.otag</code>，规格 / 变体 / 颜色全部遵循 <code>tag.md</code>：本页用 <code>fill × small</code> = 高 20px · 水平内边距 6px · 圆角 4px · tip2 12px），<b>禁止卡片自创徽标样式</b>——旧版 <code>.ocard__badge</code>（高 20px · 圆角 100px · padding 0 8px）的圆角与内边距均不符合 tag.md，已删除；位置为 Head 行内、标题之后（full-cover 整卡即图片，不适用规则 4 中 cover 类型的「右上角 absolute」口径）。三张演示卡分别演示：全要素（图标 + 标题 + Tag）/ 无图标 / 无 Tag。</li>
+        <li>✅ <b>裁定 H（Light → Dark 全量 Token 翻转，2026-10-23）</b>：Dark 模式<b>不是"只反色文字"</b>，而是<b>整套 Token 的成对翻转</b>——凡 <code>:root</code> 定义过且本页被引用到的 Token，在 <code>.o-dark</code> 作用域内必须逐项覆盖为 <b>Dark 值</b>：交互态（卡片 hover 标题 <code>primary1</code>、Footer 按钮 hover <code>primary2</code> / active <code>primary3</code>）、组件自身色（图标槽底色 <code>primary1-light</code>、图标色 <code>primary1</code>、OTag fill 底色 <code>primary1</code>）、阴影全部在内。旧版只覆盖了 <code>fill2/fill3/info1/info3/shadow-2</code>，<code>primary</code> 系列未切换，导致 dark 区 hover 标题用 <b>Light 的 #002FA7 深蓝</b>压在深色卡上（对比度极低、几乎不可见）——本轮已按上游 Token 真源补齐：primary1 → rgb(73,122,248)、primary2 → rgb(42,72,158)、primary3 → rgb(29,51,120)、primary1-light → rgb(18,34,87)。此规则为<b>全局铁律</b>（hard-constraints.md §0.1），适用于所有组件。</li>
+        <li>card.md <b>未规定、本页取演示值</b>的项（回写规范时需确认）：full-cover Head 行内部间距与标题→正文间距（12px）、水平图标卡结构（图标 + 文字列）、<code>--o-color-primary1-light</code> 取值（8% 品牌色浅底）、Dark 模式 fill3 / 画布底色、深色封面占位色、shadow-1（取上游 token 值）。</li>
+        <li>社区 Token 口径：openEuler（radius xs/s/m/l 均为 4px，故 full-cover 外档 = 内档 = 4px；openEuler 线上页面另指定 16/8，见 card.md「圆角基准说明」）。</li>
+        <li><b>Footer 操作按钮引用 OButton 组件</b>：操作区按钮不是卡片自定义样式，而是引用 [components/button.md](../components/button.md) 的「size=medium · Variant=text」组合（card.md Footer 硬约束指定）。卡片只拥有 <code>.ocard__footer</code> 这个<b>布局槽位</b>（flex · 左对齐 · 内边距分档；按钮间距 cover 24 / icon 32→24，均随断点收紧）；按钮本体用组件命名空间 <code>.o-button .o-button--text</code>（SKILL.md L229：组件语义用 <code>o-</code> 前缀），样式独立成块，符合 floor-card.md L19「卡片不写子组件内部样式，仅引用组件规范选尺寸变体」。规格：高 32px · 水平内边距 0（text 变体专属）· 无最小宽度 · 圆角 16px · 字号 font_size-tip1 14px / 行高 line_height-tip1 22px · 无背景无边框 · Enabled 文字色 grey-14。交互：默认 info1 → hover primary2 → active primary3 → 选中 primary1；Disabled 为 grey-14 @ 40%。</li>
+        <li>⚠️ <b>button.md 内部冲突点 5（text 变体 Disabled 色值）</b>：Token 表（第 161 行）写「grey-14 @ 40%、不使用单独 token」，而交互状态表（第 199 行）写「--o-color-info4」，两者值不同（40% 黑 vs #999）。本页按第 161 行 Token 表实现为 opacity .4，请裁决。</li>
+        <li>封面占位图标为手写线性 SVG（与 assets/public icons/icon-图片.svg 同语义，占位用途从简）；图标卡图标同为手写线性 SVG（assets 中无功能入口语义图标）。</li>
+    </ul>
+
+    <h4>表 1 · 变体索引（card.md Part B）</h4>
+    <table>
+        <tr><th>type</th><th>layout</th><th>Dark</th><th>本页示例</th></tr>
+        <tr><td>cover</td><td>vertical</td><td>off</td><td>§① 单跳转卡（无操作区）/ 多交互卡（Footer 按钮）/ 禁用态按钮卡 / 长文案卡</td></tr>
+        <tr><td>cover</td><td>horizontal</td><td>off</td><td>§② 封面高跟随内容列、宽 16:9 反推 · 容器 上/下/左 8、右 0</td></tr>
+        <tr><td>icon</td><td>vertical</td><td>off</td><td>§③ 容器 padding 24/24/16/12/12 · 描述→操作区 16/12/8/无/无 · 按钮间距 32/32/24</td></tr>
+        <tr><td>icon</td><td>horizontal</td><td>off</td><td>§③ 图标 + 文字列 · 图标→文字列 12（五档一致）</td></tr>
+        <tr><td>full-cover</td><td>vertical</td><td>off</td><td>§④ 浅色封面（info1/info3 文字）</td></tr>
+        <tr><td>full-cover</td><td>vertical</td><td>off</td><td>§④ 深色封面（info1-inverse/info3-inverse 文字）</td></tr>
+        <tr><td>cover</td><td>vertical</td><td>on</td><td>§⑤ Dark 区</td></tr>
+        <tr><td>icon</td><td>vertical</td><td>on</td><td>§⑤ Dark 区</td></tr>
+        <tr><td>full-cover</td><td>vertical</td><td>on</td><td>§⑤ Dark 区</td></tr>
+    </table>
+
+    <h4>表 2 · cover 类型内边距（分层值 · 单层口径 · 按断点分档）</h4>
+    <table>
+        <tr><th>规格项</th><th>≥1681px</th><th>1201~1680px</th><th>841~1200px</th><th>601~840px</th><th>340~600px</th></tr>
+        <tr><td>容器 padding 上/右/下/左（vertical）</td><td>8/8/<b>0</b>/8</td><td>8/8/<b>0</b>/8</td><td>8/8/<b>0</b>/8</td><td>4/4/<b>0</b>/4</td><td>4/4/<b>0</b>/4</td></tr>
+        <tr><td>容器 padding 上/右/下/左（horizontal）</td><td><b>0</b>/<b>0</b>/<b>0</b>/8</td><td><b>0</b>/<b>0</b>/<b>0</b>/8</td><td><b>0</b>/<b>0</b>/<b>0</b>/8</td><td><b>0</b>/<b>0</b>/<b>0</b>/4</td><td><b>0</b>/<b>0</b>/<b>0</b>/4</td></tr>
+        <tr><td>封面上/下内缩（horizontal 专用，封面自身 margin）</td><td>8/8</td><td>8/8</td><td>8/8</td><td>4/4</td><td>4/4</td></tr>
+        <tr><td>Body padding 上/右/下/左</td><td>24/24/24/24</td><td>16/16/16/16</td><td>12/8/12/8</td><td>12/8/12/8</td><td>12/8/12/8</td></tr>
+        <tr><td>Body padding 下（带操作区时）</td><td><b>0</b></td><td><b>0</b></td><td><b>0</b></td><td><b>0</b></td><td><b>0</b></td></tr>
+        <tr><td>Footer padding 上/右/下/左</td><td>24/24/24/24</td><td>16/16/16/16</td><td>12/8/12/8</td><td>12/8/12/8</td><td>12/8/12/8</td></tr>
+        <tr><td>标题→描述</td><td>12</td><td>8</td><td>8</td><td>8</td><td>8</td></tr>
+        <tr><td>描述→操作区按钮（= Footer 上）</td><td>24</td><td>16</td><td>12</td><td>12</td><td>12</td></tr>
+    </table>
+    <ul class="notes">
+        <li>Body 下默认 = 24px，作为「描述文字底 → 卡片底」的底部留白；<b>带操作区时归 0</b>，改由 Footer 上内边距单独承担「描述→按钮」间距（24px），Body 下与 Footer 上<b>不叠加</b>（叠加会变 48px，见验收说明冲突点 4）。</li>
+        <li>无操作区的单跳转卡：描述文字底 → 卡片底 = 24 / 16 / 12 / 12 / 12（Body 下原值）。</li>
+    </ul>
+
+    <h4>表 3 · cover 类型实际可视间距（直读值 · 校验用 · vertical）</h4>
+    <table>
+        <tr><th>测量项</th><th>≥1681px</th><th>1201~1680px</th><th>841~1200px</th><th>601~840px</th><th>340~600px</th></tr>
+        <tr><td>封面 → 卡片 上/左/右</td><td>8/8/8</td><td>8/8/8</td><td>8/8/8</td><td>4/4/4</td><td>4/4/4</td></tr>
+        <tr><td>封面 → 标题</td><td>24</td><td>16</td><td>12</td><td>12</td><td>12</td></tr>
+        <tr><td>标题 → 描述</td><td>12</td><td>8</td><td>8</td><td>8</td><td>8</td></tr>
+        <tr><td>标题/描述 → 卡片 左/右</td><td>32/32</td><td>24/24</td><td>16/16</td><td>12/12</td><td>12/12</td></tr>
+        <tr><td>描述文字底 → 卡片底（无操作区）</td><td>24</td><td>16</td><td>12</td><td>12</td><td>12</td></tr>
+        <tr><td>描述文字底 → 操作区按钮</td><td>24</td><td>16</td><td>12</td><td>12</td><td>12</td></tr>
+        <tr><td>Footer 内容 → 卡片 左/右</td><td>32/32</td><td>24/24</td><td>16/16</td><td>12/12</td><td>12/12</td></tr>
+        <tr><td>Footer 内容底 → 卡片底</td><td>24</td><td>16</td><td>12</td><td>12</td><td>12</td></tr>
+    </table>
+    <h4>表 3b · cover + horizontal 实际可视间距（直读值 · 校验用）</h4>
+    <table>
+        <tr><th>测量项</th><th>≥1681px</th><th>1201~1680px</th><th>841~1200px</th><th>601~840px</th><th>340~600px</th></tr>
+        <tr><td>封面 → 卡片 上/左</td><td>8/8</td><td>8/8</td><td>8/8</td><td>4/4</td><td>4/4<sup>†</sup></td></tr>
+        <tr><td>封面 → 标题（横向间距）</td><td>24</td><td>16</td><td>12</td><td>12</td><td>12</td></tr>
+        <tr><td>标题/描述 → 卡片 左/右</td><td>32/24</td><td>24/16</td><td>16/8</td><td>12/8</td><td>12/8</td></tr>
+        <tr><td>标题 → 卡片顶（= Body 上）</td><td>24</td><td>16</td><td>12</td><td>12</td><td>12</td></tr>
+        <tr><td>标题 → 描述</td><td>12</td><td>8</td><td>8</td><td>8</td><td>8</td></tr>
+        <tr><td>描述文字底 → 卡片底（无操作区）</td><td>24</td><td>16</td><td>12</td><td>12</td><td>12</td></tr>
+        <tr><td>描述文字底 → 操作区按钮</td><td>24</td><td>16</td><td>12</td><td>12</td><td>—<sup>‡</sup></td></tr>
+        <tr><td>Footer 内容底 → 卡片底</td><td>24</td><td>16</td><td>12</td><td>12</td><td>—<sup>‡</sup></td></tr>
+        <tr><td>操作区是否存在</td><td colspan="4">按需（footer 灵活可选）</td><td><b>一律去掉</b><sup>‡</sup></td></tr>
+        <tr><td>一排几张 horizontal 卡</td><td colspan="4">按卡片数量（≤5 单行横排 / >5 四列换行）</td><td><b>一排一张</b><sup>§</sup></td></tr>
+    </table>
+    <ul class="notes">
+        <li>horizontal 的「标题/描述 → 卡片 左/右」= <b>32/24</b>（≠ vertical 的 32/32）：左侧 = 容器左 8 + Body 左 24；右侧 = 容器右 <b>0</b> + Body 右 24，因容器右归 0（封面在左，容器右不服务封面）。</li>
+        <li>⚠️ <b>容器上/下 padding 必须为 0</b>（2026-10-21 修正）：horizontal 的封面与内容区在垂直方向并排，容器上/下 padding 会同时压在内容区上，造成「标题→卡顶」= 容器 8 + Body 24 = <b>32</b>、「按钮底→卡底」= Footer 24 + 容器 8 = <b>32</b>，均非规范值 24。故容器只留左 8，封面的上/下 8px 内缩由封面自身 <code>margin: 8px 0</code> 承担（≤840 档 4px）。改后内容区所有纵向值均为直读，与 vertical 一致。</li>
+        <li><sup>†</sup> ≤600 档封面按窄档规则封顶（卡内容宽 308 − 文字列最小可用宽 160 = 148px）后会矮于内容列，封面贴卡顶内缩 4px、底部留白，故「封面 → 卡片下」不是固定值。</li>
+        <li><sup>‡</sup> <b>≤600px 一律去掉操作区</b>（2026-10-21 裁定）：无论 cover / icon / full-cover、vertical / horizontal，footer 全部隐藏；「描述文字底 → 卡片底」回落到该档 Body 下原值 12px。</li>
+        <li><sup>§</sup> <b>≤840px：cover + horizontal 一排只放一张卡</b>（2026-10-21 裁定）。该档四列卡宽仅 157px，双列宽 330px 时封面已占 241.8px、文字列被压到极限，故水平卡独占一行。flex 布局下须写 <code>flex: 0 0 100%</code>，仅写 <code>width: 100%</code> 会被 flex-shrink 收缩回 (676−16)/2 = 330px，两张仍并排。</li>
+    </ul>
+
+    <h4>表 4a · icon 类型间距（按断点分档 · 2026-10-23 起 icon 也分档，原「容器 24/32、间距不分档」口径废止）</h4>
+    <table>
+        <tr><th>规格项</th><th>≥1681px</th><th>1201~1680px</th><th>841~1200px</th><th>601~840px</th><th>340~600px</th></tr>
+        <tr><td>容器 padding 上/右/下/左</td><td>24</td><td>24</td><td>16</td><td>12</td><td>12</td></tr>
+        <tr><td>图标 → 标题（vertical 上下排列 · 纵向间距）</td><td>12</td><td>12</td><td>12</td><td>12</td><td>12</td></tr>
+        <tr><td>图标 → 文字列（horizontal 横向排列 · 横向间距）</td><td>12</td><td>12</td><td>12</td><td>12</td><td>12</td></tr>
+        <tr><td>标题行盒底 → 描述行盒顶</td><td>8</td><td>8</td><td>8</td><td>8</td><td>8</td></tr>
+        <tr><td>描述文本 → 操作区（Footer）</td><td>16</td><td>12</td><td>8</td><td><b>无操作区</b></td><td><b>无操作区</b></td></tr>
+        <tr><td>操作区按钮间距（Footer 内 gap）</td><td>32</td><td>32</td><td>24</td><td>—</td><td>—</td></tr>
+        <tr><td>图标槽尺寸 / 内层 SVG</td><td>32 / 24</td><td>32 / 24</td><td>24 / 18</td><td>24 / 18</td><td>24 / 18</td></tr>
+        <tr><td>vertical 卡文字可用宽（卡宽 − 2 × padding）</td><td>300</td><td>245.2</td><td>210</td><td>133</td><td>126</td></tr>
+    </table>
+    <ul class="notes">
+        <li>「标题行盒底 → 描述行盒顶」按<b>行盒口径</b>量（`desc.top − title.bottom`），不是字形视觉间距——标题 line-height 大于 font-size，按字形凑会被 half-leading 干扰、永远凑不到 8。</li>
+        <li>vertical 卡的图标<b>必须绝对定位</b>（不撑高 header）：否则 header 高 = max(图标槽, 标题行盒)，图标比标题行盒高 2px（1201~1680 档 6px），「标题行盒→描述」实测 10 / 14 / 8 而非 8。</li>
+        <li>两种布局口径一致（vertical 的「图标→标题」与 horizontal 的「图标→文字列」同为 12px）；图标与标题<b>顶对齐</b>。</li>
+        <li><b>图标槽</b>：尺寸随档（32 / 24），圆角 4px（radius_control-m）· 底色 primary1-light · 图标 primary1，不随档变化。</li>
+        <li><b>≤840px 一律不显示 icon 卡操作区</b>（比 cover 的 ≤600 更严）：601~840 档 cover 仍有 Footer，icon 已去掉。icon 的间距全部由容器 padding 与 margin 承担，无 <code>:has()</code> 依赖，footer 隐藏后不会出现「描述底→卡底」被压成 0 的残留问题。</li>
+    </ul>
+
+    <h4>表 4b · full-cover 规格</h4>
+    <table>
+        <tr><th>规格项</th><th>值</th></tr>
+        <tr><td>full-cover 卡片比例</td><td><b>16:9</b>（默认 · 垂直结构）/ <b>3:1</b>（超宽形态）· 整卡即图片，遵守封面固定比例规则</td></tr>
+        <tr><td>full-cover 宽度 / 高度</td><td>宽度按栅格定（可跨 1~N 列）；高度 = 宽度 ÷ 比例（<code>aspect-ratio</code> 反推），禁止内容撑高</td></tr>
+        <tr><td>full-cover 内容层 padding</td><td>上 28px · 左右 24px · 下 24px</td></tr>
+        <tr><td>full-cover 卡片圆角</td><td>外档 radius_control-l（openEuler 4px；线上页指定 16px）</td></tr>
+        <tr><td>full-cover 卡内元素圆角</td><td>内档 radius_control-s（openEuler 4px；线上页指定 8px）</td></tr>
+        <tr><td>full-cover 内容层节点</td><td><b>标题 + 正文必选；图标槽非必选、标题后 Tag 非必选</b>（三张演示卡分别演示：全要素 / 无图标 / 无 Tag）</td></tr>
+        <tr><td>full-cover 标题后 Tag</td><td><b>调用 OTag 组件</b>（<code>.otag</code>，规格见 tag.md）：推荐 <code>fill</code> × <code>small</code> = 高 20px · 水平内边距 6px · 圆角 4px · tip2 12px · 位置 = Head 行内标题之后；<b>禁止自创徽标样式</b>（旧版「圆角 100px · padding 0 8px」已废止）</td></tr>
+    </table>
+
+    <h4>表 5 · 交互状态与文本行数上限</h4>
+    <table>
+        <tr><th>卡片类型</th><th>hover / pressed 反馈</th></tr>
+        <tr><td>单体卡片</td><td>阴影 shadow-2 + 标题 info1 → primary1（内容文字不变）</td></tr>
+        <tr><td>图文卡片（cover）</td><td>阴影 shadow-2 + 封面 scale 1.05 + 标题 → primary1</td></tr>
+        <tr><td>全幅封面（full-cover）</td><td>阴影 shadow-2 + 封面（内层元素）scale 1.05，标题颜色不变；⛔ 禁止 scale 卡片容器</td></tr>
+        <tr><td>Footer text 按钮</td><td>引用 OButton 组件（.o-button--text）· button.md「medium · text」· 默认 info1（黑）→ hover primary2 → active primary3 → 选中 primary1</td></tr>
+        <tr><td>Footer text 按钮 Disabled</td><td>grey-14 @ 40%（opacity .4），不可点击（button.md 第 161 行）</td></tr>
+        <tr><td>Footer 按钮规格</td><td>高 32px · 水平内边距 0 · 圆角 16px · 字号 14px / 行高 22px · 无背景无边框</td></tr>
+        <tr><td>Footer 槽位（卡片自有）</td><td>flex 左对齐 · 按钮间距 24px · 内边距分档 24/16/12/12/12</td></tr>
+        <tr><td>标题行数上限</td><td>≥841px 2 行 · ≤840px 1 行</td></tr>
+        <tr><td>描述行数上限</td><td>≥841px 3 行 · ≤840px 2 行（line-clamp 四件套齐全）</td></tr>
+    </table>
+
+    <h4>表 6 · 圆角 / 阴影 / 颜色（Light → Dark）</h4>
+    <table>
+        <tr><th>规格项</th><th>Light</th><th>Dark</th></tr>
+        <tr><td>卡片圆角</td><td colspan="2">4px（radius_control-m；openEuler 社区 xs/s/m/l 均为 4px）</td></tr>
+        <tr><td>卡片背景</td><td>--o-color-fill2 #FFFFFF</td><td>--o-color-fill2 rgb(36,36,39)</td></tr>
+        <tr><td>标题 / 内容文字</td><td>info1 #000 / info3 #666</td><td>info1 #FFF / info3 rgba(255,255,255,.6)</td></tr>
+        <tr><td>悬浮阴影</td><td>shadow-2 = 0 2px 24px rgba(0,0,0,.15)</td><td>shadow-2 = 0 2px 24px rgba(255,255,255,.15)</td></tr>
+        <tr><td>深色封面文字</td><td colspan="2">必须切换 info1-inverse / info3-inverse（白色系），禁止黑字压深底</td></tr>
+    </table>
+</details>
+
+<!-- ===== 模块 CSS（与 components/card.md 逐条对应；唯一差异：本页为验收用途）===== -->
+<template id="tpl-css">
+:root {
+    /* 语义 Token：openEuler 社区（WebFetch 失败，按 SKILL.md 降级口径；数值与 opendesign-floor-card-5check.html 一致）*/
+    --o-color-fill1: #F3F3F5;
+    --o-color-fill2: #FFFFFF;
+    --o-color-fill3: #EDEDF0;
+    --o-color-info1: #000000;
+    --o-color-info2: #333333;
+    --o-color-info3: #666666;
+    --o-color-info4: #999999;
+    --o-color-primary1: #002FA7;
+    --o-color-primary2: #5177CA;
+    --o-color-primary3: #002793;
+    --o-color-white: #FFFFFF;
+    /* card.md 硬约束：深色封面上的文字必须切换 inverse 色（白色系）*/
+    --o-color-info1-inverse: #FFFFFF;
+    --o-color-info3-inverse: rgba(255, 255, 255, 0.6);
+    /* card.md 未给出 primary1-light 表现值：取 8% 品牌色浅底（与 interactive-card-demo 一致，属演示值）*/
+    --o-color-primary1-light: rgba(0, 47, 167, 0.08);
+    /* 圆角：openEuler 社区 xs/s/m/l 均为 4px（card.md 圆角基准说明）*/
+    --o-radius-xs: 4px;
+    --o-radius-s: 4px;
+    --o-radius-m: 4px;
+    --o-radius-l: 4px;
+    /* 阴影：shadow-2 取 card.md 颜色映射表现值（与上游 openeuler-token 不一致，见验收说明冲突点 2）；
+       shadow-1 card.md 未给出表现值，取上游 openeuler-token 值 */
+    --o-shadow-1: 0 3px 9px 0 rgba(0, 18, 85, 0.078);
+    --o-shadow-2: 0 2px 24px rgba(0, 0, 0, 0.15);
+    /* 静态字号（Footer 按钮 medium / 徽标 tip2 为手动选尺寸，不随断点缩放）*/
+    --o-font_size-h3: 22px;      --o-line_height-h3: 30px;
+    --o-font_size-text1: 16px;   --o-line_height-text1: 24px;
+    --o-font_size-tip1: 14px;    --o-line_height-tip1: 22px;
+    --o-font_size-tip2: 12px;    --o-line_height-tip2: 16px;
+    /* 响应式字号：h3 / text1 按断点降档（与 floors/floor-card.md 同口径）*/
+    --o-r-font_size-h3: 16px;        --o-r-line_height-h3: 24px;
+    --o-r-font_size-text1: 14px;   --o-r-line_height-text1: 22px;
+}
+@media (min-width: 841px) and (max-width: 1200px) {
+    :root {
+        --o-r-font_size-h3: 16px;        --o-r-line_height-h3: 24px;
+        --o-r-font_size-text1: 14px;   --o-r-line_height-text1: 22px;
+    }
+}
+@media (min-width: 1201px) and (max-width: 1680px) {
+    :root {
+        --o-r-font_size-h3: 18px;        --o-r-line_height-h3: 26px;
+        --o-r-font_size-text1: 14px;   --o-r-line_height-text1: 22px;
+    }
+}
+@media (min-width: 1681px) {
+    :root {
+        --o-r-font_size-h3: 22px;        --o-r-line_height-h3: 30px;
+        --o-r-font_size-text1: 16px;   --o-r-line_height-text1: 24px;
+    }
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'HarmonyOS Sans', 'HarmonyHeiTi', sans-serif;
+    background: var(--o-color-fill1);
+    color: var(--o-color-info1);
+    padding: 24px 0 48px;
+}
+
+/* ===== 演示舞台（楼层栅格口径，与 floors/floor-card.md §容器宽度一致；卡片取四列等分）===== */
+.stage { --card-gap: 32px; width: 1488px; max-width: 1488px; margin-left: 216px; margin-right: 216px; }
+@media (min-width: 1201px) and (max-width: 1440px) {
+    /* Laptop 小桌面：楼层 = grid-22，边距 = 留白 40 + 1 列 + 1 水槽（1440 时 ≈98px）*/
+    .stage { width: calc((100vw - 632px) * 11 / 12 + 504px); max-width: none; margin-left: auto; margin-right: auto; }
+}
+@media (min-width: 1441px) and (max-width: 1680px) {
+    .stage { width: calc((100vw - 864px) * 11 / 12 + 672px); max-width: none; margin-left: auto; margin-right: auto; }
+}
+@media (min-width: 841px) and (max-width: 1200px), (min-width: 601px) and (max-width: 840px) {
+    .stage { width: calc(100vw - 64px); max-width: none; margin-left: 32px; margin-right: 32px; }
+}
+@media (max-width: 600px) {
+    .stage { width: 312px; max-width: 312px; margin-left: 24px; margin-right: 24px; }
+}
+/* 卡片宽度 = 四列等分（≥601 档：348 / ≈293.2 / 242 / 157）；≤600 档禁用四列，见下方两列平铺 */
+.stage { --card-w: calc((100% - 3 * var(--card-gap)) / 4); }
+@media (min-width: 1201px) and (max-width: 1680px) { .stage { --card-gap: 24px; } }
+@media (min-width: 841px) and (max-width: 1200px) { .stage { --card-gap: 16px; } }
+@media (min-width: 601px) and (max-width: 840px) { .stage { --card-gap: 16px; } }
+@media (max-width: 600px) {
+    .stage { --card-gap: 12px; }
+}
+/* 同行卡片取自然高度（align-items: flex-start）：组件验收需逐卡直读「描述底→卡底」等间距；
+   若用默认 stretch，矮卡会被行内最高卡拉高、直读值失真（floors/floor-card.md 的等宽等高卡片场景除外）*/
+.ocard-row { display: flex; flex-wrap: wrap; gap: var(--card-gap); align-items: flex-start; }
+/* 340~600px：card.md 最窄卡宽 150px（文字可用宽 126px）；floor-card.md 明确禁止该档四列
+   （内容容器仅 312px，放 4 列只有 69px/卡不可用）。验收页取两列平铺（卡宽 =(312-12)/2=150px），
+   全部变体同屏可见；一排两卡 + 横滑模式规则见 floor-card.md §5.2 */
+@media (max-width: 600px) {
+    .ocard-row { display: grid; grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ===== 演示分区标题（验收页外壳，非组件规格）===== */
+.demo-sec { margin-top: 40px; }
+.demo-sec:first-child { margin-top: 0; }
+.demo-sec__t {
+    font-size: 14px; line-height: 22px; font-weight: 600; color: var(--o-color-info2);
+    margin-bottom: 16px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+}
+.demo-sec__t small { font-weight: 400; color: var(--o-color-info4); font-size: 12px; }
+
+/* ═════════════════════════════════════════════
+   OCard 基础（card.md：容器 FRAME · fill2 · radius_control-m 4px · 无边框 · 悬浮 shadow-2）
+   ═════════════════════════════════════════════ */
+.ocard {
+    position: relative;
+    background: var(--o-color-fill2);
+    border-radius: var(--o-radius-m);
+    transition: box-shadow .2s ease;
+    width: var(--card-w);
+}
+a.ocard { display: flex; flex-direction: column; text-decoration: none; color: inherit; cursor: pointer; }
+.ocard:hover { box-shadow: var(--o-shadow-2); }
+.ocard--h, .ocard--full { width: calc(var(--card-w) * 2 + var(--card-gap)); }
+
+/* ── cover 类型：容器 padding 只服务封面（单层口径），按封面位置分方向 ──
+   vertical：封面在上 → 上/左/右 8，下 0（Body 在下方，由 Body 下接管底部留白）
+   horizontal：封面在左 → 容器只留 左 8；上/下归 0，封面的上下内缩由封面自身
+     margin: 8px 0 表达。原因：horizontal 的封面与内容区在垂直方向并排，
+     容器上/下 padding 若不为 0，会同时压在内容区上形成「容器 8 + Body 24 = 32」叠加
+     （2026-10-21 实测确认，旧写法 titleT→卡顶 / 按钮底→卡底 均为 32，非规范值 24）。
+     改由封面 margin 承担后，内容区「距卡顶 = Body 上」「按钮底→卡底 = Footer 下」全部直读。
+   与 vertical 同为「封面三边内缩 8」：vertical 是上/左/右（下边接 Body），
+   horizontal 是上/下/左（右边接内容列）——镜像关系，封面圆角四角皆 4px */
+.ocard--cover { padding: 8px 8px 0; }
+.ocard--cover.ocard--h { padding: 0 0 0 8px; }
+.ocard__cover {
+    position: relative; width: 100%; aspect-ratio: 16 / 9;
+    border-radius: var(--o-radius-m);
+    background: var(--o-color-fill3);
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+}
+.ocard__cover-inner { display: flex; color: var(--o-color-info4); transition: transform .2s ease; }
+.ocard:hover .ocard__cover-inner { transform: scale(1.05); }   /* 图文卡片：封面放大至 105% */
+.ocard__cover-inner svg { width: 48px; height: 48px; display: block; }
+.ocard__body { padding: 0; }
+/* Body 下 = 0 仅对带操作区的卡片生效：描述→按钮间距由 Footer 上内边距单独承担（24px），
+   Body 下与 Footer 上不叠加（叠加会变 48px，见验收说明冲突点 4）。
+   无操作区的单跳转卡保持 Body 下 = 24px，作为「描述文字底 → 卡片底」的底部留白。*/
+.ocard--cover .ocard__body { padding: 24px 24px 24px; }        /* ≥1681px 档：四边 24 */
+.ocard--cover:has(.ocard__footer) .ocard__body { padding-bottom: 0; }
+.ocard--cover .ocard__desc { margin-top: 12px; }
+.ocard--cover .ocard__footer { padding: 24px; }             /* 卡片自有：操作区槽位内边距。上 24 即「描述→操作区」间距，不叠加 */
+.ocard__footer { display: flex; align-items: center; gap: 24px; }   /* 卡片自有：操作区布局槽位（左对齐 · 按钮间距 24px，硬约束 §1.1）。按钮本体是引用的 OButton 组件，样式见下方 .o-button 块 */
+
+.ocard__title {
+    font-size: var(--o-r-font_size-h3); line-height: var(--o-r-line_height-h3);
+    font-weight: 600; color: var(--o-color-info1);
+    transition: color .2s ease;
+    /* 文本行数上限（硬约束规则 8）：≥841px 标题 2 行；≤840px 收紧 1 行 */
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+/* 单体 / 图文卡片 hover：标题 → primary1；full-cover 不变（见下方 full-cover 规则）*/
+.ocard--cover:hover .ocard__title, .ocard--icon:hover .ocard__title { color: var(--o-color-primary1); }
+.ocard__desc {
+    font-size: var(--o-r-font_size-text1); line-height: var(--o-r-line_height-text1);
+    font-weight: 400; color: var(--o-color-info3);
+    /* ≥841px 描述 3 行；≤840px 收紧 2 行 */
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ▎OButton 组件（引用 components/button.md）
+   ▎card.md Footer 硬约束指定：size=medium · Variant=text
+   ▎命名遵循 SKILL.md L229「组件语义使用 o- 前缀」→ .o-button / .o-button--text
+   ▎floor-card.md L19 硬约束：卡片不写子组件内部样式，此处独立成块，卡片只引用
+   规格逐项对应 button.md：
+     高 32px（medium，L36）· 水平内边距 0（text 变体专属，L132）· 无最小宽度（text 无约束，L86）
+     圆角 16px（medium 档，L66）· 字号 font_size-tip1 14px / 行高 line_height-tip1 22px（L128、L213）
+     Enabled 文字色 grey-14（= --o-color-info1，Light 黑 / Dark 白，L160）· 无背景无边框
+     交互：默认 info1 → 悬浮 primary2 → 按下 primary3 → 选中 primary1（L192-196 Text 交互表）
+     Disabled：grey-14 @ 40%（L161 Token 表）
+   ⚠️ button.md 内部不一致：L199 交互表把 text Disabled 写作 --o-color-info4，与 L161 的
+      「grey-14 @ 40%、不使用单独 token」冲突。本页按 L161 Token 表实现，请裁决。
+   ══════════════════════════════════════════════════════════════════════════ */
+.o-button {
+    appearance: none; border: 0; background: none; cursor: pointer;
+    font-family: inherit; font-weight: 400;
+    display: inline-flex; align-items: center; gap: 4px; flex: none;
+    transition: color .2s ease;
+}
+.o-button--text {
+    height: 32px; padding: 0; border-radius: 16px;
+    font-size: var(--o-font_size-tip1); line-height: var(--o-line_height-tip1);
+    color: var(--o-color-info1);                 /* text 变体 Enabled = grey-14（Light 黑 / Dark 白）*/
+}
+.o-button--text:hover:not(:disabled) { color: var(--o-color-primary2); }
+.o-button--text:active:not(:disabled) { color: var(--o-color-primary3); }
+.o-button--text:disabled { opacity: .4; cursor: default; }   /* text 变体 Disabled = grey-14 @ 40% */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ▎OTag 组件（引用 components/tag.md）
+   ▎card.md 规则 4 硬约束：卡片内 Tag 必须调用 OTag，禁止自创徽标/Badge 样式
+   ▎full-cover 标题后的 Tag 用 fill × small（2026-10-23 用户裁定：Tag 非必选，
+   ▎  位置 = 内容层 Head 行内、标题之后，跟随内容流）
+   ▎规格逐项对应 tag.md「布局规格」表：
+     高 20px（small，L131）· 水平内边距 6px / 垂直内边距 2px（L134-135）
+     圆角 4px（radius_control-m，L138）· 字号 font_size-tip2 12px / 行高 line_height-tip2 18px（L142-145）
+     fill 变体：背景语义色 + 文字白色（L148-163 Fill 变体表）
+   ⚠️ 旧版自创的 .ocard__badge（高 20px · 圆角 100px · padding 0 8px）已废止——
+     圆角与内边距均不符合 tag.md（OTag 圆角 4px 非 100px、水平内边距 6px 非 8px）
+   ══════════════════════════════════════════════════════════════════════════ */
+.otag {
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+    font-weight: 400; white-space: nowrap;
+}
+.otag--small { height: 20px; padding: 2px 6px; border-radius: var(--o-radius-m); font-size: var(--o-font_size-tip2); line-height: var(--o-line_height-tip2); }
+.otag--fill { background: var(--o-color-primary1); color: var(--o-color-white); }
+.otag--fill.otag--success { background: var(--o-color-success1); }
+.otag--fill.otag--danger { background: var(--o-color-danger1); }
+.otag--fill.otag--warning { background: var(--o-color-warning1); }
+
+/* ── cover 类型内边距分档（1201~1680 / 841~1200 / 601~840 / 340~600 覆盖默认值）── */
+@media (min-width: 1201px) and (max-width: 1680px) {
+    .ocard--cover .ocard__body { padding: 16px 16px 16px; }
+    .ocard--cover:has(.ocard__footer) .ocard__body { padding-bottom: 0; }
+    .ocard--cover .ocard__desc { margin-top: 8px; }
+    .ocard--cover .ocard__footer { padding: 16px; }
+}
+@media (min-width: 841px) and (max-width: 1200px) {
+    .ocard--cover .ocard__body { padding: 12px 8px 12px; }
+    .ocard--cover:has(.ocard__footer) .ocard__body { padding-bottom: 0; }
+    .ocard--cover .ocard__desc { margin-top: 8px; }
+    .ocard--cover .ocard__footer { padding: 12px 8px; }
+}
+@media (min-width: 601px) and (max-width: 840px) {
+    .ocard--cover { padding: 4px 4px 0; }
+    .ocard--cover.ocard--h { padding: 0 0 0 4px; }
+    .ocard--cover .ocard__body { padding: 12px 8px 12px; }
+    .ocard--cover:has(.ocard__footer) .ocard__body { padding-bottom: 0; }
+    .ocard--cover .ocard__desc { margin-top: 8px; }
+    .ocard--cover .ocard__footer { padding: 12px 8px; }
+    /* ≤840px：cover + horizontal 一排只放一张卡（用户裁定 2026-10-21）。
+       该档四列卡宽仅 157px，双列宽 330px 时封面已要 166px（窄档封顶），文字列被压到 160px 极限；
+       若两个 330px 卡并排则文字列进一步恶化，故水平卡独占一行。flex 下须用 flex-basis 100%，
+       仅写 width:100% 会被 flex-shrink 收缩回 (676-16)/2 = 330，两张仍并排。 */
+    .ocard--h { flex: 0 0 100%; width: 100%; }
+}
+@media (max-width: 600px) {
+    .ocard--cover { padding: 4px 4px 0; }
+    .ocard--cover.ocard--h { padding: 0 0 0 4px; }
+    .ocard--cover .ocard__body { padding: 12px 8px 12px; }
+    .ocard--cover:has(.ocard__footer) .ocard__body { padding-bottom: 0; }
+    .ocard--cover .ocard__desc { margin-top: 8px; }
+    .ocard--cover .ocard__footer { padding: 12px 8px; }
+    .ocard--h, .ocard--full { width: 100%; }   /* 两列平铺下网格列宽即卡宽，双列宽属性不适用 */
+    /* --card-w 内的 100% 在卡片自身上解析（两列网格下 = 150px），四列算式会算出 28.5px，故直接取满列宽 */
+    .ocard { width: 100%; min-width: 0; }
+    /* 水平卡占满整行：该档一列仅 150px，而封面即便按窄档封顶也要 148px（卡内容宽 308 − 文字列 160），
+       只占一列会把文字列压成 0，故跨满整行（卡宽 312） */
+    .ocard--h { grid-column: 1 / -1; }
+    /* full-cover 同样跨满整行：卡片须保持 16:9，单列 150px 只能推出 84px 高，
+       容不下内容层 144px（28+32+12+48+24）；跨满整行 312px → 175.5px 才成立 */
+    .ocard--full { grid-column: 1 / -1; }
+    /* ≤600px：所有类型卡片一律去掉操作区（用户裁定 2026-10-21）。
+       footer 用 display:none 隐藏而非删除 DOM，:has(.ocard__footer) 仍会命中，
+       故需显式把 Body 下恢复为该档原值 12px，否则「描述底→卡底」会被压成 0。 */
+    .ocard__footer { display: none; }
+    .ocard--cover:has(.ocard__footer) .ocard__body { padding-bottom: 12px; }
+}
+/* 601~840px / 340~600px：标题 1 行 · 描述 2 行（硬约束规则 8 分档表）*/
+@media (max-width: 840px) {
+    .ocard__title { -webkit-line-clamp: 1; }
+    .ocard__desc  { -webkit-line-clamp: 2; }
+}
+
+/* ── cover + horizontal：与 vertical 镜像同构，仅排列方向不同 ──
+   封面尺寸由内容高度反推（裁定口径：细化 card.md「封面图片规格」表 horizontal 行
+   「图片宽度 固定（如 120px）」——封面既不定宽也不定高，而是高度跟随内容、宽度按 16:9 反推）：
+     高度 = 内容列高度 − 封面自身上下 margin（8px × 2），align-self:center 居中
+     宽度 = 该高度 × 16/9，由 aspect-ratio 表达该比例
+   ⚠️ 两处必须用脚本兜底，纯 CSS 做不到：
+   ① grid auto 轨道这里是循环依赖（列高 → 封面宽 → 列宽 → 列高），且文字换行使列高依赖列宽，
+      Chrome 对 auto 轨道只迭代一次、不收敛：实测列高已 218，轨道却按中间态 194 推，
+      封面矮 24px 且内容列撑爆卡底（按钮距卡底只剩 8px）。故 fitHCovers() 按实测列高回填封面宽。
+   ② 窄档回退：列高 × 16/9 会超过卡内容宽（601~840 档卡宽 330 → 封面 256，文字列只剩 70px；
+      340~600 档卡宽 312 → 文字列只剩 52px，标题被 line-clamp 截成「水…」）。此时封面宽封顶为
+      「卡内容宽 − 文字列最小可用宽 160px」，封面高随宽按 16:9 收（不再撑满列高，align-self 居中）。
+      ≥841px 三档列高反推值均小于封顶值，走主规则不受影响。
+   vertical 是「宽铺满 → 高由比例反推」，horizontal 是「高铺满 → 宽由比例反推」，互为镜像
+   比例守规则 5 硬约束（16:9 横向，宽 > 高）
+   容器 padding = 左 8、上/下/右 0（封面在左，容器只服务封面左侧；右侧由内容列右 padding 24 接管）
+   封面上/下内缩 8px 由封面自身 margin 承担——不能用容器上/下 padding，那会同时压在内容区上，
+   使「内容区→卡顶」= 容器 8 + Body 24 = 32、「按钮底→卡底」= Footer 24 + 容器 8 = 32（非 24）
+   内容列：Body/Footer padding 24px 同 vertical，「封面→标题」横向间距 = 24px */
+.ocard.ocard--h { display: grid; grid-template-columns: auto minmax(0, 1fr); }
+/* align-self:start（非 center）：封面贴卡顶内缩，封顶变矮时底部留白，
+   若用 center 会把 margin 撑成上下各 8.4px（≤600 档实测），三边内缩不再一致 */
+.ocard.ocard--h .ocard__cover { width: auto; height: 100%; aspect-ratio: 16 / 9; align-self: start; margin: 8px 0; }
+.ocard__col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+/* ≤840 档封面上下内缩收紧为 4px。必须写在本块之后：基础规则同为 (0,3,0)，
+   若写在下方 cover padding 分档媒体查询里会被本规则的 8px 按源顺序反覆盖（已实测踩坑） */
+@media (max-width: 840px) {
+    .ocard.ocard--h .ocard__cover { margin: 4px 0; }
+}
+
+/* ── icon 类型：容器 padding 与内部间距按断点分档（card.md「icon 类型内边距与间距」表）──
+   各间距均为直读 margin / gap，不用容器统一 gap：「标题区→描述」(8) 与「描述→操作区」(16/12/8)
+   两个值不同，统一 gap 会同时作用于 Header→Body 与 Body→Footer 两处、无法分别表达。
+   源顺序注意：本块之后是分档媒体查询，同为 (0,2,0) 特异性时后写的覆盖先写的 */
+.ocard.ocard--icon { display: flex; flex-direction: column; gap: 0; padding: 24px; }
+.ocard--icon .ocard__desc { margin-top: 8px; }                             /* 标题区（图标+标题）→ 描述 8px · 五档一致 */
+.ocard--icon .ocard__footer { padding: 0; margin-top: 16px; gap: 32px; }   /* ≥1681px：描述→操作区 16 · 按钮间距 32 */
+/* vertical（上下排列）：图标在标题**上方**，与 cover 的 vertical 同逻辑（封面在文字上方），
+   也与 card.md 组件结构树「Header → [图标] + [标题文字]」一致。图标左对齐（与文字左对齐一致）。
+   header 为 column，其底 = 标题行盒底，故 __desc 的 margin-top:8px 即精确 8px（标题折行仍成立）。
+   ⚠️ 禁止把 vertical 做成「图标与标题横排」：那既与 cover 的 vertical 逻辑相反，也会让
+   header 高 = max(图标槽 32, 标题行盒 30) = 32，把 desc margin 的参考点顶低 2px
+   （1201~1680 档 32 vs 26，顶低 6px），实测「标题行盒→描述」变成 10/14/8（2026-10-23 踩坑）。
+   此时也不要靠按档补偿 margin——标题折成 2 行后 header 高改由标题决定，补偿反而过度 */
+.ocard--icon .ocard__header { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }  /* 图标→标题 12px（五档一致）*/
+.ocard__icon {
+    width: 32px; height: 32px; flex: none;
+    border-radius: var(--o-radius-m);
+    background: var(--o-color-primary1-light);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--o-color-primary1);
+}
+.ocard__icon svg { width: 24px; height: 24px; display: block; }
+/* horizontal（横向排列）：图标在标题**左侧**、与文字列横向排列，间距 12px，与 cover 的 horizontal
+   同逻辑（封面在文字左侧）。图标与标题顶对齐（align-items: flex-start）。
+   禁用 align-items:center——center 会把 32px 图标对着「标题+描述」整列（标题 30 + 间距 8 + 描述 ≈44）
+   垂直居中，图标比标题低约 25px、掉到标题与描述之间（2026-10-23 实测修复）。
+   gap:12 覆盖基础规则 gap:0，源顺序在本块之后故生效 */
+.ocard.ocard--icon--h { flex-direction: row; align-items: flex-start; gap: 12px; }
+.ocard--icon--h .ocard__body { flex: 1; min-width: 0; }
+
+/* ── icon 分档 A：≤1200px（841~1200 / 601~840 / 340~600 三档）图标槽 32→24 ──
+   内层 SVG 24→18，保持与 32/24 相同的 3/4 占比。
+   作用域限定 .ocard--icon：full-cover 的同名 .ocard__icon 恒为 32px（见下方 .ocard--full .ocard__icon），
+   且其规则源顺序更靠后，不会被此处误伤 */
+@media (max-width: 1200px) {
+    .ocard--icon .ocard__icon { width: 24px; height: 24px; }
+    .ocard--icon .ocard__icon svg { width: 18px; height: 18px; }
+}
+/* ── icon 分档 B：1201~1680px ── 仅「描述→操作区」16→12（padding 24、按钮间距 32 同 ≥1681 档，不重复写）*/
+@media (min-width: 1201px) and (max-width: 1680px) {
+    .ocard--icon .ocard__footer { margin-top: 12px; }
+}
+/* ── icon 分档 C：841~1200px ── padding 24→16 · 描述→操作区 16→8 · 按钮间距 32→24 */
+@media (min-width: 841px) and (max-width: 1200px) {
+    .ocard.ocard--icon { padding: 16px; }
+    .ocard--icon .ocard__footer { margin-top: 8px; gap: 24px; }
+}
+/* ── icon 分档 D：≤840px ── padding 12 · 操作区一律去掉（比 cover 的 ≤600 更严）。
+   ≤600 档已由全局 .ocard__footer{display:none} 覆盖；601~840 档 cover 仍有操作区，
+   故此处只对 icon 隐藏。icon 的间距全走容器 padding 与 margin，无 :has() 依赖，隐藏后无残留 */
+@media (max-width: 840px) {
+    .ocard.ocard--icon { padding: 12px; }
+    .ocard--icon .ocard__footer { display: none; }
+}
+
+/* ── full-cover：封面即卡片背景，铺满整卡、无内层圆角；内容层整块叠于封面上层 ──
+   🚨 卡片自身必须保持横向比例（2026-10-23 用户裁定）：整卡即图片，故遵守「封面图片固定比例」
+   规则（card.md 规则 5）——16:9 默认 / 3:1 超宽形态；宽度按栅格定（演示为跨双列），
+   高度 = 宽度 ÷ 比例（aspect-ratio 反推），禁止内容撑高、禁止写死高度。
+   内容层（padding 28/24/24 + 标题≤2行 + 描述≤3行）必须放得下：演示最窄档 312px 卡宽
+   → 16:9 高 175.5px ≥ 内容层 144px（28+32+12+48+24），余量 31px */
+.ocard--full { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--o-radius-l); aspect-ratio: 16 / 9; }   /* 外档 radius_control-l */
+.ocard__bg { position: absolute; inset: 0; background: var(--o-color-fill3); transition: transform .2s ease; }
+/* 深色封面占位（照片性质，非 UI Token；演示 card.md 对比度硬约束用）*/
+.ocard__bg--dark { background: rgb(38, 38, 42); }
+/* 非整卡跳转的 full-cover：封面 105% 必须通过内层元素实现；⛔ 禁止 scale 卡片容器 */
+.ocard--full:not(a):hover .ocard__bg { transform: scale(1.05); }
+/* 整卡跳转（<a>）的 full-cover：悬浮只显示阴影（card.md 交互规格说明：避免与封面放大叠加造成视觉过载）*/
+.ocard__inner { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 28px 24px 24px; }
+.ocard__head { display: flex; align-items: center; gap: 12px; }
+.ocard--full .ocard__icon {
+    width: 32px; height: 32px; flex: none; border-radius: var(--o-radius-s);   /* 内档 radius_control-s */
+    background: var(--o-color-primary1-light); color: var(--o-color-primary1);
+    display: flex; align-items: center; justify-content: center;
+}
+.ocard--full .ocard__title { color: var(--o-color-info1); }   /* full-cover hover 标题不变色（交互规格）*/
+.ocard--full .ocard__desc { margin-top: 0; }
+/* 深色封面：文字切换 inverse 色（硬约束：禁止黑字压深底）*/
+.ocard--full--ondark .ocard__title { color: var(--o-color-info1-inverse); }
+.ocard--full--ondark .ocard__desc { color: var(--o-color-info3-inverse); }
+
+/* ── Dark 模式（Dark=on）──
+   🚨 hard-constraints.md §0.1「Light → Dark 切换铁律」（2026-10-23 用户裁定）：
+     Dark 是整套 Token 的成对翻转，不是"只反色文字"。凡 :root 里定义过、且在本页
+     被引用到的 Token，此处必须逐项覆盖为 Dark 值——交互态（hover/active/selected）、
+     组件自身色（背景/文字/边框/图标/阴影）、*-light 浅底一个都不能漏。
+   ⚠️ 旧版只覆盖了 fill2/fill3/info1/info3/shadow-2，primary 系列未切换，导致 dark 区
+     卡片 hover 标题用 Light 的 #002FA7 深蓝压深色卡（几乎不可见）、Footer 按钮 hover
+     用 Light 的 #5177CA、图标槽底色 primary1-light 与 OTag 底色 primary1 全是 Light 值。
+   Dark 值真源：opendesign-tokens/references/tokens-openeuler.md L59-66 */
+.o-dark {
+    --o-color-fill2: rgb(36, 36, 39);
+    --o-color-fill3: rgb(58, 58, 62);          /* 演示占位：Dark 下封面/图示区底色（card.md 未给出 fill3 Dark 值）*/
+    --o-color-info1: rgb(255, 255, 255);
+    --o-color-info3: rgba(255, 255, 255, 0.6);
+    /* info2 / info4 上游 Token 未定义（tokens-openeuler.md 无 info 系列），按「与 Light 同灰度、反色」推导：
+       Light info2 = #333（黑 80%）→ Dark = 白 80%；Light info4 = #999（黑 40%）→ Dark = 白 40%。
+       封面占位图标（.ocard__cover-inner → info4）与禁用/次要文字都会用到，漏切会残留 Light 灰 */
+    --o-color-info2: rgba(255, 255, 255, 0.8);
+    --o-color-info4: rgba(255, 255, 255, 0.4);
+    --o-color-primary1: rgb(73, 122, 248);     /* Dark 值（Light: rgb(0,47,167)）——hover 标题色 / OTag fill 底 / 图标色*/
+    --o-color-primary2: rgb(42, 72, 158);      /* Dark 值（Light: rgb(81,119,202)）——Footer 按钮 hover 色*/
+    --o-color-primary3: rgb(29, 51, 120);      /* Dark 值（Light: rgb(0,39,147)）——Footer 按钮 active 色*/
+    --o-color-primary1-light: rgb(18, 34, 87); /* Dark 值（Light: rgb(206,219,245)）——图标槽浅底*/
+    --o-shadow-2: 0 2px 24px rgba(255, 255, 255, 0.15);
+    background: rgb(20, 20, 22);                /* 演示画布（深色页面底，非组件规格）*/
+    padding: 24px; border-radius: var(--o-radius-m);
+}
+.o-dark .demo-sec__t { color: var(--o-color-info1); }
+.o-dark .demo-sec__t small { color: var(--o-color-info3); }
+
+/* ===== 实测标注（仅验收开关，不属于组件规格）===== */
+.g-label {
+    position: absolute; left: 4px; top: 4px; z-index: 20; pointer-events: none;
+    max-width: calc(100% - 8px);
+    background: rgba(255, 255, 255, 0.92); border: 1px solid var(--o-color-primary2); border-radius: 2px;
+    font-size: 10px; line-height: 14px; font-weight: 400; color: var(--o-color-primary2);
+    padding: 2px 4px; font-family: 'HarmonyOS Sans', 'HarmonyHeiTi', sans-serif;
+}
+</style>
+</template>
+
+<!-- ===== 模块 HTML（与 components/card.md 结构一致；覆盖全变体）===== -->
+<template id="tpl-cards">
+<div class="stage">
+
+    <!-- ① cover + vertical -->
+    <section class="demo-sec">
+        <div class="demo-sec__t">① cover + vertical<small>封面卡片 · 垂直布局（默认）· 架构 = 封面区 + 内容区 + 操作区（可选）· 交互两类：单跳转（整卡即链接）/ 多交互（Footer 按钮组）</small></div>
+        <div class="ocard-row">
+            <!-- 单跳转卡：整卡可点击，无操作区 -->
+            <a class="ocard ocard--cover" href="javascript:void(0)">
+                <div class="ocard__cover"><span class="ocard__cover-inner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M5 17l4.5-4.5 3.5 3.5 3-3L19 16"/></svg>
+                </span></div>
+                <div class="ocard__body">
+                    <h4 class="ocard__title">单跳转卡片</h4>
+                    <p class="ocard__desc">单一跳转方式：整卡即为链接，不显示 Footer 操作区，悬浮时标题变品牌色。</p>
+                </div>
+            </a>
+            <!-- 多交互卡：操作区放 Footer 按钮（medium text 变体 · 左对齐 · 间距 24）-->
+            <article class="ocard ocard--cover">
+                <div class="ocard__cover"><span class="ocard__cover-inner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M5 17l4.5-4.5 3.5 3.5 3-3L19 16"/></svg>
+                </span></div>
+                <div class="ocard__body">
+                    <h4 class="ocard__title">多交互卡片</h4>
+                    <p class="ocard__desc">多交互方式：操作区放 Footer 按钮，使用 medium text 变体；描述文字底到按钮为 24px。</p>
+                </div>
+                <div class="ocard__footer">
+                    <button class="o-button o-button--text" type="button">操作一</button>
+                    <button class="o-button o-button--text" type="button">操作二</button>
+                </div>
+            </article>
+            <!-- 禁用态示例：button.md text 变体 Disabled = grey-14 @ 40% -->
+            <article class="ocard ocard--cover">
+                <div class="ocard__cover"><span class="ocard__cover-inner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M5 17l4.5-4.5 3.5 3.5 3-3L19 16"/></svg>
+                </span></div>
+                <div class="ocard__body">
+                    <h4 class="ocard__title">禁用态按钮卡</h4>
+                    <p class="ocard__desc">操作按钮禁用时文字透明度降至 40%（button.md text 变体 Disabled），不可点击。</p>
+                </div>
+                <div class="ocard__footer">
+                    <button class="o-button o-button--text" type="button" disabled>已禁用</button>
+                    <button class="o-button o-button--text" type="button">操作二</button>
+                </div>
+            </article>
+            <!-- 长文案卡：验证 line-clamp 行数上限 -->
+            <article class="ocard ocard--cover">
+                <div class="ocard__cover"><span class="ocard__cover-inner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M5 17l4.5-4.5 3.5 3.5 3-3L19 16"/></svg>
+                </span></div>
+                <div class="ocard__body">
+                    <h4 class="ocard__title">长文案卡片：验证标题两行与描述三行的截断行为</h4>
+                    <p class="ocard__desc">这是一段刻意写得很长的卡片描述文字，用于验证 line-clamp 行数上限在五档断点下的表现：≥841px 标题最多两行、描述最多三行，≤840px 标题收紧为一行、描述两行，超出部分末尾省略号截断，保证同一行卡片高度一致、底边不参差。</p>
+                </div>
+            </article>
+            <!-- 单跳转卡 2：同架构、无操作区 -->
+            <a class="ocard ocard--cover" href="javascript:void(0)">
+                <div class="ocard__cover"><span class="ocard__cover-inner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M5 17l4.5-4.5 3.5 3.5 3-3L19 16"/></svg>
+                </span></div>
+                <div class="ocard__body">
+                    <h4 class="ocard__title">单跳转卡片 · 无操作区</h4>
+                    <p class="ocard__desc">与左侧同一架构（封面区 + 内容区），仅交互不同：描述文字底到卡片底即 24px。</p>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- ② cover + horizontal -->
+    <section class="demo-sec">
+        <div class="demo-sec__t">② cover + horizontal<small>封面卡片 · 水平布局 · 与 vertical 同架构，仅排列方向与容器 padding 方向不同 · 封面高度跟随内容列、宽度由 16:9 反推 · 容器只留左 8，封面上下内缩 8px 由封面自身 margin 承担 · <b>Footer 灵活可选</b>（左：默认无操作；右：需要多交互时加在内容列尾部）· ≤600px 一律去掉操作 · ≤840px 一排只放一张</small></div>
+        <div class="ocard-row">
+            <!-- 单跳转卡（默认形态）：封面 + 内容区，无操作区 -->
+            <a class="ocard ocard--cover ocard--h" href="javascript:void(0)">
+                <div class="ocard__cover"><span class="ocard__cover-inner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M5 17l4.5-4.5 3.5 3.5 3-3L19 16"/></svg>
+                </span></div>
+                <div class="ocard__col">
+                    <div class="ocard__body">
+                        <h4 class="ocard__title">水平布局单跳转卡片</h4>
+                        <p class="ocard__desc">默认形态无操作区，封面与文字横向排列，描述文字底到卡片底即 24px。</p>
+                    </div>
+                </div>
+            </a>
+            <!-- 多交互卡：需要多交互时，把 Footer 加在内容列尾部这个位置 -->
+            <article class="ocard ocard--cover ocard--h">
+                <div class="ocard__cover"><span class="ocard__cover-inner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M5 17l4.5-4.5 3.5 3.5 3-3L19 16"/></svg>
+                </span></div>
+                <div class="ocard__col">
+                    <div class="ocard__body">
+                        <h4 class="ocard__title">水平布局多交互卡片</h4>
+                        <p class="ocard__desc">需要多交互时把 Footer 加在内容列尾部：封面不定宽也不定高，高度跟随内容列，宽度由高度按 16:9 反推。</p>
+                    </div>
+                    <div class="ocard__footer">
+                        <button class="o-button o-button--text" type="button">操作一</button>
+                        <button class="o-button o-button--text" type="button">操作二</button>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+    <!-- ③ icon -->
+    <section class="demo-sec">
+        <div class="demo-sec__t">③ icon<small>图标卡片 · 同架构（图标区 + 内容区 + 操作区可选）· 两种排列：vertical 图标在标题上方（上下排列）/ horizontal 图标在标题左侧（横向排列）· 容器 padding 24/24/16/12/12 分档 · 图标→标题 12 · 标题行盒→描述 8 · 描述→操作区 16/12/8/无/无 · 按钮间距 32/32/24 · 图标槽 32/32/24/24/24</small></div>
+        <div class="ocard-row">
+            <!-- icon + vertical 单跳转卡 -->
+            <a class="ocard ocard--icon" href="javascript:void(0)">
+                <div class="ocard__header">
+                    <span class="ocard__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    </span>
+                    <h4 class="ocard__title">功能入口</h4>
+                </div>
+                <div class="ocard__body">
+                    <p class="ocard__desc">vertical 排列：图标在标题上方、左对齐，容器 padding 按断点分档（24/24/16/12/12）。</p>
+                </div>
+            </a>
+            <!-- icon + vertical 多交互卡（操作区按钮）-->
+            <article class="ocard ocard--icon">
+                <div class="ocard__header">
+                    <span class="ocard__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+                    </span>
+                    <h4 class="ocard__title">数据统计</h4>
+                </div>
+                <div class="ocard__body">
+                    <p class="ocard__desc">图标卡片同样适用操作区按钮规则：medium text 变体、左对齐，描述到操作区 16px、按钮间距 32px（≤840px 无操作区）。</p>
+                </div>
+                <div class="ocard__footer">
+                    <button class="o-button o-button--text" type="button">查看详情</button>
+                    <button class="o-button o-button--text" type="button">导出数据</button>
+                </div>
+            </article>
+            <!-- icon + horizontal 单跳转卡 -->
+            <a class="ocard ocard--icon ocard--icon--h" href="javascript:void(0)">
+                <span class="ocard__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                </span>
+                <div class="ocard__body">
+                    <h4 class="ocard__title">水平图标卡</h4>
+                    <p class="ocard__desc">horizontal 排列：图标在标题左侧、与标题顶对齐，图标与文字列间距 12px。</p>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- ④ full-cover -->
+    <section class="demo-sec">
+        <div class="demo-sec__t">④ full-cover<small>全幅封面卡片 · 与 cover 同架构（封面区即卡片背景 + 内容区）· <b>卡片保持 16:9（超宽形态 3:1），宽按栅格、高由宽反推</b> · 内容层 padding 28/24/24 · <b>图标槽与标题后 Tag 均非必选</b>（Tag 调用 OTag 组件，遵循 tag.md）· 外档 / 内档圆角分层 · 交互两类：整卡跳转（&lt;a&gt;）悬浮只显阴影，非跳转形态封面放大 105% + 阴影</small></div>
+        <div class="ocard-row">
+            <!-- 浅色封面：全要素（icon + 标题 + OTag NEW）· 文字 info1 / info3 -->
+            <a class="ocard ocard--full" href="javascript:void(0)">
+                <div class="ocard__bg"></div>
+                <div class="ocard__inner">
+                    <div class="ocard__head">
+                        <span class="ocard__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z"/></svg>
+                        </span>
+                        <span class="ocard__title">全幅封面卡片</span>
+                        <span class="otag otag--fill otag--small">NEW</span>
+                    </div>
+                    <p class="ocard__desc">封面铺满整卡并作为卡片背景，文字层整块叠在封面上层；浅色封面配 info1 / info3 文字。</p>
+                </div>
+            </a>
+            <!-- 深色封面：无图标（icon 非必选）· 标题 + OTag HOT · 文字必须切换 inverse 色 -->
+            <a class="ocard ocard--full ocard--full--ondark" href="javascript:void(0)">
+                <div class="ocard__bg ocard__bg--dark"></div>
+                <div class="ocard__inner">
+                    <div class="ocard__head">
+                        <span class="ocard__title">深色封面卡片</span>
+                        <span class="otag otag--fill otag--small">HOT</span>
+                    </div>
+                    <p class="ocard__desc">深色封面下文字必须切换 info1-inverse / info3-inverse（白色系），禁止黑字压深底；整卡跳转时悬浮只显示阴影、标题不变色。</p>
+                </div>
+            </a>
+            <!-- 非整卡跳转形态（article）：无 Tag（Tag 非必选）· 悬浮 = 封面 105% + 阴影，标题不变色 -->
+            <article class="ocard ocard--full">
+                <div class="ocard__bg"></div>
+                <div class="ocard__inner">
+                    <div class="ocard__head">
+                        <span class="ocard__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z"/></svg>
+                        </span>
+                        <span class="ocard__title">非跳转封面卡</span>
+                    </div>
+                    <p class="ocard__desc">非整卡跳转形态（无链接、无按钮）：悬浮时内层封面放大至 105% 并显示阴影 shadow-2，标题颜色保持不变。</p>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- ⑤ Dark 模式 -->
+    <section class="demo-sec o-dark">
+        <div class="demo-sec__t">⑤ Dark 模式（Dark=on）<small><b>整套 Token 成对翻转</b>（hard-constraints §0.1 铁律）：fill2 → rgb(36,36,39) · info1 → 白 · info3 → 白 60% · <b>primary1 → rgb(73,122,248) · primary2 → rgb(42,72,158) · primary3 → rgb(29,51,120) · primary1-light → rgb(18,34,87)</b> · shadow-2 反向。hover 标题 / 图标色 / Tag 底 / 按钮 hover 全部走 Dark 值</small></div>
+        <div class="ocard-row">
+            <!-- cover + vertical 多交互卡 -->
+            <article class="ocard ocard--cover">
+                <div class="ocard__cover"><span class="ocard__cover-inner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M5 17l4.5-4.5 3.5 3.5 3-3L19 16"/></svg>
+                </span></div>
+                <div class="ocard__body">
+                    <h4 class="ocard__title">深色模式封面卡</h4>
+                    <p class="ocard__desc">Dark=on 时卡片背景切换为深色值，文字切换为白色系。</p>
+                </div>
+                <div class="ocard__footer">
+                    <button class="o-button o-button--text" type="button">操作一</button>
+                    <button class="o-button o-button--text" type="button">操作二</button>
+                </div>
+            </article>
+            <!-- icon + vertical 单跳转卡 -->
+            <a class="ocard ocard--icon" href="javascript:void(0)">
+                <div class="ocard__header">
+                    <span class="ocard__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    </span>
+                    <h4 class="ocard__title">功能入口</h4>
+                </div>
+                <div class="ocard__body">
+                    <p class="ocard__desc">深色模式下的图标卡片，容器 padding 与间距分档值不变。</p>
+                </div>
+            </a>
+            <!-- full-cover（深色画布 + 深色封面，文字用 Dark 信息色 · 带 OTag 演示 Tag 底色也走 Dark primary1）-->
+            <a class="ocard ocard--full" href="javascript:void(0)">
+                <div class="ocard__bg"></div>
+                <div class="ocard__inner">
+                    <div class="ocard__head">
+                        <span class="ocard__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4L12 2z"/></svg>
+                        </span>
+                        <span class="ocard__title">深色模式全幅封面</span>
+                        <span class="otag otag--fill otag--small">NEW</span>
+                    </div>
+                    <p class="ocard__desc">深色画布上的全幅封面卡片，标题 / 正文使用 Dark 信息色，Tag 底色同步切为 Dark primary1。</p>
+                </div>
+            </a>
+        </div>
+    </section>
+</div>
+</template>
+
+<div id="bp-host"></div>
+
+<script>
+(function () {
+    /* CSS 为纯文本，必须走 content.textContent：template 的内容在 .content 片段里，
+       且 innerHTML 会把 > 序列化成 &gt;，注入 <style> 后子代选择器非法被丢弃 */
+    var css = document.getElementById('tpl-css').content.textContent;
+    var cards = document.getElementById('tpl-cards').innerHTML;
+
+    /* 实测标注：读取 computed padding 与 getBoundingClientRect 间距，逐卡输出到卡片左上角 */
+    var IFRAME_JS =
+        /* 水平卡封面：高度跟内容列、宽度按 16:9 回填（主规则）；列高反推出的宽超过
+           「卡内容宽 − 文字列最小可用宽 160px」时按封顶值收，高度随之按 16:9 缩（窄档回退）。
+           纯 CSS 做不到：grid auto 轨道循环依赖只迭代一次不收敛，且封顶需按卡片实际宽计算。
+           封面自身有上下 margin（8px / ≤840 档 4px）实现不贴边，故反推基准 = 列高 − 上下 margin。
+           跑 3 轮：列宽变化会引起列高再变，多轮收敛。 */
+        'function fitHCovers(){' +
+        'for(var p=0;p<3;p++){' +
+        'document.querySelectorAll(".ocard--cover.ocard--h").forEach(function(card){' +
+        'var cv=card.querySelector(".ocard__cover"),col=card.querySelector(".ocard__col");' +
+        'if(!cv||!col)return;' +
+        'var cvs=getComputedStyle(cv);' +
+        'var m=parseFloat(cvs.marginTop)+parseFloat(cvs.marginBottom);' +
+        'var cs=getComputedStyle(card);' +
+        'var maxW=card.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)-160;' +
+        'var w=Math.min((col.getBoundingClientRect().height-m)*16/9,maxW);' +
+        'cv.style.width=w+"px";cv.style.height=(w*9/16)+"px";});}}' +
+        'function f(n){return Math.round((parseFloat(n)||0)*100)/100;}' +
+        'function drawGuides(){' +
+        'fitHCovers();' +
+        'document.querySelectorAll(".g-label").forEach(function(n){n.remove();});' +
+        'if(!document.body.classList.contains("guides-on"))return;' +
+        'document.querySelectorAll(".ocard").forEach(function(card){' +
+        'var r=card.getBoundingClientRect();' +
+        'var cs=getComputedStyle(card);' +
+        'var rows=[];' +
+        'rows.push("容器 "+f(cs.paddingTop)+"/"+f(cs.paddingRight)+"/"+f(cs.paddingBottom)+"/"+f(cs.paddingLeft));' +
+        'if(cs.rowGap&&cs.rowGap!=="normal"&&parseFloat(cs.rowGap)>0)rows.push("gap "+f(cs.rowGap));' +
+        'var body=card.querySelector(".ocard__body");' +
+        'if(body){var b=getComputedStyle(body);var bp=f(b.paddingTop)+"/"+f(b.paddingRight)+"/"+f(b.paddingBottom)+"/"+f(b.paddingLeft);if(bp!=="0/0/0/0")rows.push("Body "+bp);}' +
+        'var ft=card.querySelector(".ocard__footer");' +
+        'if(ft&&ft.offsetParent){var t=getComputedStyle(ft);var tp=f(t.paddingTop)+"/"+f(t.paddingRight)+"/"+f(t.paddingBottom)+"/"+f(t.paddingLeft);if(tp!=="0/0/0/0")rows.push("Footer "+tp);}' +
+        'var inner=card.querySelector(".ocard__inner");' +
+        'if(inner){var i2=getComputedStyle(inner);rows.push("内容层 "+f(i2.paddingTop)+"/"+f(i2.paddingRight)+"/"+f(i2.paddingBottom)+"/"+f(i2.paddingLeft));}' +
+        /* full-cover：整卡即图片，必须保持 16:9（或 3:1）——宽按栅格定、高由宽反推，禁止内容撑高。
+           直接量卡片盒子宽高比，五档均应为 1.778（3:1 则为 3） */
+        'if(card.classList.contains("ocard--full")){var fr2=card.getBoundingClientRect();' +
+        'rows.push("整卡 "+f(fr2.width)+"×"+f(fr2.height)+" 比例 "+f(fr2.width/fr2.height));}' +
+        'var cover=card.querySelector(".ocard__cover");' +
+        'var title=card.querySelector(".ocard__title");' +
+        'var desc=card.querySelector(".ocard__desc");' +
+        'if(cover){var cr=cover.getBoundingClientRect();rows.push("封面→卡 上/左/右 "+f(cr.top-r.top)+"/"+f(cr.left-r.left)+"/"+f(r.right-cr.right));}' +
+        'if(title&&cover){var tr=title.getBoundingClientRect();rows.push("封面→标题 "+f(tr.top-cover.getBoundingClientRect().bottom));}' +
+        'var icn=card.querySelector(".ocard__icon");' +
+        /* vertical 与 horizontal 量的方向不同：vertical 图标在标题上方 → 量纵向间距与左差；
+           horizontal 图标在标题左侧 → 量横向间距与顶差。两者均应 12 / 0 */
+        'if(icn&&title){var ir=icn.getBoundingClientRect();var tr0=title.getBoundingClientRect();' +
+        'if(card.classList.contains("ocard--icon--h")){rows.push("icon→标题 横/顶差 "+f(tr0.left-ir.right)+"/"+f(tr0.top-ir.top));}' +
+        'else{rows.push("icon→标题 纵/左差 "+f(tr0.top-ir.bottom)+"/"+f(tr0.left-ir.left));}}' +
+        'if(title&&desc){var tr2=title.getBoundingClientRect();var dr=desc.getBoundingClientRect();' +
+        /* 「标题→描述」按行盒口径量：desc.top − title.bottom，五档两种布局均应为 8。
+           不能按字形视觉凑——标题 line-height 大于 font-size，half-leading 会让视觉间距 ≠ 8 */
+        'rows.push("标题→描述(行盒) "+f(dr.top-tr2.bottom));' +
+        'rows.push("文字→卡 左/右 "+f(tr2.left-r.left)+"/"+f(r.right-dr.right));' +
+        'rows.push("描述底→卡底 "+f(r.bottom-dr.bottom));}' +
+        'if(ft&&desc&&ft.offsetParent){var fr=ft.getBoundingClientRect();var btn=ft.querySelector(".o-button--text:not(:disabled)");' +
+        'if(btn){var br=btn.getBoundingClientRect();rows.push("按钮→卡 左/右/底 "+f(br.left-r.left)+"/"+f(r.right-br.right)+"/"+f(r.bottom-br.bottom));}' +
+        'rows.push("描述→Footer盒顶 "+f(fr.top-desc.getBoundingClientRect().bottom));' +
+        'if(btn)rows.push("描述→按钮 "+f(btn.getBoundingClientRect().top-desc.getBoundingClientRect().bottom));' +
+        'rows.push("Footer盒底→卡底 "+f(r.bottom-fr.bottom));}' +
+        'var lb=document.createElement("div");lb.className="g-label";lb.textContent=rows.join(" · ");card.appendChild(lb);' +
+        '});}' +
+        'window.addEventListener("message",function(e){' +
+        'if(e.data==="guides-on"){document.body.classList.add("guides-on");drawGuides();}' +
+        'if(e.data==="guides-off"){document.body.classList.remove("guides-on");drawGuides();}});' +
+        'window.addEventListener("resize",drawGuides);' +
+        'drawGuides();';
+
+    var BPS = [
+        { w: 1920, h: 900, name: '≥1681px · Desktop', note: '1920 为例 · 容器 8/8/0/8 · Body 24 · 标题 22/30 · 卡宽 348（4 列）· 标题 2 行 / 描述 3 行' },
+        { w: 1440, h: 900, name: '1201~1680px · Laptop', note: '1440 为例 · Body 16 · 标题 18/26 · 卡宽 ≈293.2（楼层 grid-22，边距 ≈98）' },
+        { w: 1080, h: 900, name: '841~1200px · Pad 横屏', note: '1080 为例 · Body 12/8 · 标题 16/24 · 卡宽 242（内容区 1016）' },
+        { w: 740,  h: 860, name: '601~840px · Pad 竖屏', note: '740 为例 · 容器 4/4/0/4 · Body 12/8 · 卡宽 157 · 标题 1 行 / 描述 2 行' },
+        { w: 360,  h: 860, name: '340~600px · Phone', note: '360 为例 · 容器 4/4/0/4 · Body 12/8 · 卡宽 150 一排两卡 · 标题 1 行 / 描述 2 行' }
+    ];
+
+    var host = document.getElementById('bp-host');
+    BPS.forEach(function (bp) {
+        var wrap = document.createElement('div');
+        wrap.className = 'bp';
+        wrap.innerHTML =
+            '<div class="bp__inner">' +
+            '<div class="bp__label">' + bp.name + '<span>' + bp.note + '</span></div>' +
+            '<div class="bp__frame"><iframe title="' + bp.name + '" scrolling="no"></iframe></div>' +
+            '</div>';
+        var frame = wrap.querySelector('iframe');
+        frame.style.width = bp.w + 'px';
+        frame.style.height = bp.h + 'px';
+        frame.srcdoc =
+            '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8">' +
+            '<style>' + css + '</style></head><body>' + cards +
+            '<script>' + IFRAME_JS + '<\/script></body></html>';
+        host.appendChild(wrap);
+        frame.addEventListener('load', function () {
+            var doc = frame.contentDocument;
+            frame.style.height = (doc.documentElement.scrollHeight + 2) + 'px';
+        });
+    });
+
+    document.getElementById('guides').addEventListener('change', function () {
+        var msg = this.checked ? 'guides-on' : 'guides-off';
+        document.querySelectorAll('.bp__frame iframe').forEach(function (f) {
+            f.contentWindow.postMessage(msg, '*');
+        });
+    });
+})();
+</script>
+
+</body>
+</html>

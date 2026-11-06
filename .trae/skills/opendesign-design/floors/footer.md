@@ -98,7 +98,7 @@ ONavigation Footer PC（1920px × 460px）
 | 顶部说明文字 | 20px / 28px, Regular | 硬约束 §2（四级标题） |
 | 导航列标题 | 20px / 28px, Regular, white | navigation.md |
 | 导航链接 | 14px / 22px, Regular, white@0.6 | 硬约束 §2（提示文本1） |
-| 友情链接标题 | 12px / 24px, UltraLight(200), white | navigation.md |
+| 友情链接标题 | 12px / 18px, UltraLight(200), white | 硬约束 §2 成对规则（原 12px/24px 违反成对锁定，2026-10-29 修正；navigation.md 同步） |
 | 友情链接文字 | 12px / 18px, Regular, white@0.6 | 硬约束 §2（提示文本2） |
 | 底部链接 | 14px / 22px, Regular, white | 硬约束 §2 |
 | 版权声明 | 14px / 22px, Regular, white@0.6 | 硬约束 §2 |
@@ -216,3 +216,34 @@ ONavigation Footer Mb（360px × 458px）
 □ MB 端顶部说明字重是否为 Medium（非 Regular）？
 □ 所有图形资源（Logo / 二维码 / 社交媒体图标）是否从 assets Read 后逐属性内联 <svg>（禁止 <img> / 凭记忆手绘）？
 ```
+
+---
+
+## 五、生成前必读（SKILL.md 第四步要求，2026-10-29 验证轮补齐）
+
+| 必读项 | 文件 | 说明 |
+|---|---|---|
+| 设计规格对照 | [components/navigation.md](../components/navigation.md)「PC 页脚 / MB 页脚」 | HTML 实现以本模板为唯一真源，组件文档供设计规格对照 |
+| 固定深色区颜色 | 本模板「颜色」节 | 页脚不随 light/dark 翻转；半透明白无语义 Token，按特例写法并注释 |
+| 图形资源 | 本模板「资源引用」 | 全部 Read 后逐属性内联 `<svg>`（禁止 `<img src>`） |
+
+## 六、已确认清单（用户历轮确认过的规格，优先级高于本模板正文旧值）
+
+| # | 规格 | 确认轮次 |
+|---|------|---------|
+| 1 | 友情链接标题行高 12px → 18px（成对规则，原 12/24 违反） | 2026-10-29 验证轮（footer 楼层裁定，navigation.md 同步修正） |
+| 2 | 无素材区域（社交入口 / 顶部说明 / 底部 Logo 等）省略并在工单与 HTML 注释说明，禁止编造 | 2026-10-29 验证轮（openGauss 场景实践） |
+| 3 | ⏳ 待确认：页脚高度 460px（PC）/ 458px（MB）为 openEuler 全内容集导出值，且结构值累加不自洽（≈510px ≠ 460px） | 2026-10-29 验证轮发现，**遗留裁决项**：改内容自然高度或给各内容档高度参考表 |
+
+## 七、冲突声明
+
+- 本模板与 [global/hard-constraints.md](../global/hard-constraints.md) 冲突时：按 SKILL.md「规则冲突裁决」执行（如友链标题行高已按成对规则修正）；组件级几何参数（底部 padding 34px、底部信息行 78px）按 hard-constraints §3「组件级几何参数」例外执行
+- 跨社区场景：本模板内容示例（6 列 openEuler 分组、基金会 Logo、社交区）与仓内品牌资产均随目标社区替换，按 SKILL.md 通用生成约束「跨社区内容适配」执行
+
+## 八、踩坑记录（已验证错误，禁止再犯）
+
+| # | 坑 | 禁令 |
+|---|---|---|
+| 1 | 友链标题行高 12/24 脱离成对规则被硬约束拦下 | 行高一律与字号按 §2 白名单成对锁定 |
+| 2 | 半透明白误用 `--o-color-info3`（随主题翻转，dark 下深色压深底不可读） | 固定深色区一律特例写法 `rgb(255,255,255,0.6)` + 注释 |
+| 3 | 跨社区时套用 openEuler 内容 / 品牌资产编造页脚 | 素材未提供的区域省略 + 说明（SKILL.md「跨社区内容适配」） |

@@ -1,12 +1,12 @@
 ---
 name: opendesign-design
 description: OpenDesign HTML 页面生产指南。当需要生成符合 OpenDesign 设计规范的 HTML 页面（按钮、输入框、卡片、导航等 UI 组件）、应用设计规范（栅格/颜色/字号/间距/圆角）、搭建页面框架时使用此 skill。包含 PC/MB 双断点的变量映射硬约束（字号/行高/间距/栅格/图标尺寸的合法取值白名单），覆盖 27 个组件设计规范。生成的 HTML 遵循 opendesign-codegen 工程规范（--o-* 语义 Token、OpenDesign 组件命名、BEM、响应式 Token），可直接作为设计原型或进一步转译为 Vue SFC 生产代码。
-last_update: 2026-10-16
+last_update: 2026-10-31
 ---
 
 # Design Skill · HTML 页面生成指南
 
-> 🎨 **设计师第一次使用？** → 先读 [references/designer-guide.md](references/designer-guide.md)，里面有角色决策树、规范速览卡和推荐交互方式。核心建议：**逐楼层生成，不要一次性生成整页**——逐楼层还原度远高于整页一次性生成。
+> 🎨 **设计师第一次使用？** → 先读 [references/designer-guide.md](references/designer-guide.md)，里面有角色决策树、输入清单、规范速览卡和推荐交互方式。核心建议：**逐楼层生成，不要一次性生成整页**——逐楼层还原度远高于整页一次性生成。
 
 > 💡 本文件为 AI 执行入口，仅包含生成 HTML 页面所需的指令与约束。完整使用说明、目录结构、协议信息请查看 [README.md](README.md)；请勿全量加载所有子文件，按工作流按需读取即可。
 >
@@ -64,6 +64,8 @@ last_update: 2026-10-16
 | [OMenu](components/menu.md) | 菜单 | | |
 | [OSearch](components/search.md) | 搜索框 | | |
 
+> 📌 **卡内数据统计栏（stats-bar）**：卡片内出现浏览量 / 点赞 / 评论 / 收藏 / 评分等统计数据行时，一律按 [OCard 规则 7](components/card.md) 的 `.stats-bar` 规格落地（`tip1` 14px / `--o-color-info3` / 图标间距 8px / 统计项间距 16px / 无评分居左 · 含评分时评分居左、其余居右），该规格已列入 [hard-constraints.md §1.3](global/hard-constraints.md) 组合规则——禁止为统计数据自创类名、字号或对齐方式。
+
 ## 图标处理规范（核心约束）
 
 > ⚠️ 本节规则优先级最高，所有生成步骤必须遵守。
@@ -107,7 +109,9 @@ last_update: 2026-10-16
    — ⚠️ 无法确定目标社区时停下询问用户，禁止猜测
 
 WebFetch 拉取目标社区主题 Token（必须执行！URL 见 #数据资源 社区映射表）
-   — 将 JSON 中的颜色/字号/间距变量翻译为 :root CSS 变量
+   — 将 JSON 中的全部变量翻译为 :root CSS 变量——颜色、字号/行高、间距、栅格、圆角、阴影、控件/图标尺寸一个不漏
+   — ⚠️ 圆角随社区差异最大（平直社区全 4px、内容 xl 档 0px；递进社区 4/8/12/16——六主题口径见 hard-constraints §7.1）：`:root` 的 `--o-radius-*` / `--o-radius_control-*` 按目标社区口径取值，禁止沿用 openEuler 基准值
+   — ⚠️ **openGauss / openUBMC 圆角取数覆盖（2026-10-30 维护者裁定）**：两社区的圆角档位**不从上游 JSON 翻译**（JSON 当前为递进值，与设计口径不一致）——`:root` 圆角一律按本仓口径写入（全档 4px、`--o-radius-xl: 0px`，即 `../opendesign-tokens/references/tokens-opengauss.md` / `tokens-openubmc.md` 圆角表的值），其余变量照常从 JSON 翻译；上游对齐后撤销本条
    — ⚠️ 禁止凭训练数据"猜测"颜色值！尤其是 --o-color-fill1（页面背景=浅灰，不是纯白）
    — 拉取失败时：降级用本地 `../opendesign-tokens/references/tokens-{社区}.md`（六主题全量 Token + Dark 值反查，离线可用；栅格 / 响应式见同目录 [tokens.md](../opendesign-tokens/references/tokens.md)）；designer-guide.md 速查表仅作 openEuler Light 辅助
    — 目标社区无本地 Token 文件时：停下询问用户，禁止借用其他社区 Token
@@ -126,24 +130,57 @@ WebFetch 拉取目标社区主题 Token（必须执行！URL 见 #数据资源 �
 
 ### 第一步：规划页面楼层结构
 
+**输入齐全性检查（规划前必做）**：对照以下清单检查用户输入，意图级信息（1~4 项）缺失时**先索要再规划**，禁止凭空假设：
+
+```
+1. 目标社区（第零步已识别）
+2. 目标设备（PC / MB）
+3. 场景：new-page 全新落地页，还是 site-extension 已有站点增改（后者须有 site_url）
+4. 页面语言（zh / en / zh-en；未说明默认 zh，在需求单中显式呈现供确认）
+5. 楼层构成意图与内容素材（越具体越好；不全时不阻塞规划，在第三步楼层工单中逐层索要）
+```
+
+**快捷通道**：用户首轮已直接提供填好的页面需求单 → 按 [references/page-brief-template.md](references/page-brief-template.md) §三校验（【必填】缺失停下询问、枚举非法给出合法值请用户修正），校验通过则跳过本步规划确认，直接进入逐楼层循环。
+
 根据用户需求，将页面拆解为楼层序列。所有落地页遵循固定结构（见 [hard-constraints.md §8](global/hard-constraints.md)）：
 
 ```
 导航楼层（必选）→ [Banner 楼层]（可选）→ 楼层 1 → 楼层 2 → … → 页脚楼层（必选）
 ```
 
-向用户输出楼层规划，**等待确认后才能继续**：
+向用户输出**页面需求单草稿**（格式见 [references/page-brief-template.md](references/page-brief-template.md) §一），**等待确认后才能继续**：
 
 ```
-我理解本次页面由以下楼层组成，请确认或调整：
-  1. 导航楼层（ONavigation）
-  2. Banner 楼层（OBanner，XL/L/M/无）
-  3. 功能介绍楼层（OCard × N 栅格）
-  4. 数据统计楼层（自定义数字 + 描述）
-  5. 页脚楼层（ONavigation Footer）
+# ========== 页面需求单 ==========
+meta:
+  community: openEuler
+  device: PC
+  scenario: new-page
+  language: zh
+floors:
+  - id: nav
+    type: navigation
+    summary: 主导航，logo + 一级菜单 + 搜索
+  - id: banner
+    type: banner
+    variant: XL
+    summary: 首页主视觉，slogan + 双按钮
+  - id: features
+    type: card-grid
+    columns: 3
+    summary: 功能介绍——3 列封面卡片
+  - id: stats
+    type: card-grid
+    columns: 4
+    summary: 数据统计楼层——OCard icon 统计卡片栅格（规格见 components/card.md「组合搭配 · 统计卡片」）
+  - id: footer
+    type: footer
+    summary: 站点地图 + 版权 + 友链
 
-请确认每个楼层的类型和内容，确认后我将逐楼层读取规范并生成。
+请确认或调整楼层规划，确认后我将逐楼层读取规范并生成。
 ```
+
+> ⚠️ 需求单是**确认载体**：楼层 `type` / `variant` / `id` 由你规划填写，用户只做确认与修改——**禁止要求用户先学会楼层分类学再填单**。用户以自然语言表达调整意见（如「第二层改成图文左右布局」）时，先更新需求单再继续。
 
 楼层模板速查见 [#楼层模板索引](#楼层模板索引)。用户确认后，进入逐楼层循环。
 
@@ -170,23 +207,36 @@ WebFetch 拉取目标社区主题 Token（必须执行！URL 见 #数据资源 �
 > 2. **停下询问用户（硬门禁）**——向用户提问下拉面板样式：**平铺式**（`floors/navigation-dropdown.md`，垂直列表、选项独占一行）还是**分类平铺式**（`floors/navigation-dropdown-categorized.md`，多列 + 列头 + 条目说明 + 快捷链接栏）？**未经用户明确选择，禁止自行决定样式、禁止跳过本步**
 > 3. **确认后一并生成全套**——读取用户选定的下拉面板模板，将「顶导 + 下拉面板」作为**一套完整的导航模式**完整生成（`navigation.md` + `navigation-dropdown` 或 `navigation-dropdown-categorized` = 全套），再进入第六步验证
 >
-> ⛔ 禁止把裸顶导（无下拉面板）当作导航楼层的最终交付；⛔ 禁止顶导与面板分多轮生成；⛔ 禁止未经用户确认自选面板样式。
+> 🔴 **两种下拉面板样式是二选一，禁止混用（2026-10-19 用户纠错后新增）**：同一套导航（同一顶导）下的**所有**下拉面板必须统一使用用户选定的那一种样式——要么全部平铺式，要么全部分类平铺式。⛔ **禁止按菜单项分别挂不同样式**（如「开发」挂分类平铺式、「下载」挂平铺式）：两种样式的宽度 / 边距 / 定位 / 圆角 / 条目交互规则完全不同（平铺式 = 居中触发器 auto 宽 + 4px 间距 + hover 色块；分类平铺式 = 通栏 216px + 零间距抽屉 + hover 只改文字色），混用会让同一页面出现两套几何逻辑与两种 hover 反馈，视觉与交互割裂。不需要下拉面板的菜单项（如「首页」「WIKI」）保持纯链接即可，这不属于混用。
+>
+> ⚠️ **样式判断要看整套导航的信息结构，不是逐个菜单项分配**：有条目说明文案 + 两个以上分类 → 分类平铺式；纯菜单名列表、无描述、无分组 → 平铺式。同一导航的信息结构通常只适配其中一种，**不存在「这个菜单适合 A、那个菜单适合 B」的混搭结论**。若拿不准，把各菜单的内容结构列给用户，让用户按上述标准二选一，**禁止自行分配**。
+>
+> ⛔ 禁止把裸顶导（无下拉面板）当作导航楼层的最终交付；⛔ 禁止顶导与面板分多轮生成；⛔ 禁止未经用户确认自选面板样式；⛔ 禁止同一顶导混用两种下拉面板样式。
 
-#### 第三步：确认本楼层涉及的组件
+#### 第三步：生成本楼层工单草稿（组件选型 + 内容素材 + 验收点）
 
-仅列出**当前楼层**用到的组件，不是整页所有组件：
+仅处理**当前楼层**（不是整页所有组件），输出**楼层工单草稿**（格式见 [references/page-brief-template.md](references/page-brief-template.md) §二），包含三部分：
 
 ```
-当前楼层：[楼层名称]
-涉及组件：
+# ========== 楼层工单：[楼层名称] ==========
+components:                  # AI 选型，用户可增删
   - OCard（封面卡片，vertical）
   - OButton（solid + outline）
   - OTag（分类标签）
+content:                     # 逐条列出本层文案 / 配图意图；【用户素材】缺失项向用户索要
+  - 卡片 1 标题：…
+  - 卡片 1 描述：…
+acceptance:                  # 可选：本层验收点，叠加在第六步自检之上
+  - …
 
-确认后我将读取对应规范。
+确认 / 补充后我将读取对应规范并生成本楼层。
 ```
 
-用户确认后，逐一读取每个组件的 `components/{name}.md`，**全部读取完毕才能进入下一步**。
+> ⚠️ **内容素材是用户素材：缺失时停下向用户索要，禁止编造**——导航菜单项、页脚链接、卡片标题 / 描述、Banner 文案均同（第零步「站点框架基准」抓取到的线上结构除外）。本条是「禁止凭空编造导航项」在全部楼层内容上的泛化。
+>
+> ⚠️ 页面需求单 `meta.confirm = auto` 时：楼层工单仍须生成（内容结构化载体），但仅内容素材缺失或验收点存疑时停下，其余直接进入第四步。
+
+用户确认 / 补充后，逐一读取每个组件的 `components/{name}.md`，**全部读取完毕才能进入下一步**。
 
 #### 第四步：读取本楼层组件规范与资源
 
@@ -221,9 +271,9 @@ WebFetch 拉取目标社区主题 Token（必须执行！URL 见 #数据资源 �
 | 字号/行高 | 优先使用 `var(--o-r-font_size-*)` + `var(--o-r-line_height-*)` 响应式 Token |
 | 间距 | 页面级使用 `var(--o-r-gap-*)`；组件内使用 `var(--o-gap-*)` |
 | 栅格 | 页面级布局使用 24 栅格（`--o-r-grid-N` + 水槽 `--o-r-grid-column-gutter`） |
-| 圆角/阴影 | `--o-radius-*`、`--o-shadow-*` |
-| 组件命名 | 容器类名使用 BEM（如 `.navigation`、`.card-grid`），组件语义使用 `o-` 前缀（如 `.o-button`、`.o-card`） |
-| 响应式 | 优先响应式 Token 免写媒体查询；确需断点时用 `@media` |
+| 圆角/阴影 | 档位圆角一律 `var(--o-radius-*)` / `var(--o-radius_control-*)`（值随目标社区 token），禁止写死 px；形状语义圆角（胶囊 100px 等固定造型）按组件文档直值。阴影用 `--o-shadow-*` |
+| 组件命名 | 容器类名使用 BEM（如 `.navigation`、`.card-grid`）；组件类名**以各组件规范权威 DOM 为唯一真源**（如 `.o-button`、`.ocard`——各组件前缀不统一，禁止凭本表猜测，2026-10-29 修正示例误导） |
+| 响应式 | 优先响应式 Token 免写媒体查询；确需断点时用 `@media`。**楼层模板 / 组件规范已给出精确分档值的（含固定直值与显式断点），以模板值为准、禁止改用 `--o-r-*` 替换**——楼层模板 CSS 骨架视为已确认的断点特例（如 Banner 正文 MB 档 12/18，直接套 `--o-r-font_size-h4` 会错成 16/24；2026-10-29 验证轮澄清） |
 | 无内联 style | 禁止 `style="..."` 内联样式（极特殊动态值除外并注释） |
 | 无 !important | 除非硬约束中的布局强制要求，否则禁止 `!important` |
 
@@ -244,10 +294,13 @@ WebFetch 拉取目标社区主题 Token（必须执行！URL 见 #数据资源 �
 □ 【HTML颜色】`body` 的 `background-color` 是否使用 `var(--o-color-fill1)`？（禁止 `#FFFFFF` / `white`）
 □ 【SVG搬运】图标 SVG 是否逐属性原样搬运（fill-rule / clip-rule / transform / opacity 未丢失）？
 □ 【CodeGen对齐】颜色是否全部使用 `var(--o-color-*)` 语义 Token，无 `#fff`/`rgb()` 硬编码？
+□ 【社区Token】`:root` 的圆角档位（`--o-radius-*` / `--o-radius_control-*`）是否按目标社区口径取值？（平直社区全 4px / 内容 xl 0px、递进社区 4/8/12/16——六主题口径见 hard-constraints §7.1；禁止沿用 openEuler 值。openGauss / openUBMC 按口径覆盖：不从 JSON 取递进值）
+□ 【HTML圆角】档位圆角是否全部为 `var(--o-radius_*)`？（硬编码 `border-radius: 数字px` 仅允许形状语义特例——胶囊 100px、Tab 指示器 9px 等组件文档明示的固定造型）
 □ 【CodeGen对齐】是否未直接使用色板变量（`--o-kleinblue-*`/`--o-grey-*` 等）？
 □ 【CodeGen对齐】字号/行高是否使用 `var(--o-r-font_size-*)` + `var(--o-r-line_height-*)`？
 □ 【CodeGen对齐】是否无内联 `style="..."` 和非必要 `!important`？
 □ 【CodeGen对齐】类名是否使用 BEM 命名规范？
+□ 【卡内统计】卡片内出现浏览 / 点赞 / 评论 / 收藏 / 评分等数据行时，是否按 card.md 规则 7 使用 `.stats-bar`（tip1 14px / 22px / 400 · `info3` · 图标间距 8px · 统计项间距 16px · 无评分居左 / 含评分评分居左+其余居右）？（禁止自创统计栏类名、字号或对齐）
 □ 【视觉合理性】数值虽全部合规，视觉是否仍然异常（内容重心偏移 / 对比度不足 / 留白失衡 / 信息色与背景色颠倒）？——数值自洽不等于符合设计意图，禁止只验算式不验视觉；发现疑点必须在交付说明中显式提出，禁止静默放行
 
 渲染验证（按环境能力分级，禁止静默跳过）：
@@ -281,12 +334,14 @@ WebFetch 拉取目标社区主题 Token（必须执行！URL 见 #数据资源 �
 □ 楼层间距是否统一为间距 10（PC 72px / MB 32px）？
 □ 全页组件组合是否无黑名单违规？
 □ 整体视觉一致性检查
-□ 【社区Token】:root 颜色是否来自目标社区主题 Token（对照第零步社区识别结论，禁止 openEuler 默认值混入）？
+□ 【社区Token】:root 颜色与圆角档位是否来自目标社区主题 Token（对照第零步社区识别结论，禁止 openEuler 默认值混入——圆角尤甚：平直社区全 4px / 内容 xl 0px，Ascend / Mindspore 等递进社区照抄即错）？
+□ 【下拉面板样式统一】导航所有下拉面板是否统一使用用户选定的那一种样式（`.o-nav__dropdown` 与 `.o-nav__dropdown--categorized` 不得在同一顶导内混用）——有下拉面板的页面必查
 □ 【站点框架】路由A页面级增改场景：导航/页脚是否与社区线上实际结构一致（对照第零步抓取的站点框架基准）？
 □ 【渲染验证】组装完成后逐楼层目检完整页面（有浏览器能力 → 打开截图目检；无 → 按第六步降级为静态自检并显式标注「未做渲染目检」）——重点排查固定 width/height 容器内的长文案是否折行溢出堆叠（步骤条标题、卡片标题、按钮、标签）
 □ 【图标风格】关键图标是否与设计系统一致（以浏览器渲染为准，非仅看源码 fill/stroke 属性）？
 □ 【CodeGen对齐】全页颜色是否全部使用 `var(--o-color-*)` 语义 Token，无硬编码？
 □ 【CodeGen对齐】全页字号/行高/间距是否使用响应式 Token？
+□ 【CodeGen对齐】全页档位圆角是否全部使用 `var(--o-radius_*)`（形状语义特例除外），无硬编码 `border-radius: 数字px`？
 □ 【CodeGen对齐】全页是否无语义色板变量直接引用？
 □ 【CodeGen对齐】全页类名是否符合 BEM 规范？
 □ 【视觉合理性】全页数值虽合规，视觉是否仍然异常（各楼层内容重心偏移 / 信息色与背景色颠倒 / 品牌色对比度不足）？——禁止只验数值不验视觉，发现疑点显式提出
@@ -302,6 +357,13 @@ WebFetch 拉取目标社区主题 Token（必须执行！URL 见 #数据资源 �
 > - 合法的参数来源只有三个：① 对应组件规范文档 ② 硬约束白名单（第零步） ③ 上游 Token 真源
 > - 三者之外的任何取值均属**自定义内容，一律禁止**，包括但不限于：近似色值、估算间距、推断圆角、猜测默认变体
 > - **规格表必须逐行对照，禁止凭先验落笔**：颜色 / 尺寸 / 圆角 / 变体等每一处取值，都必须回到本楼层 `components/{name}.md` 的规格表逐行确认后再写。当「我习惯的写法 / 训练数据中的常见样式」与规范表冲突时，**一律以规范表为准**——读过了规范不等于对照过规范，禁止边写边凭印象填充
+> - 🚨 **对齐方式必须回表确认，禁止跨变体自由发挥**：同一语义元素（图标 vs 标题、文字 vs 图标、按钮 vs 容器）在**不同布局变体下必须是同一对齐口径**，且该口径必须在规格表里有明确行。若规范表只写了尺寸/颜色/间距而**漏写对齐方式**，这正是缺项——先按设计常识补齐该行并显式告知用户，**禁止让 vertical 用 `flex-start`、horizontal 用 `center` 这类「各自看着办」的分裂实现**。历史教训：OCard icon 卡因规范漏写对齐方式，horizontal 变体用了 `align-items: center`，导致 32px 图标对着「标题+描述」整列垂直居中、比标题低约 25px 掉到标题与描述之间（第十五轮）
+> - 🚨 **间距必须取自分档表，禁止只读单一值**：凡规范表按断点分档的内边距 / 间距 / 元素尺寸，必须**逐档取值并逐档写媒体查询**，禁止把某一档的值当作「组件通用值」全档复用。反向同样成立——规范若写「不分档」，实现就不许自行分档；发现「不分档」与实际窄档体验冲突时，先向用户提出并按回复回写规范
+> - 🚨 **排列方式变体的结构必须与同类组件的同名变体镜像，禁止自造结构**：`vertical` / `horizontal` 是**跨组件通用的语义**——vertical = 视觉主体（封面 / 图标 / 头像）在文字**上方**，horizontal = 视觉主体在文字**左侧**。给任何组件生成变体前，先查规范中该变体的 DOM 结构定义（Header 方向、图标在 Header 内还是移出与 Body 并排）；同类组件已有一个变体的实现时，**结构必须与之对齐**，禁止按个人理解另造一种。历史教训：OCard icon 卡未定义排列方式结构，实现侧把 vertical 做成「图标与标题横排」，与 cover 的 vertical（封面在上）逻辑相反，还因图标槽比标题行盒高撑大 header，导致「标题行盒→描述」实测 10/14/8 而非 8（第十六轮）
+> - 🚨 **统一 flex gap 会与子元素 margin 叠加，两个纵向间距值不同时禁用 gap**：容器 `gap` 作用于**每一对相邻子元素**，与子元素自身 `margin-top/bottom` 是**相加**关系。当「A→B」与「B→C」需要不同值时（如 OCard icon 的 8px 与 16px），统一 gap 结构上无法分别表达，必须改 `gap: 0` + 分段 margin 直读；若确实要用 gap，须确认相邻子元素没有额外 margin，否则实测值 = gap + margin 而非 gap
+> - 🚨 **卡内数据统计栏必须走 OCard stats-bar 规格，禁止自创**：卡片内出现浏览量 / 点赞 / 评论 / 收藏 / 评分等统计数据行时，一律按 [components/card.md](components/card.md) 规则 7 落地——类名 `.stats-bar`、字号 `font_size-tip1`（14px）/ 行高 22px / 字重 400、颜色 `--o-color-info3`、统计项内图标与文字间距 8px、统计项之间 16px、无背景无边框、无评分全部居左 / 含评分评分居左+其余居右（该规格已列入 [hard-constraints.md §1.3](global/hard-constraints.md) 与其 §3 校验项 □11）；禁止自创类名、改字号改色或另行布局
+> - 🚨 **跨社区内容适配（2026-10-29 验证轮新增）**：楼层模板与组件规范中的社区内容示例（导航菜单项、页脚分组、社交入口、二维码、基金会 Logo 等）与仓内品牌资产（`references/assets/` 以 openEuler 为基）均**随目标社区替换**——非 openEuler 社区：① 内容素材按目标社区用户提供，素材未提供的区域**省略并在工单与 HTML 注释中说明，禁止套用 openEuler 内容编造**；② 仓内 openEuler 品牌资产禁止跨社区使用；③ 模板 / 组件文档内嵌的 openEuler 参考值——色值（如 #F0F5FF）、档位圆角直值（多数 4px）、阴影——生成时一律以目标社区 Token 等价语义覆盖（档位圆角写 `var(--o-radius_*)`，值由 `:root` 的目标社区定义决定）；社区专属禁令（如「主色调必须 #002FA7」）同样按目标社区覆盖
+> - **问题必须回写 skill，禁止只改产物**：用户每抛出一个问题，修复时除改当前产物外，**必须同步定位到对应 skill 文件并回写**（组件规范补缺项 / 硬约束补条款 / QA 清单补检查项 / CHANGELOG 记根因与踩坑）。只改产物不回写规范 = 下一轮必复发；本轮问题若在 CHANGELOG 中找不到对应记录，视为未完成
 > - **规范未覆盖时的分级处理**（禁止静默取值）：
 >   - 规范文档缺少某项参数（如 PC 端未写明 Banner 的垂直对齐方式）→ **先显式向用户指出该缺失**，并给出你打算采用的设计常识做法
 >   - 确需按设计常识补位时，必须在交付说明中标注「**此点为规范未覆盖的推断，需你确认**」
@@ -316,7 +378,7 @@ WebFetch 拉取目标社区主题 Token（必须执行！URL 见 #数据资源 �
 > - 颜色全部使用 `var(--o-color-*)` 语义 Token，**严禁**使用色板变量（`--o-kleinblue-*`/`--o-grey-*` 等）
 > - 字号/行高优先 `var(--o-r-font_size-*)` + `var(--o-r-line_height-*)` 响应式 Token
 > - 间距使用 `var(--o-r-gap-*)` 或 `var(--o-gap-*)` Token
-> - 圆角/阴影使用 `--o-radius-*` / `--o-shadow-*` Token
+> - 档位圆角一律 `var(--o-radius-*)` / `var(--o-radius_control-*)`（值随目标社区 token，禁止写死 px；胶囊 100px 等形状语义特例除外），阴影使用 `--o-shadow-*` Token
 > - 类名使用 BEM 命名规范（`block__element--modifier`）
 > - 禁止非必要 `!important` 和内联 `style="..."`
 > - 页面使用 24 栅格布局（`--o-r-grid-N` + `--o-r-grid-column-gutter`）
@@ -340,6 +402,7 @@ WebFetch 拉取目标社区主题 Token（必须执行！URL 见 #数据资源 �
 | 导航下拉面板 · 分类平铺式 | [floors/navigation-dropdown-categorized.md](floors/navigation-dropdown-categorized.md) | 顶导菜单项展开的分类平铺式下拉面板（多列 + 列头 + 条目说明 + 快捷链接栏，与导航楼层搭配） |
 | Banner | [floors/banner.md](floors/banner.md) | 首页/栏目页顶部横幅（XL/L/M） |
 | 卡片栅格 | [floors/card-grid.md](floors/card-grid.md) | 功能展示、产品列表、特性介绍 |
+| 通用楼层卡片模块 | [floors/floor-card.md](floors/floor-card.md) | 页面通用标准楼层：楼层标题+描述+二级标题+Tab+卡片+查看更多，五档断点固定规格（间距为固定值约束） |
 | 图文特色 | [floors/feature-section.md](floors/feature-section.md) | 左图右文/左文右图特色介绍 |
 | 页脚 | [floors/footer.md](floors/footer.md) | 站点地图、版权信息、社交入口 |
 
@@ -367,7 +430,7 @@ WebFetch 拉取目标社区主题 Token（必须执行！URL 见 #数据资源 �
 
 | 异常场景 | 处理方式 |
 |----------|----------|
-| WebFetch 拉取上游 Token 失败（超时 / 404） | 使用 `references/designer-guide.md` 中的 Token 语义速查表作为降级数据源，在输出中注明「Token 真源未拉取，使用降级数据源」 |
+| WebFetch 拉取上游 Token 失败（超时 / 404） | 降级用本地 `../opendesign-tokens/references/tokens-{社区}.md` 六主题 Token 文件（与第零步正文一致），在输出中注明「Token 真源未拉取，使用降级数据源（可能落后上游）」；`references/designer-guide.md` 速查表仅作 openEuler Light 辅助，不覆盖其他社区（2026-10-29 修正两处指引不一致） |
 | `components/{name}.md` 不存在 | 停下告知用户该组件暂无设计规范，询问是否继续（无规范 = 无合法参数来源，禁止自行推断） |
 | 硬约束白名单无法覆盖需求值 | 停下告知用户该值不在合法取值集合内，给出最接近的白名单值供选择，禁止静默取近似值 |
 | `references/assets/` 中无目标 SVG | 按图标使用规则降级：手写线性风格 SVG 路径，并在 HTML 注释中注明「assets 中无资源」 |

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>通用楼层卡片模块 · 规范验收（五档断点）</title>
+<style>
+/* ===== 验收页外壳（非模块本体，仅用于并排查看五档）===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'HarmonyOS Sans', 'HarmonyHeiTi', sans-serif;
+    background: #E8E8EA;
+    color: #000;
+    padding: 24px 24px 64px;
+}
+.page-head { max-width: 1400px; margin: 0 auto 24px; }
+.page-head h1 { font-size: 20px; line-height: 28px; font-weight: 600; }
+.page-head p { font-size: 13px; line-height: 22px; color: #333; margin-top: 4px; }
+.toolbar {
+    max-width: 1400px; margin: 0 auto 24px; display: flex; align-items: center; gap: 16px;
+    background: #fff; border-radius: 4px; padding: 12px 16px; font-size: 13px; line-height: 22px;
+}
+.toolbar label { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+.toolbar .hint { color: #666; }
+details.legend { max-width: 1400px; margin: 0 auto 24px; background: #fff; border-radius: 4px; padding: 12px 16px; }
+details.legend summary { font-size: 13px; line-height: 22px; cursor: pointer; font-weight: 600; }
+details.legend table { border-collapse: collapse; margin: 12px 0; font-size: 12px; line-height: 20px; }
+details.legend th, details.legend td { border: 1px solid #DEDEDE; padding: 4px 10px; text-align: center; white-space: nowrap; }
+details.legend th { background: #F3F3F5; font-weight: 600; }
+details.legend td:first-child, details.legend th:first-child { text-align: left; }
+.bp { margin: 0 auto 32px; }
+.bp__inner { width: max-content; margin: 0 auto; }
+.bp__label {
+    margin: 0 0 8px; font-size: 13px; line-height: 22px; font-weight: 600;
+    display: flex; gap: 12px; align-items: baseline;
+}
+.bp__label span { font-weight: 400; color: #444; }
+.bp__frame { background: #fff; padding: 0; border-radius: 4px; overflow-x: auto; }
+.bp__frame iframe { display: block; border: 0; }
+</style>
+</head>
+<body>
+
+<div class="page-head">
+    <h1>通用楼层卡片模块 · 规范验收</h1>
+    <p>对应模板：skills/opendesign-design/floors/floor-card.md ｜ 五档断点同页并排渲染，每帧为真实视口宽度（媒体查询按帧宽生效）。可选模块按约定全部默认渲染。</p>
+</div>
+
+<div class="toolbar">
+    <label><input type="checkbox" id="guides"> 显示间距标注（读取实际 computed margin-bottom）</label>
+    <span class="hint">标注值为浏览器实测像素，可与模板间距表逐档核对。</span>
+</div>
+
+<details class="legend">
+    <summary>规格速查（点击展开 / 收起）</summary>
+    <table>
+        <tr><th>元素</th><th>≥1681px</th><th>1201~1680px</th><th>841~1200px</th><th>601~840px</th><th>340~600px</th></tr>
+        <tr><td>楼层标题（semibold / info1）</td><td>40 / 56</td><td>32 / 44</td><td>24 / 32</td><td>18 / 26</td><td>18 / 26</td></tr>
+        <tr><td>楼层描述（regular / info2）</td><td>16 / 24</td><td>14 / 22</td><td>14 / 22</td><td>14 / 22</td><td>14 / 22</td></tr>
+        <tr><td>二级标题（semibold / info1）</td><td>24 / 32</td><td>20 / 28</td><td>18 / 26</td><td>16 / 24</td><td>16 / 24</td></tr>
+        <tr><td>Tab 尺寸</td><td>L</td><td>M</td><td>M</td><td>S</td><td>S</td></tr>
+        <tr><td>查看更多（text 变体）</td><td>L</td><td>M</td><td>M</td><td>S</td><td>S</td></tr>
+        <tr><td>卡片标题行数上限</td><td>2 行</td><td>2 行</td><td>2 行</td><td>1 行</td><td>1 行</td></tr>
+        <tr><td>卡片描述行数上限</td><td>3 行</td><td>3 行</td><td>3 行</td><td>2 行</td><td>2 行</td></tr>
+    </table>
+    <table>
+        <tr><th>间距项</th><th>≥1681px</th><th>1201~1680px</th><th>841~1200px</th><th>601~840px</th><th>340~600px</th></tr>
+        <tr><td>楼层与楼层上下之间间距</td><td>72</td><td>56</td><td>40</td><td>32</td><td>32</td></tr>
+        <tr><td>楼层标题 → 楼层描述</td><td>16</td><td>12</td><td>8</td><td>16</td><td>16</td></tr>
+        <tr><td>楼层描述 → 二级标题</td><td>40</td><td>24</td><td>16</td><td>12</td><td>12</td></tr>
+        <tr><td>二级标题 → Tab 页签</td><td>24</td><td>16</td><td>12</td><td>12</td><td>12</td></tr>
+        <tr><td>Tab 页签 → 卡片容器</td><td>24</td><td>16</td><td>12</td><td>12</td><td>12</td></tr>
+        <tr><td>卡片容器 → 查看更多按钮</td><td>32</td><td>24</td><td>16</td><td>12</td><td>12</td></tr>
+        <tr><td>查看更多 → 模块底部外边距</td><td>72</td><td>56</td><td>40</td><td>32</td><td>32</td></tr>
+        <tr><td>卡片水平间距</td><td>32</td><td>24</td><td>16</td><td>16</td><td>12</td></tr>
+        <tr><td>卡片垂直间距</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>卡片列数</td><td>横排</td><td>横排</td><td>横排</td><td>横排</td><td>横排，超出横向滑动</td></tr>
+    </table>
+</details>
+
+<!-- ===== 模块 CSS（与 floors/floor-card.md 逐条一致；唯一差异：本页为验收用途）===== -->
+<template id="tpl-css">
+:root {
+    /* 语义 Token：openEuler 社区（WebFetch 失败，降级用本地 tokens-openeuler.md）*/
+    --o-color-fill1: #F3F3F5;
+    --o-color-fill2: #FFFFFF;
+    --o-color-fill3: #EDEDF0;
+    --o-color-info1: #000000;
+    --o-color-info2: #333333;
+    --o-color-info3: #666666;
+    --o-color-info4: #999999;
+    --o-color-primary1: #002FA7;
+    --o-color-primary2: #5177CA;
+    --o-color-primary3: #002793;
+    --o-color-control1: rgba(0, 0, 0, 0.25);
+    --o-color-control2-light: #EBF1FA;
+    --o-color-white: #FFFFFF;
+    --o-radius-xs: 4px;
+    --o-radius-s: 4px;
+    --o-radius-m: 4px;
+    --o-radius-l: 4px;
+    --o-shadow-1: 0 3px 9px 0 rgba(0, 18, 85, 0.078);
+    --o-shadow-2: 0 6px 18px 0 rgba(0, 18, 85, 0.12);
+    /* 静态字号（Tab / Button 为手动选尺寸，不随断点缩放）*/
+    --o-font_size-h4: 20px;      --o-line_height-h4: 28px;
+    --o-font_size-text2: 18px;   --o-line_height-text2: 26px;
+    --o-font_size-tip1: 14px;    --o-line_height-tip1: 22px;
+    --o-font_size-text1: 16px;   --o-line_height-text1: 24px;
+    /* 响应式字号：基准档 = Phone/Pad 竖屏（≤840px）*/
+    --o-r-font_size-display3: 18px;  --o-r-line_height-display3: 26px;
+    --o-r-font_size-h3: 16px;        --o-r-line_height-h3: 24px;
+    --o-r-font_size-h2: 16px;        --o-r-line_height-h2: 24px;
+    --o-r-font_size-text1: 14px;   --o-r-line_height-text1: 22px;
+}
+@media (min-width: 841px) and (max-width: 1200px) {
+    :root {
+        --o-r-font_size-display3: 24px;  --o-r-line_height-display3: 32px;
+        --o-r-font_size-h3: 16px;        --o-r-line_height-h3: 24px;
+        --o-r-font_size-h2: 18px;        --o-r-line_height-h2: 26px;
+        --o-r-font_size-text1: 14px;   --o-r-line_height-text1: 22px;
+    }
+}
+@media (min-width: 1201px) and (max-width: 1680px) {
+    :root {
+        --o-r-font_size-display3: 32px;  --o-r-line_height-display3: 44px;
+        --o-r-font_size-h3: 18px;        --o-r-line_height-h3: 26px;
+        --o-r-font_size-h2: 20px;        --o-r-line_height-h2: 28px;
+        --o-r-font_size-text1: 14px;   --o-r-line_height-text1: 22px;
+    }
+}
+@media (min-width: 1681px) {
+    :root {
+        --o-r-font_size-display3: 40px;  --o-r-line_height-display3: 56px;
+        --o-r-font_size-h3: 22px;        --o-r-line_height-h3: 30px;
+        --o-r-font_size-h2: 24px;        --o-r-line_height-h2: 32px;
+        --o-r-font_size-text1: 16px;   --o-r-line_height-text1: 24px;
+    }
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'HarmonyOS Sans', 'HarmonyHeiTi', sans-serif;
+    background: var(--o-color-fill1);
+    color: var(--o-color-info1);
+}
+
+/* ===== 楼层容器（模板 §六）===== */
+.floor-card { position: relative; }
+.floor-card__title {
+    text-align: center; font-weight: 600; color: var(--o-color-info1);
+    font-size: var(--o-r-font_size-display3); line-height: var(--o-r-line_height-display3);
+    margin: 0 0 16px;
+}
+.floor-card__desc {
+    text-align: center; font-weight: 400; color: var(--o-color-info2);
+    font-size: var(--o-r-font_size-text1); line-height: var(--o-r-line_height-text1);
+    margin: 0 0 40px;
+}
+.floor-card__subtitle {
+    text-align: center; font-weight: 600; color: var(--o-color-info1);
+    font-size: var(--o-r-font_size-h2); line-height: var(--o-r-line_height-h2);
+    margin: 0 0 24px;
+}
+
+/* ===== Tab 页签（引用 tab.md：text 变体，仅选尺寸；不写内部样式之外的规则）===== */
+.floor-card__tabs { display: flex; justify-content: center; margin: 0 0 24px; }
+.otab { display: flex; }
+.otab__item {
+    appearance: none; border: 0; background: none; cursor: pointer; position: relative;
+    font-family: inherit; font-weight: 400; color: var(--o-color-info2); /* Enabled = 80% 黑 */
+    height: 48px; padding: 0 0 16px; display: inline-flex; align-items: center;
+    font-size: var(--o-font_size-h4); line-height: var(--o-line_height-h4); /* L 默认 */
+}
+.otab__item + .otab__item { margin-left: 24px; }
+/* 选中指示器：仅 Actived 显示；Press 时变色（tab.md Part C）*/
+.otab__item::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+    border-radius: 100px; background: transparent;
+}
+.otab__item.is-active { font-weight: 600; color: var(--o-color-primary1); }
+.otab__item.is-active::after { background: var(--o-color-primary1); }
+/* 交互态（tab.md Part C · text 变体；已按 navigation.md 踩坑 #17 裁决：hover / press 一律不改字重）：
+   Hover 非选中 = 仅文字 primary2（字重不变）
+   Hover 选中   = 保持 primary1 + 下划线
+   Press        = 文字 primary3 + 同色下划线（字重不变）
+   Disabled     = Regular + info4，移除下划线
+   ⚠️ hover / press 必须带 :not(:disabled) 限定：`:hover:not(.is-active)` 特异性 (0,3,0) 高于
+      `.otab__item:disabled` (0,2,0)，不加限定时禁用项被鼠标划过仍会变色（实测 hover → primary2、
+      press → primary3 且指示器变色）。disabled 是终态，不得被任何交互态覆盖。 */
+.otab__item:hover:not(.is-active):not(:disabled) { color: var(--o-color-primary2); }
+/* 特异性需 ≥ hover 规则：按下时鼠标必同时处于 hover，否则 Press 色会被 Hover 色盖掉 */
+.otab__item:active:not(.is-active):not(:disabled),
+.otab__item.is-active:active:not(:disabled) { color: var(--o-color-primary3); }
+.otab__item:active:not(:disabled)::after { background: var(--o-color-primary3); }
+.otab__item:disabled { font-weight: 400; color: var(--o-color-info4); cursor: not-allowed; }
+.otab__item:disabled::after { visibility: hidden; }  /* 视觉移除但保留占位：S 档竖排（601~840/340~600）时禁用项文字与其他页签对齐；⛔ 禁写 display:none（删掉 16px+4px 占位后文字低一截） */
+/* Tab：≥1681px 用 L，841~1200px / 1201~1680px 用 M，601~840px / 340~600px 用 S（模板「涉及组件」表）*/
+@media (min-width: 841px) and (max-width: 1680px) {
+    .otab__item {
+        height: 44px; padding: 2px 0 16px; align-items: flex-start;
+        font-size: var(--o-font_size-text2); line-height: var(--o-line_height-text2); /* M */
+    }
+}
+/* Tab：601~840px / 340~600px 用 S（tab.md small：竖向 56×56、14px/22px、16px 居中短线指示器、圆角 9px）*/
+@media (max-width: 840px) {
+    .otab__item {
+        width: 56px; height: 56px; padding: 4px 0 2px;
+        flex-direction: column; justify-content: center; align-items: center;
+        font-size: var(--o-font_size-tip1); line-height: var(--o-line_height-tip1); /* S */
+    }
+    /* small 指示器：16px 宽居中短线（非全宽），圆角 9px；改为文档流内随文字排布 */
+    .otab__item::after { position: static; left: auto; right: auto; bottom: auto; width: 16px; border-radius: 9px; margin-top: 4px; }
+}
+
+/* ===== 卡片容器（引用 card.md：cover + vertical，仅示例）===== */
+.floor-card__cards { display: flex; margin: 0 0 32px; }
+.floor-card__cards > .ocard { flex: 1; min-width: 0; }
+.floor-card__cards > .ocard + .ocard { margin-left: 32px; }
+/* 卡片内间距（card.md 内边距规格 · 单层口径 + 分档，禁止改动数值）：
+   容器 padding 只服务封面，底部收口 0；Body 自己写实际值 → 「到卡片边缘」的值可直读。
+   ⚠️ 水平方向：Body 左/右边缘本身已被容器 padding 推离卡片边缘，故
+      「标题→卡片左」= 容器左 + Body 左；「描述→卡片右」= 容器右 + Body 右。
+      竖向不受影响（封面在 Body 上方，Body 顶距量的是封面底；容器底部为 0）。
+   ┌───────────┬──────────────┬────────────────┬───────────┬──────────┬──────────┬──────────┐
+   │ 档位      │ 容器 上/右/下/左 │ Body 上/右/下/左 │ 封面→标题 │ 标题→描述 │ 文字→卡左/右 │ 文字底→卡底 │
+   ├───────────┼──────────────┼────────────────┼───────────┼──────────┼──────────┼──────────┤
+   │ ≥1681px   │ 8/8/0/8      │ 24/24/24/24    │ 24        │ 12       │ 32/32    │ 24       │
+   │ 1201~1680 │ 8/8/0/8      │ 16/16/16/16    │ 16        │ 8        │ 24/24    │ 16       │
+   │ 841~1200  │ 8/8/0/8      │ 12/8/12/8      │ 12        │ 8        │ 16/16    │ 12       │
+   │ 601~840   │ 4/4/0/4      │ 12/8/12/8      │ 12        │ 8        │ 12/12    │ 12       │
+   │ 340~600   │ 4/4/0/4      │ 12/8/12/8      │ 12        │ 8        │ 12/12    │ 12       │
+   └───────────┴──────────────┴────────────────┴───────────┴──────────┴──────────┴──────────┘ */
+.ocard {
+    background: var(--o-color-fill2); border-radius: var(--o-radius-l); padding: 8px 8px 0;
+    transition: box-shadow .2s ease;
+}
+.ocard:hover { box-shadow: var(--o-shadow-2); }
+.ocard__cover {
+    width: 100%; aspect-ratio: 16 / 9; border-radius: var(--o-radius-s);
+    background: var(--o-color-fill3); overflow: hidden;
+}
+.ocard__cover i { display: block; width: 100%; height: 100%; background: var(--o-color-fill3); transition: transform .2s ease; }
+.ocard:hover .ocard__cover i { transform: scale(1.05); }
+/* Body 默认取 ≥1681px 档：上 24（封面↔标题）· 左右 24（+容器 8 = 文字距卡片边缘 32）· 下 24（容器底部 0，即直读值） */
+.ocard__body { padding: 24px 24px 24px; }
+.ocard__title {
+    font-size: var(--o-r-font_size-h3); line-height: var(--o-r-line_height-h3);
+    font-weight: 600; color: var(--o-color-info1);
+    /* 文本约束（card.md 硬约束规则 8）：≥1201px 标题最多 2 行；≤840px 标题只 1 行。超出末尾 ...
+       line-clamp 四件套必须齐全，缺 overflow:hidden 省略号不出现、文字直接溢出 */
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+.ocard:hover .ocard__title { color: var(--o-color-primary1); }
+.ocard__desc {
+    font-size: var(--o-r-font_size-text1); line-height: var(--o-r-line_height-text1);
+    font-weight: 400; color: var(--o-color-info3); margin-top: 12px;
+    /* 文本约束：≥1201px 描述最多 3 行；≤840px 描述只 2 行。超出末尾 ... */
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
+}
+/* ===== 卡片内间距分档（1201~1680 / 841~1200 / 601~840 / 340~600 四档覆盖默认值）===== */
+@media (min-width: 1201px) and (max-width: 1680px) {
+    .ocard__body { padding: 16px 16px 16px; }
+    .ocard__desc { margin-top: 8px; }
+}
+@media (min-width: 841px) and (max-width: 1200px) {
+    .ocard__body { padding: 12px 8px 12px; }
+    .ocard__desc { margin-top: 8px; }
+}
+/* 601~840px：容器收到 4px、文字距卡片左/右 12 */
+@media (min-width: 601px) and (max-width: 840px) {
+    .ocard       { padding: 4px 4px 0; }
+    .ocard__body { padding: 12px 8px 12px; }
+    .ocard__desc { margin-top: 8px; }
+}
+@media (max-width: 600px) {
+    .ocard { padding: 4px 4px 0; }
+    .ocard__body { padding: 12px 8px 12px; }
+    .ocard__desc { margin-top: 8px; }
+}
+/* 601~840px / 340~600px 两档：卡片标题 1 行、描述 2 行（card.md 硬约束规则 8 分档表）*/
+@media (max-width: 840px) {
+    .ocard__title { -webkit-line-clamp: 1; }
+    .ocard__desc  { -webkit-line-clamp: 2; }
+}
+
+/* ===== 查看更多（引用 button.md：text 变体，仅选尺寸）===== */
+.floor-card__more { display: flex; justify-content: center; margin: 0 0 72px; }
+.obutton--text {
+    appearance: none; border: 0; background: none; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: inherit; font-weight: 400; color: var(--o-color-info1);
+    height: 40px; padding: 0; font-size: var(--o-font_size-text1); line-height: var(--o-line_height-text1); /* L */
+}
+.obutton--text svg { width: 24px; height: 24px; flex: none; }
+/* 图标属性已逐项内联保留；此处仅用 CSS 把 fill 切到 currentColor，使 hover / active 换色生效 */
+.obutton--text svg path { fill: currentColor; fill-opacity: 1; }
+.obutton--text:hover { color: var(--o-color-primary2); }
+.obutton--text:active { color: var(--o-color-primary3); }
+/* 查看更多：L（≥1681px）/ M（1201~840px）/ S（≤600px）*/
+@media (min-width: 1201px) and (max-width: 1680px) {
+    .obutton--text { height: 32px; font-size: var(--o-font_size-tip1); line-height: var(--o-line_height-tip1); }
+    .obutton--text svg { width: 16px; height: 16px; }
+}
+@media (min-width: 601px) and (max-width: 840px) {
+    .obutton--text { height: 28px; font-size: var(--o-font_size-tip1); line-height: var(--o-line_height-tip1); }
+    .obutton--text svg { width: 16px; height: 16px; }
+}
+@media (max-width: 600px) {
+    .obutton--text { height: 28px; font-size: var(--o-font_size-tip1); line-height: var(--o-line_height-tip1); }
+    .obutton--text svg { width: 16px; height: 16px; }
+}
+
+/* ===== 间距表（固定值 + 媒体查询，禁止改用 --o-r-gap-*）===== */
+@media (min-width: 1201px) and (max-width: 1680px) {
+    .floor-card__title    { margin-bottom: 12px; }
+    .floor-card__desc     { margin-bottom: 24px; }
+    .floor-card__subtitle { margin-bottom: 16px; }
+    .floor-card__tabs     { margin-bottom: 16px; }
+    .floor-card__cards    { margin-bottom: 24px; }
+    .floor-card__cards > .ocard + .ocard { margin-left: 24px; }
+    .floor-card__more     { margin-bottom: 56px; }
+}
+@media (min-width: 841px) and (max-width: 1200px) {
+    .floor-card__title    { margin-bottom: 8px; }
+    .floor-card__desc     { margin-bottom: 16px; }
+    .floor-card__subtitle { margin-bottom: 12px; }
+    .floor-card__tabs     { margin-bottom: 12px; }
+    .floor-card__cards    { margin-bottom: 16px; }
+    .floor-card__cards > .ocard + .ocard { margin-left: 16px; }
+    .floor-card__more     { margin-bottom: 40px; }
+}
+@media (min-width: 601px) and (max-width: 840px) {
+    .floor-card__title    { margin-bottom: 16px; }
+    .floor-card__desc     { margin-bottom: 12px; }
+    .floor-card__subtitle { margin-bottom: 12px; }
+    .floor-card__tabs     { margin-bottom: 12px; }
+    .floor-card__cards    { margin-bottom: 12px; }
+    .floor-card__cards > .ocard + .ocard { margin-left: 16px; }
+    .floor-card__more     { margin-bottom: 32px; }
+}
+@media (max-width: 600px) {
+    .floor-card__title    { margin-bottom: 16px; }
+    .floor-card__desc     { margin-bottom: 12px; }
+    .floor-card__subtitle { margin-bottom: 12px; }
+    .floor-card__tabs     { margin-bottom: 12px; }
+    .floor-card__cards    { margin-bottom: 12px; }
+    .floor-card__cards > .ocard + .ocard { margin-left: 12px; }
+    .floor-card__more     { margin-bottom: 32px; }
+    /* 340~600px：一排两卡（(312-12)/2=150px），第 3 张起依次往右加并横向滑动。
+       横滑容器按「卡片水平间距」规则向右外扩 36px：
+         ① 右内边距 12px —— 滚到最右时末卡与右缘同为 12px（与卡间距一致）
+         ② 内容区外扩 24px —— 第 3 张正好露出一个间距（12px），让用户看出"右边还有卡、可横滑"
+       外扩量用 width 撑开（不占文档流宽度），不会挤占「查看更多」的位置。 */
+    .floor-card__cards { overflow-x: auto; width: calc(100% + 36px); padding-right: 12px; }
+    .floor-card__cards > .ocard { flex: 0 0 auto; width: 150px; }
+}
+
+/* ===== 容器宽度（≥1681px / ≤600px 两锚点档按硬约束 §4.1；中间三档按楼层栅格适配规范）===== */
+.floor-card {
+    width: 1488px; max-width: 1488px;
+    margin-left: 216px; margin-right: 216px;
+}
+/* 1201~1680px · Laptop：楼层 = grid-22（一侧空白 1 列），边距 = 留白 + 1列 + 1水槽 */
+@media (min-width: 1201px) and (max-width: 1440px) {
+    /* 小桌面栅格：留白 40 / 水槽 24 / col = (视口−632)/24；边距 = 40 + col + 24（1440px 时 ≈98px） */
+    .floor-card { width: calc((100vw - 632px) * 11 / 12 + 504px); max-width: none; margin-left: auto; margin-right: auto; }
+}
+@media (min-width: 1441px) and (max-width: 1680px) {
+    /* 桌面栅格：留白 64 / 水槽 32 / col = (视口−864)/24；边距 = 64 + col + 32（1680px 时 = 130px） */
+    .floor-card { width: calc((100vw - 864px) * 11 / 12 + 672px); max-width: none; margin-left: auto; margin-right: auto; }
+}
+/* 841~1200px / 601~840px · Pad：楼层 = grid-full（占满），边距 = 留白 32px */
+@media (min-width: 841px) and (max-width: 1200px) {
+    .floor-card { width: calc(100vw - 64px); max-width: none; margin-left: 32px; margin-right: 32px; }
+}
+@media (min-width: 601px) and (max-width: 840px) {
+    .floor-card { width: calc(100vw - 64px); max-width: none; margin-left: 32px; margin-right: 32px; }
+}
+@media (max-width: 600px) {
+    .floor-card { width: 312px; max-width: 312px; margin-left: 24px; margin-right: 24px; }
+}
+
+/* ===== 间距标注（仅验收开关，不属于模块规格）===== */
+.guide { position: absolute; left: 0; right: 0; height: 0; border-top: 1px dashed var(--o-color-primary2); pointer-events: none; z-index: 5; }
+.guide b {
+    position: absolute; right: 0; top: -10px; background: var(--o-color-fill2); color: var(--o-color-primary2);
+    font-size: 11px; line-height: 20px; font-weight: 400; padding: 0 4px; font-family: 'HarmonyOS Sans', 'HarmonyHeiTi', sans-serif;
+}
+</style>
+</template>
+
+<!-- ===== 模块 HTML（与 floors/floor-card.md 结构一致；可选模块全部默认渲染）===== -->
+<template id="tpl-floor">
+<div class="floor-card">
+    <h2 class="floor-card__title" data-gap>楼层标题</h2>
+    <p class="floor-card__desc" data-gap>楼层描述文本：说明该楼层卡片模块的整体用途与内容范围，可选元素。</p>
+    <h3 class="floor-card__subtitle" data-gap>二级标题</h3>
+    <div class="floor-card__tabs otab" data-gap>
+        <button type="button" class="otab__item is-active">页签文字</button>
+        <button type="button" class="otab__item">页签选中</button>
+        <button type="button" class="otab__item">页签文字</button>
+        <button type="button" class="otab__item" disabled>禁用页签</button>
+    </div>
+    <div class="floor-card__cards" data-gap>
+        <article class="ocard">
+            <div class="ocard__cover"><i></i></div>
+            <div class="ocard__body">
+                <h4 class="ocard__title">标题文本标题文本</h4>
+                <p class="ocard__desc">内容文本内容文本内容文本内容文本内容文本内容文本内容文本内容文本</p>
+            </div>
+        </article>
+        <article class="ocard">
+            <div class="ocard__cover"><i></i></div>
+            <div class="ocard__body">
+                <h4 class="ocard__title">标题文本标题文本</h4>
+                <p class="ocard__desc">内容文本内容文本内容文本内容文本内容文本内容文本内容文本内容文本</p>
+            </div>
+        </article>
+        <article class="ocard">
+            <div class="ocard__cover"><i></i></div>
+            <div class="ocard__body">
+                <h4 class="ocard__title">标题文本标题文本</h4>
+                <p class="ocard__desc">内容文本内容文本内容文本内容文本内容文本内容文本内容文本内容文本</p>
+            </div>
+        </article>
+    </div>
+    <div class="floor-card__more" data-gap>
+        <button type="button" class="obutton--text">
+            查看更多
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24.000000" height="24.000000" fill="none" customFrame="#000000">
+                <rect id="icon/01公共图标/线性/右箭头" width="24.000000" x="0.000000" y="0.000000" />
+                <g id="编组 23">
+                    <rect id="矩形" width="24.000000" x="0.000000" y="0.000000" fill="rgb(216,216,216)" fill-opacity="0" transform="matrix(0,-1,-1,0,24,24)" />
+                    <rect id="矩形" width="23.000000" x="0.500000" y="0.500000" stroke="rgb(151,151,151)" stroke-opacity="0" stroke-width="1.000000" transform="matrix(0,-1,-1,0,24,24)" />
+                    <path id="路径" d="M0.7 0C1.05438 0 1.34726 0.263344 1.39361 0.605014L1.4 0.7L1.4 5.85451C1.4 5.99653 1.49868 6.1155 1.63121 6.14659L1.7 6.15451L6.90354 6.15451C7.29014 6.15451 7.60354 6.46791 7.60354 6.85451C7.60354 7.2089 7.3402 7.50177 6.99852 7.54812L6.90354 7.55451L1.7 7.55451C0.810531 7.55451 0.0806099 6.87141 0.00624001 6.0012L0 5.85451L0 0.7C0 0.313401 0.313401 0 0.7 0Z" fill="rgb(0,0,0)" fill-opacity="0.800000012" fill-rule="evenodd" transform="matrix(-0.707107,0.707107,0.707107,0.707107,10.2466,6.64082)" />
+                </g>
+            </svg>
+        </button>
+    </div>
+</div>
+</template>
+
+<div id="bp-host"></div>
+
+<script>
+(function () {
+    /* CSS 为纯文本，必须走 content.textContent：template 的内容在 .content 片段里，
+       且 innerHTML 会把 > 序列化成 &gt;，注入 <style> 后「.floor-card__cards > .ocard」
+       等选择器非法被丢弃，导致卡片水平间距（32/24/16/16/12）与 ≤600px 横向滑动全部失效 */
+    var css = document.getElementById('tpl-css').content.textContent;
+    var floor = document.getElementById('tpl-floor').innerHTML;
+
+    var BPS = [
+        { w: 1920, h: 900, name: '≥1681px · Desktop', note: '1920 为例 · 标题 40/56 · 楼层间距 72 · 卡片间距 32 · Tab L · Button L' },
+        { w: 1440, h: 900, name: '1201~1680px · Laptop', note: '1440 为例 · 标题 32/44 · 楼层间距 56 · 卡片间距 24 · Tab M · Button M' },
+        { w: 1080, h: 900, name: '841~1200px · Pad 横屏', note: '1080 为例 · 标题 24/32 · 楼层间距 40 · 卡片间距 16 · Tab M · Button M' },
+        { w: 740,  h: 860, name: '601~840px · Pad 竖屏', note: '740 为例 · 标题 18/26 · 楼层间距 32 · 卡片间距 16 · Tab S · Button S' },
+        { w: 360,  h: 860, name: '340~600px · Phone', note: '360 为例 · 标题 18/26 · 楼层间距 32 · 卡片间距 12 · Tab S · Button S · 卡片一排两卡，第 3 张露出一个间距并横滑' }
+    ];
+
+    var host = document.getElementById('bp-host');
+    BPS.forEach(function (bp) {
+        var wrap = document.createElement('div');
+        wrap.className = 'bp';
+        wrap.innerHTML =
+            '<div class="bp__inner">' +
+            '<div class="bp__label">' + bp.name + '<span>' + bp.note + '</span></div>' +
+            '<div class="bp__frame"><iframe title="' + bp.name + '" scrolling="no"></iframe></div>' +
+            '</div>';
+        var frame = wrap.querySelector('iframe');
+        frame.style.width = bp.w + 'px';
+        frame.style.height = bp.h + 'px';
+        frame.srcdoc =
+            '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8">' +
+            '<style>' + css + '</style></head><body>' + floor +
+            '<script>' +
+            'function drawGuides(){document.querySelectorAll(".guide").forEach(function(n){n.remove()});' +
+            'if(!document.body.classList.contains("guides-on"))return;' +
+            'var floor=document.querySelector(".floor-card");' +
+            'floor.querySelectorAll("[data-gap]").forEach(function(el){' +
+            'var mb=parseFloat(getComputedStyle(el).marginBottom);' +
+            'if(!mb)return;' +
+            'var d=document.createElement("div");d.className="guide";' +
+            'd.style.top=(el.offsetTop+el.offsetHeight+mb/2)+"px";' +
+            'd.innerHTML="<b>"+mb+"px</b>";floor.appendChild(d);});}' +
+            'window.addEventListener("message",function(e){' +
+            'if(e.data==="guides-on"){document.body.classList.add("guides-on");drawGuides();}' +
+            'if(e.data==="guides-off"){document.body.classList.remove("guides-on");drawGuides();}});' +
+            'window.addEventListener("resize",drawGuides);' +
+            /* Tab 交互：点击切换 is-active（同一时刻仅一个），禁用项不响应 */
+            'document.querySelectorAll(".otab__item").forEach(function(t){' +
+            't.addEventListener("click",function(){' +
+            'if(t.disabled)return;' +
+            't.parentNode.querySelectorAll(".otab__item").forEach(function(n){n.classList.remove("is-active");});' +
+            't.classList.add("is-active");});});' +
+            '<\/script></body></html>';
+        host.appendChild(wrap);
+        frame.addEventListener('load', function () {
+            var doc = frame.contentDocument;
+            frame.style.height = (doc.documentElement.scrollHeight + 2) + 'px';
+        });
+    });
+
+    document.getElementById('guides').addEventListener('change', function () {
+        var msg = this.checked ? 'guides-on' : 'guides-off';
+        document.querySelectorAll('.bp__frame iframe').forEach(function (f) {
+            f.contentWindow.postMessage(msg, '*');
+        });
+    });
+})();
+</script>
+
+</body>
+</html>

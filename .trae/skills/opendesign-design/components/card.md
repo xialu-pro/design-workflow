@@ -23,6 +23,7 @@
 - ✅ **信息展示**：用户信息卡、订单信息卡、商品信息卡等
 - ✅ **列表项**：卡片式列表布局，每个列表项为独立卡片
 - ✅ **内容分组**：页面中不同内容模块的边界标识
+- ✅ **卡内数据统计栏（stats-bar）**：卡片底部展示浏览量 / 点赞 / 评论 / 收藏 / 评分等数据行——注意与上文「统计卡片」（整卡承载统计数字的 icon 卡）是**两个概念**：stats-bar 是**卡内的一个辅助信息区**，类名 `.stats-bar`，规格固定见 Part C「[规则 7：数据统计区域位置规则](#规则-7数据统计区域位置规则)」（`tip1` 14px / `info3` / 图标间距 8px / 统计项间距 16px / 无评分居左 · 含评分评分居左+其余居右），**禁止自创统计栏样式**
 - ❌ **不适合**：表单分组（用分割线）、导航切换（用 Tab）、大量文字描述（用详情页）
 
 ---
@@ -119,7 +120,20 @@ OCard（HORIZONTAL，自适应宽高）
 
 ### 响应式行为
 
-参照 [栅格规范](../SKILL.md#数据资源) 中的断点定义，OCard 无自动断点响应式行为。宽度由容器或栅格系统控制，高度由内容自适应。布局方式通过 `layout` 变体手动切换。
+参照 [栅格规范](../SKILL.md#数据资源) 中的断点定义，OCard **无自动断点切换布局的行为**——`layout`（vertical / horizontal）由使用者通过变体手动切换，卡片不会因视口变窄自动从横向改纵向。宽度由容器或栅格系统控制，高度由内容自适应。
+
+> ⚠️ **full-cover 例外（2026-10-23 用户裁定）**：full-cover 整卡即图片，卡片**自身**保持横向比例（16:9 / 3:1），宽度按栅格定、**高度 = 宽度 ÷ 比例**，不由内容撑高。详见「full-cover 规格 → 布局规格」与规则 5。
+
+但以下四项**有断点规则**（2026-10-21 新增，与「布局不自动切换」不矛盾）：
+
+| 规则 | 断点 | 行为 |
+|------|------|------|
+| 内边距分档 | 5 档（≥1681 / 1201~1680 / 841~1200 / 601~840 / 340~600） | 随卡片变窄逐档收紧，见「内边距规格」 |
+| 文本行数上限 | ≥841px 标题 2 行 / 描述 3 行；≤840px 标题 1 行 / 描述 2 行 | 见**规则 8** |
+| **操作区可见性** | **≤600px 一律不显示 Footer** | 所有类型、两种布局；见**规则 6** |
+| **icon 卡操作区可见性** | **≤840px 一律不显示 Footer**（比 cover 的 ≤600px 更严） | 仅 `icon` 类型；见「icon 类型内边距与间距」 |
+
+> ⚠️ **horizontal 布局的每行列数规则在楼层规范**：`cover + horizontal` 在 ≤840px 一排只放一张卡，见 [floors/floor-card.md](../floors/floor-card.md)。
 
 ---
 
@@ -144,12 +158,21 @@ OCard（HORIZONTAL，自适应宽高）
 
 | 规格项 | 档位 | Token | 默认基准 | 当前 openEuler 页面实现 |
 |--------|------|-------|---------|------------------------|
+| **卡片比例** | — | **`16:9`（默认）/ `3:1`（超宽形态）** | — | — |
+| **卡片宽度** | — | 由栅格决定（可跨 1~N 列） | — | — |
+| **卡片高度** | — | **= 宽度 ÷ 比例**（`aspect-ratio` 反推） | — | — |
 | 卡片圆角 | 外档 | `radius_control-l` | 4px | 16px |
 | 封面填充 | — | 铺满整卡（`background-size:cover`） | — | — |
 | 封面内层圆角 | — | 无（继承卡片外圆角） | — | — |
 | 卡内元素圆角 | 内档 | `radius_control-s` | 4px | 8px |
 | 内容层内边距 | — | 上 28px · 左右 24px · 下 24px | — | — |
 | 悬浮阴影 | — | `shadow-2` | `shadow-2` | `shadow-2` |
+
+> 🚨 **full-cover 卡片自身必须保持横向比例（硬约束，2026-10-23 用户裁定）**：full-cover 的定义是「卡片内部整个图片填充」，因此**整张卡片**就是封面，必须遵守**规则 5（封面图片固定比例）**——
+> - 比例只取 **`16:9`（默认）或 `3:1`（超宽形态）**，禁止竖向比例与其他横向比例
+> - **宽度按栅格定**（单列 / 跨双列 / 跨整行均可），**高度 = 宽度 ÷ 比例**，用 `aspect-ratio` 反推；**禁止内容撑高、禁止写死高度**（如 `height: 400px`）
+> - **内容层必须在比例高度内放得下**：内容层最小高度 = `上 28 + 标题（≤2 行，行盒 30×2=60 取 30）+ Head 行 32 + 间距 12 + 描述（≤3 行）+ 下 24`。以最窄场景验算：卡宽 312px → 16:9 高 175.5px ≥ 内容层 144px（28+32+12+48+24，描述 2 行）；若选 `3:1` 则高仅 104px **放不下**，必须回到 16:9 或缩短文案。**禁止溢出、禁止出现滚动条**
+> - 与 `cover` 的分工：`cover` 的比例作用于**封面图片区域**（卡片其余部分是文字区）；`full-cover` 的比例作用于**整张卡片**（无独立文字区背景）
 
 > 🔲 **圆角取值遵循上文「圆角基准说明」**：卡片取**外档**、卡内元素取**内档**，两者保持「外大一档 / 内小一档」的分层关系；
 > 具体 px 以社区 token 为准（默认基准 4px）。表中「当前 openEuler 页面实现」为 `opendesign-home.html`
@@ -159,26 +182,27 @@ OCard（HORIZONTAL，自适应宽高）
 
 | 层级 | 字号 | 行高 | 字重 | 颜色 |
 |------|------|------|------|------|
-| 卡片标题 | `font_size-h3`（22px） | `line_height-h3`（30px） | bold | `--o-color-info1` |
+| 卡片标题 | `font_size-h3`（22px） | `line_height-h3`（30px） | Semibold（600） | `--o-color-info1` |
 | 卡片正文 | `font_size-text1`（16px） | `line_height-text1`（24px） | regular | `--o-color-info3` |
-| 徽标（NEW/HOT） | `font_size-tip2`（12px） | 16px | regular | `--o-color-white` |
+| 标题后 Tag | **调用 [OTag 组件](./tag.md)，不在此定义样式**（推荐 `fill` × `small`：高 20px / 内边距 6px·2px / 圆角 4px / 字号 tip2） | | | 按 Tag 的 Color 语义取 |
 
 **结构示意**
 
 ```
 OCard（full-cover，VERTICAL）
 │  cornerRadius: 外档（radius_control-l，默认基准 4px）
+│  aspect-ratio: 16 / 9（或 3 / 1）   ← 宽由栅格定，高由宽按比例反推；整卡即图片
 │  background: 封面图铺满整卡（无独立内圆角）
 │
 └── [内容层 FRAME]（叠在封面上层，padding 28/24/24）
     ├── [Head 行]
-    │   ├── [图标槽] 32px / 圆角内档（radius_control-s）/ fill2 底 + primary1 图标
+    │   ├── [图标槽]（可选）32px / 圆角内档（radius_control-s）/ primary1-light 底 + primary1 图标
     │   ├── [标题文字] font_size-h3 / Bold / info1
-    │   └── [徽标] 高 20px / 圆角 100px / primary1 底 + 白字
-    ├── [正文文字] font_size-text1 / Regular / info3
-    └── [内容区]（可选，如界面示意）
-          fill2 底 / 圆角内档（radius_control-s）/ shadow-1
+    │   └── [OTag 实例]（可选，标题之后）← 调用 tag.md，禁止自创徽标样式
+    └── [正文文字] font_size-text1 / Regular / info3
 ```
+
+> 📌 **full-cover 的语义就是「卡片内部整幅图片填充 + 文字层叠在封面上层」**（2026-10-23 用户裁定）：封面铺满整卡并作为卡片 background，内容层只含图标 / 标题 / 徽标 / 正文。**不存在「界面示意区」之类的内容区节点**——旧版从 opendesign-home.html「最新上线」楼层带入的 `.oc-card--full-cover__visual`（fill2 底 + shadow-1 的内层预览块）是**该楼层的业务内容，不是 OCard full-cover 的规范节点**，已移除。
 
 **代码基准**（来自 opendesign-home.html「最新上线」楼层，圆角为该页指定值）
 
@@ -187,12 +211,18 @@ OCard（full-cover，VERTICAL）
   display:flex;flex-direction:column;
   padding:28px 24px 24px;border-radius:16px;      /* 外档：radius_control-l（该页指定 16px） */
   background-image:var(--o-cover);background-size:cover;  /* 封面铺满整卡 */
+  aspect-ratio:16/9;                              /* 规范硬约束（2026-10-23 新增，该页原未设置）：整卡 16:9，宽按栅格、高由宽反推 */
 }
 .oc-card--full-cover__icon{width:32px;height:32px;border-radius:8px;}   /* 内档：radius_control-s（该页指定 8px） */
 .oc-card--full-cover__title{font-size:var(--o-r-font_size-h3);font-weight:600;color:var(--o-color-info1);}
 .oc-card--full-cover__desc{font-size:var(--o-r-font_size-text1);font-weight:400;color:var(--o-color-info3);}
-.oc-card--full-cover__visual{border-radius:8px;background-color:var(--o-color-fill2);box-shadow:var(--o-shadow-1);}
+/* 标题后的 Tag 是 OTag 组件实例（.otag），样式归 tag.md，卡片不定义徽标样式（规则 4）*/
 ```
+
+> 🚨 **full-cover 内容层节点的可选性（2026-10-23 用户裁定）**：内容层四类节点中，**只有标题与正文是必选**——
+> - **图标槽：非必选**。标题可直接作为 Head 行首元素
+> - **标题后 Tag：非必选**。需要状态标记时才在标题之后加一个 **OTag 实例**（如 NEW / HOT）；Tag 必须严格遵循 [tag.md](./tag.md) 规范（变体、尺寸、颜色、间距全部取 OTag 规格），**禁止在 Card 内自创徽标 / Badge 样式**——旧版的「高 20px · 圆角 100px · primary1 底 · padding 0 8px」是自创样式，已废止；正确做法按 OTag `fill` × `small`（高 20px / 水平内边距 6px / 圆角 4px / tip2 12px），Color 按语义选（primary / success / danger / info）
+> - Tag 位置：**Head 行内、标题之后**（full-cover 整卡即图片，无独立封面区，不适用规则 4 中 cover 类型的「右上角 absolute」口径；full-cover 的 Tag 跟随内容流）
 
 > ⚠️ **封面明度硬约束**：文字直接叠在封面上，封面必须保证与文字色的对比度达标（WCAG AA）。
 > 浅色/柔和彩底封面 → 文字用 `info1` / `info3`；深色封面 → 文字必须切换到
@@ -234,36 +264,168 @@ OCard（full-cover，VERTICAL）
 
 ### 内边距规格
 
-> **cover 类型**：卡片容器统一 padding 8px，各 section 无独立 padding，Body（文字区域）额外增加 bottom 16px、left/right 16px。
-> **icon 类型**：卡片容器统一 padding top/bottom 24px、left/right 32px，无独立 section padding。
+> **cover 类型（单层口径 + 断点分档，2026-10-20 修订；2026-10-21 补 horizontal 镜像口径）**：
+> - **单层口径**：卡片容器 padding **只服务封面**，且**只服务封面所在的那几边**；Body（文字区域）自己写实际值。这样「封面 / 文字 → 卡片边缘」可以**一眼直读**，不需要把容器 padding 和 section padding 叠加心算——旧版「容器统一 8px + Body 额外加」的叠加模型已废止。
+> - **断点分档**：内边距随断点收紧（卡片越窄、留白越小），共 5 档，见下表。
+> - ⚠️ **水平方向叠加陷阱**：Body 的左/右边缘本身已被容器 padding 推离卡片边缘，故 **「标题→卡片左」= 容器左 + Body 左**、「描述→卡片右」= 容器右 + Body 右。竖向不受影响（封面在 Body 上方，Body 顶距量的是封面底；容器底部为 0）。
+> - 🔴 **horizontal 容器上/下必须为 0（2026-10-21 新增，踩坑修正）**：horizontal 的封面与内容区是**左右并排**，容器上/下 padding 会同时压在内容区上，与 Body 上 / Footer 下叠加成 32px。因此 horizontal 容器**只留封面所在侧的那一边**（封面在左 → 只留 `padding-left`），封面另外两侧的内缩由**封面自身 `margin`** 承担，见「封面图片规格」。
+> **icon 类型**：卡片容器 padding 与内部间距按断点分档（24/24/16/12/12），无独立 section padding；分档表见「icon 类型内边距与间距」。
 
-**cover 类型内边距**
+**cover 类型内边距（分层值，按断点分档）**
 
-| 区域 | vertical（上/下） | horizontal（左/右） |
-|------|-----------------|-------------------|
-| Header 内边距 | 8px | 8px |
-| Body 内边距 | 上 0px · 下 16px | 16px |
-| Footer 内边距 | 8px | 8px |
-| 区域间距（Header↔Body） | 24px | — |
-| 区域间距（Body↔Footer） | 24px | — |
+| 档位 | 容器 padding 上/右/下/左（vertical） | 容器 padding 上/右/下/左（horizontal） | Body padding 上/右/下/左 | 标题→描述 |
+|------|----------------------|----------------------|----------------------|---------|
+| ≥1681px | 8 / 8 / **0** / 8 | **0 / 0 / 0** / 8 | 24 / 24 / 24 / 24 | 12px |
+| 1201~1680px | 8 / 8 / **0** / 8 | **0 / 0 / 0** / 8 | 16 / 16 / 16 / 16 | 8px |
+| 841~1200px | 8 / 8 / **0** / 8 | **0 / 0 / 0** / 8 | 12 / 8 / 12 / 8 | 8px |
+| 601~840px | 4 / 4 / **0** / 4 | **0 / 0 / 0** / 4 | 12 / 8 / 12 / 8 | 8px |
+| 340~600px | 4 / 4 / **0** / 4 | **0 / 0 / 0** / 4 | 12 / 8 / 12 / 8 | 8px |
 
-**icon 类型内边距**
+> - horizontal 封面自身 `margin-top/bottom`（承担另外两边内缩）：≥841px `8px`，≤840px `4px`。
+> - Header 无独立 padding（封面即 Header，由容器 padding 收口）；Footer padding 与 Body 同构（上/右/下/左 同值）。
+> - **带操作区时 Body 下归 0**（由 Footer 上内边距单独承担「描述→按钮」），Body 下与 Footer 上**不得叠加**（叠加会变 48px）。
 
-| 区域 | vertical（垂直布局） | horizontal（水平布局） |
-|------|-----------------|-------------------|
-| 卡片容器 padding（上/下） | 24px | 24px |
-| 卡片容器 padding（左/右） | 32px | 32px |
-| 内容项间距（gap） | 16px | 24px |
+**cover 类型实际可视间距（直读值，校验用）**
+
+| 测量项 | ≥1681px | 1201~1680px | 841~1200px | 601~840px | 340~600px |
+|-------|---------|------------|-----------|----------|----------|
+| 封面 → 卡片 上 / 左 / 右 | 8 / 8 / 8 | 8 / 8 / 8 | 8 / 8 / 8 | 4 / 4 / 4 | 4 / 4 / 4 |
+| 封面 → 标题 | 24 | 16 | 12 | 12 | 12 |
+| 标题 → 描述 | 12 | 8 | 8 | 8 | 8 |
+| 标题 / 描述 → 卡片 左 / 右 | 32 / 32 | 24 / 24 | 16 / 16 | 12 / 12 | 12 / 12 |
+| 描述文字底 → 卡片底 | 24 | 16 | 12 | 12 | 12 |
+| Footer 内容 → 卡片 左 / 右 | 32 / 32 | 24 / 24 | 16 / 16 | 12 / 12 | 12 / 12 |
+| Footer 内容底 → 卡片底 | 24 | 16 | 12 | 12 | 12 |
+
+**cover + horizontal 实际可视间距（直读值，校验用）**
+
+| 测量项 | ≥1681px | 1201~1680px | 841~1200px | 601~840px | 340~600px |
+|-------|---------|------------|-----------|----------|----------|
+| 封面 → 卡片 上 / 左（= 封面 margin / 容器 left） | 8 / 8 | 8 / 8 | 8 / 8 | 4 / 4 | 4 / 4 |
+| 封面 → 标题（横向间距） | 24 | 16 | 12 | 12 | 12 |
+| 标题 / 描述 → 卡片 左 / 右 | 32 / 24 | 24 / 16 | 16 / 8 | 12 / 8 | 12 / 8 |
+| 标题 → 卡片顶（= Body 上） | 24 | 16 | 12 | 12 | 12 |
+| 标题 → 描述 | 12 | 8 | 8 | 8 | 8 |
+| 描述文字底 → 卡片底（无操作区） | 24 | 16 | 12 | 12 | 12 |
+| 描述文字底 → 操作区按钮 | 24 | 16 | 12 | 12 | — |
+| 操作区（Footer）是否存在 | 按需 | 按需 | 按需 | 按需 | **一律去掉** |
+
+> ✅ **为什么 horizontal 容器上/下归 0**：旧写法让容器跟着 vertical 写上/下 8，那 8px 会同时压在内容区上，导致「标题→卡顶」和「按钮底→卡底」都变成 32px 而非 24px；且旧版注释里的「内容列 `margin-bottom: -8px` 抵消」方案从未真正实现，即便实现也会把无操作区的「描述底→卡底」压成 16px。改为封面自身 margin 后，内容区所有纵向值均为直读，与 vertical 完全一致。
+
+> ✅ **为什么改单层口径**：旧模型下「描述文字底 → 卡片底」= Body 下内边距 16 + 容器下内边距 8 = 24px，要心算两步才能校验；且容器那 8px 本意是服务封面的，被顺带当成文字底部留白用。现由 Body 直接写 24px，容器底部归 0，**每个"到卡片边缘"的值都能直读**。
+> ✅ **为什么分档**：卡片宽度随断点从 475px 收到 150px，固定留白会让窄卡文字区被挤压（150px 卡配 32px 左右留白只剩 86px 可用宽）。按档收紧后文字可用宽为 411 / 389 / 296 / 191 / 126px，比例协调。
+
+**icon 类型排列方式（vertical / horizontal，2026-10-23 用户裁定）**
+
+> icon 与 cover **共用同一套 layout 语义，结构完全镜像**——`layout` 描述的是「视觉主体（封面 / 图标）相对于文字列的位置」，与主体是封面还是图标无关：
+
+| layout | 排列方式 | 视觉主体位置 | 对应 cover 结构 |
+|--------|---------|------------|----------------|
+| `vertical`（默认） | **上下排列** | 图标在标题**上方**，左对齐 | 封面在标题上方 |
+| `horizontal` | **横向排列** | 图标在标题**左侧**，与文字列并排 | 封面在标题左侧 |
+
+DOM 结构（与 cover 的 vertical / horizontal 一一对应）：
+
+```html
+<!-- vertical：Header 为纵向（column），图标在上、标题在下；描述在下一个兄弟节点 -->
+<a class="ocard ocard--icon">
+    <div class="ocard__header">          <!-- flex-direction: column; gap: 12px -->
+        <span class="ocard__icon">…</span>
+        <h4 class="ocard__title">标题</h4>
+    </div>
+    <div class="ocard__body"><p class="ocard__desc">描述</p></div>
+</a>
+
+<!-- horizontal：整卡为横向（row），图标移出 Header、与文字列并排 -->
+<a class="ocard ocard--icon ocard--icon--h">
+    <span class="ocard__icon">…</span>   <!-- 直接作为卡片的第一个子元素 -->
+    <div class="ocard__body">            <!-- flex: 1; min-width: 0 -->
+        <h4 class="ocard__title">标题</h4>
+        <p class="ocard__desc">描述</p>
+    </div>
+</a>
+```
+
+> - 🔴 **禁止把 vertical 做成「图标与标题横排」**：那既与 cover 的 vertical 逻辑相反（cover 的 vertical 是封面在上），也会让 `.ocard__header` 高 = `max(图标槽, 标题行盒)` = 32px（图标槽 32/32/24/24/24 **大于**标题行盒 30/26/24/24/24），header 底比标题行盒底低 2~6px，`__desc` 的 `margin-top: 8px` 从 header 底起算，实测「标题行盒→描述」变成 **10 / 14 / 8** 而非 8（2026-10-23 Chrome 实测踩坑）。正解就是上表的 column 结构：图标在标题上方时 header 底**恒等于**标题行盒底，margin 8px 精确成立，**且标题折行时依然成立**——不要靠按档补偿 margin（标题折成 2 行后 header 高改由标题决定，补偿反而过度），也不要把图标绝对定位（那是横排结构的补救，column 结构下不需要）。
+> - horizontal 结构无上述问题：标题与描述同在 `.ocard__body` 一列，「标题行盒→描述」天然 8px；图标与标题**顶对齐**（`align-items: flex-start`），禁 `align-items: center`（见「跨变体一致性口径」注记）。
+
+**icon 类型内边距与间距（按断点分档，2026-10-23 修订）**
+
+| 项目 | ≥1681px | 1201~1680px | 841~1200px | 601~840px | 340~600px |
+|------|---------|-----------|----------|----------|----------|
+| 卡片容器 padding（上/右/下/左） | 24px | 24px | 16px | 12px | 12px |
+| 图标 → 标题（vertical）/ 图标 → 文字列（horizontal） | 12px | 12px | 12px | 12px | 12px |
+| 标题行盒底 → 描述行盒顶 | 8px | 8px | 8px | 8px | 8px |
+| 描述文本 → 操作区（Footer） | 16px | 12px | 8px | **无操作区** | **无操作区** |
+| 操作区按钮间距（Footer 内 gap） | 32px | 32px | 24px | — | — |
+| 图标槽尺寸 / 槽内图标 | 32px / 24px | 32px / 24px | 24px / 18px | 24px / 18px | 24px / 18px |
+
+> - **2026-10-23 起 icon 类型改为按断点分档**，原「容器统一 padding top/bottom 24px、left/right 32px、间距不分档」的口径废止。
+> - **「标题行盒底 → 描述行盒顶 8px」的测量口径（2026-10-23 用户裁定）**：参考点是**行盒**，不是字形。标题行盒高 = 该档标题 `line-height`（≥1681 档 22/30 → 30px；1201~1680 档 18/26 → 26px；≤1200 档 16/24 → 24px），描述行盒高 = 该档描述 `line-height`。实测值 = `desc.top − title.bottom`，五档、两种布局均须为 8px。**不要**按「标题文字底 → 描述文字顶」的字形视觉间距去凑（那会被 half-leading 干扰，≠ 8px）。
+> - 🚨 **「图标槽比标题行盒高 → header 撑高 → 8px 不成立」陷阱（2026-10-23 Chrome 实测踩坑）**：若把图标与标题放进**同一个横向 flex 行**（`.ocard__header { flex-direction: row }`），header 高 = `max(图标槽, 标题行盒)`，而图标槽（32/32/24/24/24）**大于**标题行盒（30/26/24/24/24），header 底比标题行盒底低 2~6px，`__desc` 的 `margin-top: 8px` 从 **header 底**起算，实测「标题行盒→描述」= **10 / 14 / 8** 而非 8。两个层次的修法：① **结构正解（现行）**——按「排列方式」表把 vertical 的 header 改为 `flex-direction: column`（图标在标题**上方**），header 底恒等于标题行盒底，margin 8px 精确成立且标题折行不受影响；② 结构补救（若因故必须横排）——`.ocard__header { position: relative }` + `.ocard__icon { position: absolute; left: 0; top: 0 }` + `.ocard__title { padding-left: 图标槽 + 12px }`（≥1201 档 44px、≤1200 档 36px），把撑高元素移出文档流。**禁止按档补偿 margin**（单行标题时正确，折成 2 行后 header 高改由标题决定，补偿变成过度）。horizontal 卡无此问题（标题与描述同在 `.ocard__body` 一列，天然 8px）。
+> - **≤840px 一律不显示 icon 卡操作区**（比 cover 的 ≤600px 更严）：601~840px 与 340~600px 两档均无 Footer，卡片退化为纯展示。icon 的间距全部由容器 padding 与 margin 承担，无 `:has()` 依赖，footer 隐藏后不会出现「描述底→卡底」被压成 0 的残留问题（cover 的同类陷阱见规则 6）。
+> - 两种布局口径一致：vertical 的「图标 → 标题」与 horizontal 的「图标 → 文字列」同为 12px；**图标与标题顶对齐**（实测 `title.top − icon.top` = 0）。horizontal 布局下禁止用 `align-items: center`——那会让 32px 图标对着「标题 + 描述」整列垂直居中，图标比标题低约 25px、掉到标题与描述之间。
+> - **实现要点：不要用容器统一 flex gap**。「标题行盒 → 描述」（8px）与「描述 → 操作区」（16/12/8px）是两个不同的值，统一 gap 会同时作用于 Header→Body 与 Body→Footer 两处、无法分别表达；须分段用 margin 直读（`__desc { margin-top: 8px }`、`__footer { margin-top: 16px }`）。
+> - Footer 自身无 padding（间距由容器 padding 与「描述 → 操作区」承担），按钮左对齐（见规则 2）。
+> - 图标槽的圆角（4px）、底色（`--o-color-primary1-light`）、图标色（`--o-color-primary1`）不随档变化，仅尺寸随档。
 
 ---
 
 ### 封面图片规格（cover 类型）
 
+> ⚠️ **2026-10-21 修订（取代旧版「固定宽度」表述）**：封面**既不定宽也不定高**，尺寸一律由内容推导，vertical 与 horizontal 互为镜像——
+> - **vertical**：宽铺满卡内容宽 → 高由比例反推
+> - **horizontal**：高 = 内容列高度 → 宽由比例反推
+>
+> 旧版「horizontal 图片宽度固定（如 120px）」的表述已废止：定宽会让封面高度脱离内容，文字多寡不同时封面与内容列高度脱节，且水平方向挤占文字列。
+
 | 规格项 | vertical | horizontal |
 |--------|----------|------------|
-| 图片宽度 | 自适应（跟随卡片宽度） | 固定（如 120px） |
-| 图片高度 | 固定比例（如 16:9）或固定高度 | 自适应（跟随卡片高度） |
+| 图片宽度 | 自适应（铺满卡内容宽） | **由高度按 16:9 反推**（不定宽） |
+| 图片高度 | **由宽度按 16:9 反推**（不定高） | 自适应（= 内容列高度） |
 | 圆角 | 0px（无圆角）或顶部圆角 4px | 0px 或左侧圆角 4px |
+
+#### 封面尺寸推导规则（2026-10-21 新增）
+
+**vertical（宽 → 高）**
+```
+封面宽 = 卡片内容宽（容器 padding 已扣除封面侧，见「内边距规格」）
+封面高 = 封面宽 × 9 / 16
+```
+
+**horizontal（高 → 宽）**
+```
+封面高 = 内容列高度（标题 + 描述 + Body 上下 padding；带操作区时含 Footer 与其内边距）
+封面宽 = 封面高 × 16 / 9
+```
+
+> ⚠️ **horizontal 封面的上下内缩由封面自身 `margin` 承担，不是容器 padding**：
+> 容器只留封面所在侧的那一边（封面在左 → 只留 `padding-left`，上/右/下全 0）。
+> 若给容器写上/下 padding，那 8px 会**同时压在内容区上**，使「标题→卡片顶」= 容器 8 + Body 24 = **32px**、「操作按钮底→卡片底」= Footer 24 + 容器 8 = **32px**，均非规范值 24。
+> 封面 margin 与容器 left padding 同档收紧：≥841px 为 `8px 0`，≤840px 为 `4px 0`。
+
+> ⚠️ **窄档回退（必做，否则文字列被挤光）**：horizontal 封面按列高反推的宽度可能超过卡片可用宽度，必须封顶——
+> ```
+> 封面宽 = min(内容列高度 × 16/9, 卡片内容宽 − 文字列最小可用宽 160px)
+> ```
+> 命中封顶时封面变矮（不再等于内容列高），**贴卡顶内缩、底部留白**，不要居中。实测：601~840px 卡宽 676 时反推值 241.8px、文字列仅剩 ~160px 已到极限；340~600px 卡宽 312 时反推值 148px，若不封顶会把文字列压成 0。
+
+> 🔴 **纯 CSS 无法落地，必须脚本回填（horizontal 专属）**：`grid-template-columns: auto minmax(0,1fr)` 的 auto 轨道是循环依赖（列高 → 封面宽 → 列宽 → 列高），且文字换行使列高依赖列宽，**Chrome 对 auto 轨道只迭代一次、不收敛**——实测列高已 218px，轨道却按中间态 194px 推导，封面矮 24px 且内容列撑爆卡底（操作按钮离卡底只剩 8px）。
+> 实现范式：布局稳定后（`load` / `resize` / 断点切换）读取内容列**实测高度**，按上式回填封面宽高，并迭代 2~3 轮收敛（列宽变化会引起列高再变）。
+> ```js
+> // horizontal 封面：高跟内容列、宽按 16:9 反推 + 窄档封顶（跑 3 轮收敛）
+> for (let p = 0; p < 3; p++) {
+>   document.querySelectorAll('.card--cover.card--h').forEach(card => {
+>     const cv = card.querySelector('.cover-img'), col = card.querySelector('.content-wrapper');
+>     const m = parseFloat(getComputedStyle(cv).marginTop) + parseFloat(getComputedStyle(cv).marginBottom);
+>     const cs = getComputedStyle(card);
+>     const maxW = card.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 160;
+>     const w = Math.min((col.getBoundingClientRect().height - m) * 16 / 9, maxW);
+>     cv.style.width = w + 'px';
+>     cv.style.height = (w * 9 / 16) + 'px';
+>   });
+> }
+> ```
 
 ---
 
@@ -271,11 +433,15 @@ OCard（full-cover，VERTICAL）
 
 | 规格项 | vertical | horizontal |
 |--------|----------|------------|
-| 图标尺寸 | 32px | 32px |
+| 图标槽尺寸 | 32px（≤1200px 收 24px） | 32px（≤1200px 收 24px） |
+| 槽内图标尺寸 | 24px（槽 24px 时 18px，保持 3/4 占比） | 24px（槽 24px 时 18px） |
 | Token（图标尺寸） | `icon_size-l` | `icon_size-l` |
 | 图标颜色 | `--o-color-primary1` | `--o-color-primary1` |
 | 图标背景 | `--o-color-primary1-light` | `--o-color-primary1-light` |
 | 图标圆角 | 4px | 4px |
+
+> - 图标槽**随断点缩放**：≥1201px 为 32px，≤1200px（841~1200 / 601~840 / 340~600 三档）收为 24px；槽内图标按 3/4 占比同步收（24px → 18px）。颜色、圆角、底色不随档变化。
+> - 图标与标题**顶对齐**（两种布局一致），横向间距 12px（不分档）。
 
 ---
 
@@ -285,6 +451,17 @@ OCard（full-cover，VERTICAL）
 |------|-----------------|----------------|--------|
 | 卡片背景 | `--o-color-fill2` | `--o-color-fill2` | rgb(255,255,255) → rgb(36,36,39) |
 | 悬浮阴影 | `shadow-2` | `shadow-2` | 0 2px 24px rgba(0,0,0,0.15) → 0 2px 24px rgba(255,255,255,0.15) |
+
+> 🚨 **Dark 模式是全套 Token 成对翻转，不是"只反色文字"（硬约束，2026-10-23 用户裁定）**：
+> 卡片在 Light 下引用的**每一个** Token，Dark=on 时都必须改用**同一 Token 的 Dark 值**——交互态
+> （hover 标题色 `primary1`、Footer 按钮 hover `primary2` / active `primary3`）、组件自身色
+> （图标槽底色 `primary1-light`、图标色 `primary1`、Tag 底色 `primary1`）、阴影全部在内。
+> ❌ 禁止只切 `info1` / `info3` / `fill2` 这类"最明显的文字与背景"，漏掉 `primary*` 与 `*-light`；
+> ❌ 禁止在 Dark 作用域给某元素单独写 Light 色值"修补"。
+> openEuler 常用 Dark 值（真源 `opendesign-tokens/references/tokens-openeuler.md`）：
+> `primary1` rgb(73,122,248) · `primary2` rgb(42,72,158) · `primary3` rgb(29,51,120) · `primary1-light` rgb(18,34,87)。
+> 完整规则见 [hard-constraints.md §0.1](../global/hard-constraints.md)。
+> 注：本表的 RGB 值列为旧版快照（仅覆盖背景与阴影），以 hard-constraints §0.1 与上游 Token 真源为准。
 
 ---
 
@@ -553,7 +730,9 @@ Hover 时：
 /* icon 类型卡片同样适用 */
 .card-icon .card-footer {
   justify-content: flex-start; /* ⚠️ 同样左对齐 */
+  gap: 32px;                   /* icon 卡按钮间距：32px（≥1201px）/ 24px（841~1200px）*/
   padding: 0;
+  margin-top: 16px;            /* 描述→操作区：16px（≥1681px）/ 12px（1201~1680px）/ 8px（841~1200px）*/
 }
 ```
 
@@ -622,6 +801,8 @@ Hover 时：
 **硬性约束 B - 位置规则**：
 
 > ⚠️ **Tag 默认位置约束**：状态标记类 Tag（如 HOT、NEW、推荐等）**必须放置在卡片的右上角**
+
+> ⚠️ **full-cover 例外（2026-10-23 用户裁定）**：`full-cover` 整卡即图片、无独立封面区，Tag 不适用「右上角 absolute」口径——full-cover 的 Tag 位于**内容层 Head 行内、标题之后**，跟随内容流排版，且为**非必选**节点（同图标槽）。无论哪种位置，Tag 本体都必须是 OTag 组件实例，禁止卡片自绘徽标。
 
 **位置优先级表**：
 
@@ -741,6 +922,10 @@ Hover 时：
 
 **问题描述**：cover 类型卡片的封面图片区域必须使用固定的宽高比，禁止随意设置高度或使用竖向比例。
 
+**适用范围（2026-10-23 补充）**：本规则对两类「图片区域」同时生效——
+- `cover` 类型：比例作用于**封面图片区域**（卡片其余部分是文字区）
+- `full-cover` 类型：比例作用于**整张卡片**（整卡即图片，无独立文字区背景）——卡片宽度按栅格定，高度 = 宽度 ÷ 比例
+
 **硬性约束**：
 - ✅ **支持比例**：`16:9`（标准横向）或 `3:1`（超宽横向）
 - ❌ **禁止使用** 自定义高度（如 `height:120px`, `height:160px` 等）
@@ -759,6 +944,12 @@ Hover 时：
 .cover-img--wide {
   aspect-ratio: 3 / 1; /* 或 padding-bottom: 33.33% */
 }
+
+/* full-cover：比例作用于整张卡片（宽由栅格定，高由宽反推） */
+.oc-card--full-cover {
+  width: 100%;            /* 栅格列宽；跨列时由栅格跨域决定 */
+  aspect-ratio: 16 / 9;   /* 超宽形态用 3 / 1；禁止内容撑高、禁止写死高度 */
+}
 ```
 
 **应用场景**：
@@ -773,16 +964,18 @@ Hover 时：
 - **禁止竖向图片**：封面图必须是横向排列，宽度大于高度
 - **垂直布局卡片**统一使用 `16:9` 标准比例
 - **水平布局卡片**推荐使用 `16:9` 或 `3:1` 比例
+- **full-cover 卡片**：比例作用于**整张卡片**（不是卡内某个图片区域），默认 `16:9`、超宽形态 `3:1`；宽度按栅格定，高度 = 宽度 ÷ 比例。详见「full-cover 规格 → 布局规格」的硬约束
 
 **水平布局特殊规则**：
 
 > ⚠️ **关键约束**：水平布局带图片的卡片**不会截断内容**
+> ⚠️ **2026-10-21 修订：封面不定宽，宽由高按 16:9 反推**（旧版「宽度可自定义（如 200px、220px）」已废止）。定宽会让封面高度脱离内容列，且横向挤占文字列；窄档下必然把文字列压到不可用（实测 340~600px 卡宽 312px 时定宽 200px 只剩 ~100px 文字列）。尺寸推导、窄档封顶与脚本回填范式见「封面图片规格 → 封面尺寸推导规则」。
 
-1. **图片尺寸**：图片保持固定比例（16:9 或 3:1），宽度可自定义（如 200px、220px）
+1. **图片尺寸**：图片保持 16:9（或 3:1）横向比例，**高度 = 内容列高度，宽度由高度反推**
 2. **自适应宽度**：卡片整体宽度由内容决定，不设置 max-width 限制
 3. **内容完整显示**：所有文字内容完整展示，不截断、不省略
 4. **flex 布局**：
-   - 图片区域：`flex-shrink: 0; width: [固定值];`
+   - 图片区域：`flex-shrink: 0;`（宽度由脚本按内容列高回填，**不写死 width**）
    - 内容区域：`width: auto; min-width: 0;`
 
 **正确实现方式**：
@@ -795,10 +988,10 @@ Hover 时：
   max-width: none; /* 不限制最大宽度 */
 }
 
-/* 封面图 - 固定宽度 + 固定比例 */
+/* 封面图 - 高度跟内容列、宽度由 16:9 反推（需脚本回填，见「封面尺寸推导规则」） */
 .card-horizontal .cover-img {
-  width: 200px; /* 可调整 */
-  aspect-ratio: 16 / 9; /* 或 3/1 */
+  height: 100%;
+  aspect-ratio: 16 / 9;
   flex-shrink: 0; /* 防止压缩 */
 }
 
@@ -817,17 +1010,25 @@ Hover 时：
 /* ❌ 错误：固定高度 */
 .cover-img { width:200px; height:180px; } /* 不符合比例规范 */
 
+/* ❌ 错误：水平布局写死封面宽度（2026-10-21 起禁止） */
+.card-horizontal .cover-img { width: 200px; aspect-ratio: 16 / 9; }
+/* 封面高度脱离内容列；窄档把文字列压到不可用 */
+
+/* ❌ 错误：只靠 CSS 让封面跟随内容列高 */
+.card-horizontal .cover-img { height: 100%; aspect-ratio: 16 / 9; }
+/* grid/flex auto 轨道循环依赖只迭代一次不收敛，封面会比内容列矮、内容撑爆卡底 */
+
 /* ❌ 错误：水平布局使用竖向占位符 */
 <div class="cover-placeholder" style="writing-mode:vertical-lr;">文档</div>
 ```
 
 **正确示例**：
 ```css
-/* ✅ 正确：垂直布局使用 16:9 */
-.card-cover .cover-img { aspect-ratio: 16 / 9; }
+/* ✅ 正确：垂直布局使用 16:9，宽铺满 → 高反推 */
+.card-cover .cover-img { width: 100%; aspect-ratio: 16 / 9; }
 
-/* ✅ 正确：水平布局使用 3:1 */
-.card-horizontal .cover-img { aspect-ratio: 3 / 1; }
+/* ✅ 正确：水平布局使用 16:9，高跟内容列 → 宽反推（脚本回填） */
+.card-horizontal .cover-img { height: 100%; aspect-ratio: 16 / 9; flex-shrink: 0; }
 ```
 
 **兼容性说明**：
@@ -841,6 +1042,11 @@ Hover 时：
 **问题描述**：并非所有卡片都显示 Footer 操作按钮，按钮显示取决于跳转方式的数量。
 
 **硬性约束**：
+
+> 🔴 **2026-10-21 裁定：Footer 是灵活可选的段，不是默认存在的段**
+> - cover + vertical 与 cover + horizontal **默认无操作区**（整卡单跳转）；需要多交互时，再把 Footer 加在现有位置——vertical 加在内容区下方，horizontal 加在右侧内容列的尾部。
+> - 结构统一为「封面区 + 内容区 + 操作区（可选）」三段式，差异只在交互模式：**单跳转**（整卡即链接、无操作区）/ **多交互**（操作区放 OButton 按钮组）。
+> - 带操作区时 **Body 下内边距归 0**，由 Footer 上内边距单独承担「描述→按钮」间距；**Body 下与 Footer 上不得叠加**（叠加会变 48px）。
 
 **场景 A：单一跳转方式（无 Footer 按钮）**
 - 卡片整体可点击，直接触发跳转/操作
@@ -879,6 +1085,17 @@ Hover 时：
 </div>
 ```
 
+**断点行为（2026-10-21 新增；2026-10-23 补 icon 专项）**
+
+| 断点 | 操作区（Footer）规则 | 覆盖范围 |
+|------|---------------------|---------|
+| ≥841px | 按交互模式决定（单跳转无 / 多交互有） | 全部类型 |
+| 601~840px | **icon 类型一律不显示**，退化为纯展示；cover / full-cover 按交互模式 | 仅 `icon` 类型 |
+| **≤600px** | **一律不显示**，卡片退化为纯展示 | **所有类型**（cover / icon / full-cover）× **两种布局** |
+
+> ⚠️ **`≤600px` 去掉操作区的实现陷阱**：用 `display: none` 隐藏 footer 时，`:has(.footer)` 选择器**仍然命中**，若「带操作区时 Body 下归 0」的规则靠 `:has()` 实现，Body 下会被压成 0、导致「描述文字底 → 卡片底」= 0。必须显式把 Body 下内边距**恢复为该档原值**（340~600px 档为 12px）。
+> ✅ **icon 类型无此陷阱**：icon 的间距全部由容器 padding 与 margin 承担（无 `:has()` 依赖），footer 隐藏后各段间距自动回落到容器 padding，不需要额外恢复规则。
+
 **决策流程图**：
 ```
 判断跳转方式数量
@@ -892,6 +1109,10 @@ Hover 时：
     ├── 列出所有按钮（按优先级排序）
     ├── .card 无 onclick
     └── 按钮独立绑定事件
+
+断点修正（后置于上述判断）
+└── 视口 ≤600px → 无论上述结果如何，一律不显示 Footer
+    └── 并把 Body 下内边距恢复为该档原值（勿依赖 :has()）
 ```
 
 ---
@@ -1032,6 +1253,54 @@ Hover 时：
 
 ---
 
+#### 规则 8：卡片文本行数上限（按断点分档，超出末尾 `...`）
+
+> 🔴 **适用范围：所有 OCard 实例（cover / icon / full-cover），无例外。**
+
+**硬性约束（分档表）**：
+
+| 文本元素 | ≥841px | ≤840px（601~840px / 340~600px） |
+|---------|--------|------------------------------|
+| 卡片标题 | **2 行** | **1 行** |
+| 卡片描述 / 正文 | **3 行** | **2 行** |
+
+> 即：宽屏（PC / Pad 横屏）标题 2 行、描述 3 行；**窄屏两档（Pad 竖屏 + Phone）标题收紧为 1 行、描述收紧为 2 行**。三档宽屏同值，两档窄屏同值。
+
+**正确实现（line-clamp 四件套，缺一不可）**：
+
+```css
+/* 基准：≥841px —— 标题 2 行 / 描述 3 行 */
+.ocard__title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;          /* ⛔ 缺这条省略号不出现、文字直接溢出 */
+}
+.ocard__desc {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+}
+/* ≤840px：标题 1 行 / 描述 2 行（只改 line-clamp 数值，四件套其余三条沿用） */
+@media (max-width: 840px) {
+    .ocard__title { -webkit-line-clamp: 1; }
+    .ocard__desc  { -webkit-line-clamp: 2; }
+}
+```
+
+**为什么窄屏要收紧**：窄屏下卡片宽度可能只有 150px（两列）甚至更窄，2 行标题会把卡片撑得过高、单屏可见卡片数骤降；标题收紧到 1 行 + 描述 2 行可在有限高度内保留更多卡片。
+
+**为什么必须有这条约束**：卡片通常以多列横排/栅格出现，标题或描述一旦超行就会把该卡撑高，**同行其他卡片被拉成不同高度**，整行卡片底边参差不齐；在 `align-items: stretch` 的 flex 行里更会连带改变封面图比例区域的高度。行数封顶后卡片高度由内容上限决定，不再随文案长度漂移。
+
+**注意事项**：
+- 四件套必须齐全——`display: -webkit-box` + `-webkit-box-orient: vertical` + `-webkit-line-clamp: N` + `overflow: hidden`。只写 `-webkit-line-clamp` 而漏 `overflow: hidden` 是最常见错误，表现为「没有省略号、文字直接溢出卡片」
+- `-webkit-line-clamp` 会与 `display: flex` 冲突：若标题元素本身需要横排图标/标签，须**外层 flex 负责横排、内层 span 包文字并承载 line-clamp**（与 `floors/navigation-dropdown-categorized.md` §踩坑 #13 同一解法）
+- 行数上限是**截断**，不是「预留高度」。若产品要求文案 1 行时也占满 2 行空间以免布局抖动，另加 `min-height = N × 行高`，**不要**因此把 `-webkit-line-clamp` 数值改小
+- full-cover 卡片的标题/正文同样受本规则约束（文字叠在封面上，超行会压住封面主体）
+
+---
+
 ### 交互设计原则
 
 > ✨ **设计要点**：
@@ -1052,7 +1321,7 @@ Hover 时：
 
 | 使用场景 | 字号 Token | 行高 Token | 字重 Token | 字号值 | 行高值 |
 |---------|-----------|-----------|-----------|-------|-------|
-| Header 标题 | `font_size-h3` | `line_height-h3` | `font_weight-bold` | 22px | 30px |
+| Header 标题 | `font_size-h3` | `line_height-h3` | `font_weight-semibold` | 22px | 30px |
 | Body 正文 | `font_size-text1` | `line_height-text1` | `font_weight-regular` | 16px | 24px |
 | Footer 按钮 | `font_size-text1` | `line_height-text1` | `font_weight-regular` | 16px | 24px |
 
@@ -1074,21 +1343,24 @@ OCard（FRAME，自适应宽高）
 │
 ├── [Header 头部 FRAME]（自适应宽/固定宽）
 │   autoLayoutPadding: 见内边距规格
-│   autoLayoutDirection: HORIZONTAL / VERTICAL
+│   autoLayoutDirection: HORIZONTAL（horizontal）/ VERTICAL（vertical）
 │   │
-│   ├── [封面图片 IMAGE]（cover 类型）
-│   │     width: 自适应（vertical）/ 固定（horizontal）
-│   │     height: 固定比例或自适应
-│   │   或 [图标容器 FRAME]（icon 类型）
+│   ├── [封面图片 IMAGE]（cover 类型，Header 即封面，无标题同层）
+│   │     width: 铺满卡内容宽（vertical）/ 由高度按 16:9 反推（horizontal）
+│   │     height: 由宽度按 16:9 反推（vertical）/ 跟随内容列高（horizontal）
+│   │   或 [图标容器 FRAME]（icon 类型 · vertical：图标在标题上方，Header 为 VERTICAL）
 │   │     width/height: 32px（icon_size-l）
 │   │     cornerRadius: 4px
 │   │     fill: color-primary1-light
 │   │     └── [图标 Icon INSTANCE]
 │   │           fill: color-primary1
 │   │
-│  └── [标题文字 PARAGRAPH]
+│  └── [标题文字 PARAGRAPH]（cover 的 horizontal：标题在 Body 内，Header 只有封面）
 │         font: font_family Bold | font_size-h3
 │         fill: color-info1
+│
+│  ⚠️ icon + horizontal：图标**移出 Header**，作为卡片第一个子元素与 [Body 内容区] 并排（横向 12px），
+│     Header 结构仅适用于 cover 与 icon + vertical；详见「icon 类型排列方式」小节的 DOM 结构
 │
 ├── [Body 内容区 FRAME]（自适应宽高）
 │   autoLayoutPadding: 见内边距规格
@@ -1096,7 +1368,7 @@ OCard（FRAME，自适应宽高）
 │         font: font_family Regular | font_size-text1
 │         fill: color-info3
 │
-└── [Footer 底部 FRAME]（自适应宽/固定宽）
+└── [Footer 底部 FRAME]（可选 · 自适应宽/固定宽）  ← 单跳转卡无此节点
     autoLayoutPadding: 见内边距规格
     autoLayoutDirection: HORIZONTAL
     └── [操作按钮 OButton INSTANCE...]
@@ -1105,8 +1377,9 @@ OCard（FRAME，自适应宽高）
 **type=full-cover 层级结构**（封面即卡片背景）
 
 ```
-OCard（full-cover，FRAME，自适应宽高）
+OCard（full-cover，FRAME）
 │  cornerRadius: 外档（radius_control-l，默认基准 4px）
+│  aspect-ratio: 16 / 9（或 3 / 1）   ← 宽由栅格定，高由宽按比例反推（整卡即图片）
 │  background: 封面图铺满整卡（无独立内层圆角）
 │  overflow: hidden（供封面 hover 缩放裁剪）
 │
@@ -1115,26 +1388,27 @@ OCard（full-cover，FRAME，自适应宽高）
     autoLayoutDirection: VERTICAL
     │
     ├── [Head 行 FRAME]（HORIZONTAL）
-    │   ├── [图标槽 FRAME] 32px / cornerRadius 内档（radius_control-s）/ fill: color-fill2
+    │   ├── [图标槽 FRAME]（可选）32px / cornerRadius 内档（radius_control-s）/ fill: color-primary1-light
     │   │     └── [图标 Icon] fill: color-primary1
-    │   ├── [标题文字 PARAGRAPH]
+    │   ├── [标题文字 PARAGRAPH]（必选）
     │   │     font: font_family Bold | font_size-h3
     │   │     fill: color-info1
-    │   └── [徽标 FRAME] 高 20px / cornerRadius 100px / fill: color-primary1
-    │         └── [徽标文字] font_size-tip2 / fill: color-white
+    │   └── [OTag INSTANCE]（可选，标题之后）← 调用 tag.md 规范，卡片不定义其样式
     │
-    ├── [正文文字 PARAGRAPH]
+    ├── [正文文字 PARAGRAPH]（必选）
     │     font: font_family Regular | font_size-text1
     │     fill: color-info3
-    │
-    └── [内容区 FRAME]（可选，如界面示意）
-          cornerRadius: 内档（radius_control-s）
-          fill: color-fill2
-          effects: shadow-1
 ```
 
 > 📌 **结构要点**：full-cover 没有独立 Header 图片节点——封面挂在卡片根节点的 background 上，
-> 所有内容（图标/标题/徽标/正文/内容区）都排在同一个「内容层」里，靠 padding 与封面边缘保持距离。
+> 所有内容（图标 / 标题 / Tag / 正文）都排在同一个「内容层」里，靠 padding 与封面边缘保持距离。
+> **节点可选性（2026-10-23 用户裁定）**：内容层四类节点中**只有标题与正文必选**——**图标槽非必选**、**标题后的 Tag 非必选**；
+> Tag 是 [OTag](./tag.md) 组件实例（规格、变体、颜色全部遵循 tag.md），**禁止自创徽标样式**（规则 4）。
+> **内容层只有图标 / 标题 / Tag / 正文四类节点，无「界面示意区」等内容区节点**（同日裁定：
+> full-cover 的定义就是卡片内部整幅图片填充 + 文字层叠于封面上层；旧版从 opendesign-home.html 楼层带入的
+> visual 预览块属业务内容而非组件规范节点，已移除）。
+> **卡片高度由宽度按 16:9 / 3:1 反推，不由内容撑高**（同日裁定，见「full-cover 规格」硬约束）——
+> 内容层（padding 28/24/24 + 标题 ≤2 行 + 描述 ≤3 行）必须在该比例高度内放得下，禁止溢出。
 > 圆角取「外档 / 内档」两档（默认基准均为 4px，实际按社区 token），形成外大一档、内小一档的层次。
 
 ---
@@ -1185,12 +1459,15 @@ OCard（full-cover，FRAME，自适应宽高）
 - **深色模式**：背景色自动切换为深色值，确保在深色背景上可见
 - **三段式结构**：Header、Body、Footer 可根据场景选择性使用，不必全部包含
 - ⚠️ **Footer 操作按钮排列顺序（硬约束）**：Footer 内多个元素并排时，**操作按钮（OButton / 链接）必须排在左侧，辅助信息（版本号、日期、meta 等）排在右侧**。禁止将操作按钮放在右侧，无论 justify-content 如何设置。
-- ⚠️ **Footer 左右边距须与 Body 对齐（硬约束）**：Footer 的左右内边距必须与 Body 保持一致——在"容器 8px + Body 额外 8px = 总计 16px"的模型下，Footer 也需要额外 `padding: 0 8px`，使操作按钮与正文文字左右对齐。禁止 Footer 左右无内边距导致内容顶到容器边缘。
+- ⚠️ **Footer 左右边距须与 Body 对齐（硬约束）**：Footer 的左右内边距必须与 Body **取相同的值**（当前单层口径下 Body 为 16px，故 Footer 也写 `padding: 0 16px`），使操作按钮与正文文字左右对齐——两者叠加同一个容器 8px 后实际到卡片边缘均为 24px。禁止 Footer 左右无内边距导致内容顶到容器边缘。**注意**：这条约束的本质是"Footer 左右内边距 = Body 左右内边距"，不是某个固定数值；改 Body 左右值时 Footer 必须同步改，否则按钮与正文会左右错位。
 - ⚠️ **Footer 操作按钮使用 OButton medium text 变体（硬约束）**：卡片 Footer 内的操作按钮必须使用 **OButton size=medium, Variant=text**。关键规格：高度 32px、padding=0（无水平内边距）、文字色 `grey-14`（Light: `rgb(0,0,0)` **黑色**）、无背景无边框。**禁止使用品牌蓝 `#002FA7` / `--o-color-primary1` 作为 text 变体文字色**——蓝色是 outline/solid 变体的颜色，text 变体始终为黑色。
 - ⚠️ **full-cover 封面即背景，不设内层圆角（硬约束）**：full-cover 的封面铺满整卡并直接作为卡片 background，圆角只由卡片根节点的**外档**（`radius_control-l`）统一裁剪。禁止给封面再包一层带**内档**（`radius_control-s`）圆角的容器——那会退化成普通 `cover` 的"分区封面"语义。
-- ⚠️ **full-cover 圆角分层（硬约束）**：full-cover 卡内元素（图标槽、界面示意区、内容区）统一取**内档**（`radius_control-s`），比卡片外圆角低一档，形成「外大一档 / 内小一档」的层次。两档默认基准均为 4px，实际取值按社区 token（见「圆角基准说明」）。
+- ⚠️ **full-cover 整卡必须保持 16:9 / 3:1 横向比例（硬约束，2026-10-23 用户裁定）**：full-cover 整卡即图片，故卡片**自身**遵守规则 5——比例只取 `16:9`（默认）或 `3:1`（超宽形态）；**宽度按栅格定**（单列 / 跨双列 / 跨整行），**高度 = 宽度 ÷ 比例**（`aspect-ratio` 反推）。**禁止内容撑高、禁止写死高度、禁止竖向比例**。内容层（padding 28/24/24 + 标题 ≤2 行 + 描述 ≤3 行）必须在比例高度内放得下——最窄场景卡宽 312px → 16:9 高 175.5px ≥ 内容层 144px；若取 `3:1` 高仅 104px 放不下，必须回到 16:9 或缩短文案，禁止溢出。
+- ⚠️ **full-cover 内容层节点可选性（硬约束，2026-10-23 用户裁定）**：full-cover 内容层四类节点中**只有标题与正文必选**——**图标槽非必选**（无图标时标题直接作为 Head 行首元素）、**标题后的 Tag 非必选**。需要状态标记时在标题之后加一个 **OTag 组件实例**，其变体 / 尺寸 / 颜色 / 间距**严格遵循 [tag.md](./tag.md)**，禁止在 Card 规范或实现里自创徽标 / Badge 样式（规则 4）。Tag 位置为 **Head 行内、标题之后**（跟随内容流），不适用 cover 类型「右上角 absolute」口径——full-cover 整卡即图片、无独立封面区。
+- ⚠️ **full-cover 圆角分层（硬约束）**：full-cover 卡内元素（图标槽等）统一取**内档**（`radius_control-s`），比卡片外圆角低一档，形成「外大一档 / 内小一档」的层次。两档默认基准均为 4px，实际取值按社区 token（见「圆角基准说明」）。
 - ⚠️ **full-cover 单交互禁内嵌按钮（硬约束）**：当卡片有且只有一种交互行为（如整卡跳转）时，整卡即为 `<a>` 链接，**不得再内嵌操作按钮**；悬浮反馈只通过 `shadow-2` 体现。
 - ⚠️ **full-cover 文字对比度（硬约束）**：文字叠在封面上，封面明度必须与文字色匹配——浅色/柔和彩底用 `info1`/`info3`，深色封面必须切换 `info1-inverse`/`info3-inverse`。
+- ⚠️ **卡片文本行数上限（硬约束，按断点分档）**：**≥841px** 卡片标题最多 **2 行**、描述/正文最多 **3 行**；**≤840px**（601~840px / 340~600px）标题收紧为 **1 行**、描述收紧为 **2 行**——超出末尾 `...` 截断。line-clamp 四件套 `display: -webkit-box` + `-webkit-box-orient: vertical` + `-webkit-line-clamp: N` + `overflow: hidden` 缺一不可（漏 `overflow: hidden` 则省略号不出现、文字直接溢出）。适用于 cover / icon / full-cover 全部类型，详见 Part C 硬约束规则 8。
 
 ---
 
@@ -1232,7 +1509,7 @@ OCard（full-cover，FRAME，自适应宽高）
 | Footer 内边距 | autoLayoutPadding | 待确认 |
 | 区域间距 | autoLayoutItemSpacing | 待确认 |
 | 标题字号 | fontSize | `font_size-h3`（22px） |
-| 标题字重 | fontWeight | `font_weight-bold` |
+| 标题字重 | fontWeight | `font_weight-semibold` |
 | 正文字号 | fontSize | `font_size-text1`（16px） |
 
 ---

@@ -71,9 +71,9 @@ OButton（HORIZONTAL，自适应宽度，固定高度）
 ### 组合搭配
 
 > 🔗 **常见搭配**：
-> - **主次按钮组**：`solid` + `outline` 并排，solid 在右（主操作），outline 在左（取消）
+> - **主次按钮组**：`solid` + `outline` 并排，从左到右 **solid → outline**（solid 即主操作，有且仅 1 个）——[hard-constraints §1.1](../global/hard-constraints.md) 排列优先级口径（旧文「solid 在右」与之相反，2026-10-29 验证轮修正）
 > - **操作栏**：多个 `text` 按钮横向排列，用于表格行操作（编辑 / 删除 / 查看）
-> - **表单底部**：`solid`（提交） + `outline`（重置）组合，按钮组间距通常 8–12px
+> - **表单底部**：`solid`（提交） + `outline`（重置）组合，按钮组水平间距固定 **24px**（[hard-constraints §1.1](../global/hard-constraints.md)；旧文 8–12px 与之冲突，2026-10-29 修正）
 > - **弹窗底部**：`solid`（确认） + `outline`（取消），large 或 medium 尺寸
 
 ---

@@ -794,7 +794,7 @@ Focus 状态即 Actived 状态，显示光标和清除图标。
 | # | 禁止事项 | 正确做法 | 违规等级 | 典型错误案例 |
 |---|---------|---------|---------|-------------|
 | **Z-1** | 使用非openEuler品牌色作为主色调 | 主色调必须是 **#002FA7 (rgb(0,47,167))** [Light] / **rgb(110,148,243)** [Dark] | 🔴 **致命** | 使用橙色#E6A23C、绿色等非蓝色系颜色 |
-| **Z-2** | 使用内联SVG/CSS渐变模拟搜索/清除图标 | 必须使用 `<img>` 标签引用 `assets/public icons/icon-搜索.svg` 和 `icon-关闭.svg` | 🔴 **致命** | 手写SVG path、用Unicode字符"🔍"替代 |
+| **Z-2** | 用 `<img src>` 引用图标、用 Unicode 字符"🔍"替代 | **Read `assets/public icons/icon-搜索.svg` 和 `icon-关闭.svg` 后逐属性原样内联 `<svg>`**（SKILL.md「图标处理规范」；旧文「必须 `<img>`」与 SKILL.md「禁止 `<img src>`」相反，2026-10-29 修正） | 🔴 **致命** | `<img src>`、Unicode 字符、CSS 渐变模拟、assets 有资源却手写 path |
 | **Z-3** | **只实现2种描边状态（Enabled+Actived）** | **必须实现3种：Enabled → Hover(Focus前) → Actived(Focus后)** | 🔴 **致命** | 缺少Hover态，Focus时直接跳到Actived |
 | **Z-4** | Focus时改变宽度或背景 | Focus时**只改变描边颜色**，不改变尺寸和背景 | 🟠 严重 | width从160px→240px动画 |
 | **Z-5** | 清除按钮始终显示或显示逻辑错误 | 清除按钮**仅Actived状态显示**，且仅在**有输入内容时**可见 | 🟠 严重 | Enabled态也显示清除按钮 |
@@ -806,7 +806,7 @@ Focus 状态即 Actived 状态，显示光标和清除图标。
 | # | 要求项 | 具体内容 | 参考位置 | 验证方法 |
 |---|--------|---------|---------|---------|
 | **R-1** | **品牌色系统一致性** | primary1 = #002FA7, 全局统一使用蓝色系 | [button.md](./button.md), [Appendix A](#appendix-aosearch完整token速查表) | 搜索代码中所有color值 |
-| **R-2** | **资源完整性** | 必须引用icon-搜索.svg + icon-关闭.svg（正确尺寸） | [Part F](#part-fassets-图标资源) | 检查所有`<img>`的src和width/height |
+| **R-2** | **资源完整性** | icon-搜索.svg + icon-关闭.svg（正确尺寸）必须 Read 后逐属性内联 `<svg>` | [Part F](#part-fassets-图标资源) | 检查内联 `<svg>` 的 viewBox / width / height 与属性完整性 |
 | **R-3** | **3种描边状态完整性** | Enabled(control1) → Hover(control2=#002FA7) → Actived(control3=brand-6) | [交互状态规格](#交互状态规格) 状态矩阵表 | 测试鼠标悬浮→点击聚焦的过渡 |
 | **R-4** | **搜索建议面板规范** | Actived+有文本时展开，菜单项40px高，关键词高亮(Semibold蓝)，Hover背景#E8F0FE | [下拉面板规格](#搜索建议下拉面板规格参考-odropdown-面板) | 输入文字后检查面板 |
 | **R-5** | **Token冲突区分** | 明确区分ODropdown(#F0F5FF)和OSearch(#E8F0FE)的control2-light | [Appendix A.3](#a3控制色系control-colors--交互反馈专用) | 检查CSS变量命名 |
@@ -971,7 +971,7 @@ Focus 状态即 Actived 状态，显示光标和清除图标。
     padding: 0 12px;
     background: var(--o-color-fill2-light);   /* white / grey-4 */
     border: 1px solid var(--o-color-control1);/* 默认描边: grey@0.25 */
-    border-radius: 4px;                       /* 圆角4px */
+    border-radius: var(--o-radius_control-xs);  /* 档位圆角，值随目标社区 token */
     transition: border-color 0.2s ease;       /* 仅过渡描边颜色 */
     cursor: text;
 }
@@ -1046,9 +1046,11 @@ Focus 状态即 Actived 状态，显示光标和清除图标。
 ```html
 <!-- 建议面板HTML结构 -->
 <div class="o-search" data-state="enabled">
-    <img src="../references/assets/public icons/icon-搜索.svg" alt="搜索" class="o-search__icon">
+    <!-- 图标：Read ../references/assets/public icons/icon-搜索.svg 后逐属性原样内联（禁止 <img src> 引用） -->
+    <svg class="o-search__icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><!-- Read 所得 path 等属性原样搬运 --></svg>
     <input type="text" class="o-search__input" placeholder="搜索">
-    <img src="../references/assets/public icons/icon-关闭.svg" alt="清除" class="o-search__clear">
+    <!-- 清除图标：Read ../references/assets/public icons/icon-关闭.svg 后逐属性原样内联（禁止 <img src> 引用） -->
+    <svg class="o-search__clear" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><!-- Read 所得 path 等属性原样搬运 --></svg>
     
     <!-- ⭐ 建议面板：仅Actived+有内容时显示 -->
     <div class="o-search-suggest">
@@ -1075,7 +1077,7 @@ Focus 状态即 Actived 状态，显示光标和清除图标。
     left: 0;
     width: 100%;                               /* 与搜索框同宽 */
     background: var(--o-color-fill2-light);
-    border-radius: 4px;
+    border-radius: var(--o-radius_control-xs);  /* 档位圆角，值随目标社区 token */
     box-shadow: 0 6px 24px rgba(18,20,23,0.08); /* DROP_SHADOW */
     padding: 4px;
     

@@ -63,7 +63,7 @@ ODialog（OVERLAY，全屏覆盖）
 └── [弹窗容器 FRAME]（居中定位）
       Width: 360px（small）/ 480px（medium）/ 720px（large）/ 100%（fullscreen）
       Height: 自适应（最大高度 80vh）
-      cornerRadius: 8px → Token: `radius_control-sm`
+      cornerRadius: `var(--o-radius_control-s)`（openEuler 4px / Ascend 8px——按目标社区 token）
       fill: rgb(255,255,255) → Token: `--o-color-fill2`
       boxShadow: DIALOG_SHADOW x=0 y=16 blur=48 spread=-8 rgba(0,0,0,0.12)
       autoLayout: VERTICAL
@@ -121,7 +121,7 @@ ODialog（OVERLAY，全屏覆盖）
 ### 设计稿识别指南
 
 > 🔍 **识别特征**：
-> - 浮层容器（FRAME），圆角 8px，阴影明显（blur 48px, spread -8px）
+> - 浮层容器（FRAME），圆角随目标社区 token（`--o-radius_control-s`：openEuler 4px / Ascend 8px），阴影明显（blur 48px, spread -8px）
 > - 遮罩层（RECTANGLE），半透明黑色背景（rgba(0,0,0,0.45)），100% 尺寸覆盖
 > - 三段式结构：顶部标题区（56px 高，底部分割线）+ 中间内容区（padding 24px）+ 底部操作区（64px 高，顶部分割线）
 > - 底部右侧对齐的两个 OButton 实例（取消 + 确认），间距 12px
@@ -171,7 +171,7 @@ ODialog（OVERLAY，全屏覆盖）
 |--------|-------|--------|-------|------------|-------|
 | 宽度 | 360px | 480px | 720px | 100% | — |
 | 最大高度 | 80vh | 80vh | 80vh | 100vh | — |
-| 圆角 | 8px | 8px | 8px | 0px | `radius_control-sm` |
+| 圆角 | `var(--o-radius_control-s)`（openEuler 4px / Ascend 8px，随目标社区 token） | 同左 | 同左 | 0px | `radius_control-s` |
 | 阴影 | x=0 y=16 blur=48 spread=-8 rgba(0,0,0,0.12) | 同左 | 同左 | 无 | — |
 | 内边距（整体） | 0px | 0px | 0px | 0px | — |
 
@@ -233,7 +233,7 @@ ODialog（OVERLAY，全屏覆盖）
 | 区域 | Light 模式 | Dark 模式 | Token | RGB 值 |
 |------|-----------|----------|-------|--------|
 | 容器背景 | `white` | `grey-4` | `--o-color-fill2` | rgb(255,255,255) → rgb(36,36,39) |
-| 容器圆角 | 8px | 8px | `radius_control-sm` | — |
+| 容器圆角 | `var(--o-radius_control-s)`（openEuler 4px / Ascend 8px，随目标社区 token） | 同左 | `radius_control-s` | — |
 | 容器阴影 | rgba(0,0,0,0.12) | rgba(0,0,0,0.35) | — | x=0 y=16 blur=48 spread=-8 |
 
 #### 标题区
@@ -315,7 +315,7 @@ ODialog（OVERLAY，fixed 定位，z-index: 1000）
 └── [弹窗容器 Dialog FRAME]
     GUID: 1042:20396（主容器）
     Width: 480px（medium 默认）| Height: auto（max 80vh）
-    cornerRadius: 8px → Token: `radius_control-sm`
+    cornerRadius: `var(--o-radius_control-s)`（openEuler 4px / Ascend 8px——按目标社区 token）
     fill: rgb(255,255,255) → Token: `--o-color-fill2`
     boxShadow: x=0 y=16 blur=48 spread=-8 rgba(0,0,0,0.12)
     Position: absolute, top: 50%, left: 50%, transform: translate(-50%, -50%)
@@ -453,7 +453,7 @@ ODialog（OVERLAY，fixed 定位，z-index: 1000）
 
 | 元素 | 状态 | 视觉表现 |
 |------|------|---------|
-| 弹窗容器 | Normal | 正常显示，阴影完整，圆角 8px |
+| 弹窗容器 | Normal | 正常显示，阴影完整，圆角随目标社区 token（`--o-radius_control-s`） |
 | 弹窗容器 | Loading | 内容区显示加载动画，Footer 按钮 disabled |
 | 弹窗容器 | Disabled | 整体透明度降至 0.6，所有交互元素 disabled |
 | 遮罩层 | Normal | 半透明黑色背景（rgba(0,0,0,0.45)），可点击关闭 |
@@ -580,7 +580,7 @@ ODialog（OVERLAY，fixed 定位，z-index: 1000）
 | 元素 | 属性 | 推荐变量 Token |
 |------|------|---------------|
 | 弹窗容器背景 | fill | `--o-color-fill2` |
-| 弹窗容器圆角 | cornerRadius | `radius_control-sm` |
+| 弹窗容器圆角 | cornerRadius | `radius_control-s`（值随目标社区 token） |
 | 弹窗容器阴影 | boxShadow | 自定义 DIALOG_SHADOW（非全局 Token） |
 | 遮罩层背景 | fill | `--o-color-mask` |
 | 标题区分割线 | stroke/borderColor | `--o-color-control3` @ 0.15 |

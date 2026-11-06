@@ -160,7 +160,7 @@ ODropdown-Panel（FRAME，浮层）
 | 规格项 | large | medium |
 |--------|-------|--------|
 | 与触发按钮间距 | 4px | 4px |
-| 面板圆角 | 4px（`radius_control-xs`） | 4px |
+| 面板圆角 | `var(--o-radius_control-xs)`（openEuler 4px，随目标社区 token） | 同左 |
 | 面板内边距（四周） | 4px | 4px |
 | 阴影 | DROP_SHADOW x=0 y=6 blur=24 spread=0 rgba(18,20,23,0.08) | 同 large |
 | 每菜单项高度 | 40px（`control_size-l`） | 32px（`control_size-m`） |
@@ -370,7 +370,7 @@ ODropdown 组件支持 **5 种交互状态**：**默认(Default)**、**悬浮(Ho
 > - 面板内菜单项高度：L 尺寸 = 40px / M 尺寸 = 32px
 > - 菜单项内边距：上下 8px，左右 12px
 > - 菜单项间距：0px（hover背景色块上下各减1px放量）
-> - 面板圆角：4px（`--o-radius-control-xs`）
+> - 面板圆角：`var(--o-radius_control-xs)`（openEuler 4px，随目标社区 token）
 > - 面板阴影：`DROP_SHADOW x=0 y=6 blur=24 spread=0 rgba(18,20,23,0.08)`
 > - 面板与触发按钮间距：4px
 
@@ -414,7 +414,7 @@ ODropdown 组件支持 **5 种交互状态**：**默认(Default)**、**悬浮(Ho
 
 - **点击触发**：点击 ODropdown 按钮，按钮下方 4px 处渲染浮层面板，按钮图标切换为 `icon-上箭头.svg`
 - **面板定位**：浮层位于触发按钮正下方，垂直间距 4px，宽度与按钮一致，高度随选项数量动态伸缩
-- **面板样式**：圆角 4px（`--o-radius-control-xs`），白色背景（`--o-color-fill2`），卡片投影 `DROP_SHADOW x=0 y=6 blur=24 rgba(18,20,23,0.08)`，四周内边距 4px
+- **面板样式**：圆角 `var(--o-radius_control-xs)`（openEuler 4px，随目标社区 token），白色背景（`--o-color-fill2`），卡片投影 `DROP_SHADOW x=0 y=6 blur=24 rgba(18,20,23,0.08)`，四周内边距 4px
 - **菜单项**：高度 large=40px / medium=32px（`--o-control-size-l` / `--o-control-size-m`），内边距上下 8px 左右 12px，文字颜色 `--o-color-info1`，hover 背景 `--o-color-control2-light`
 - **选项点击**：选中后面板关闭，按钮图标恢复为 `icon-下箭头.svg`，按钮文字更新为选中项
 - **收起**：再次点击按钮或点击面板外区域，面板收起，图标恢复下箭头
@@ -524,7 +524,7 @@ ODropdown 组件支持 **5 种交互状态**：**默认(Default)**、**悬浮(Ho
 | **R-3** | **Variant正确使用** | solid=实心填充, outline=描边, **text=无背景无描边(最轻)** | [Part A 变体说明](#变体说明) | 检查CSS中background/border属性 |
 | **R-4** | **Size正确映射** | large=40px, medium=32px, **small=28px**, Mb=40px | [Part B 规格速查](#part-b规格速查参考) | 测量实际渲染高度 |
 | **R-5** | **交互状态完整性** | 必须实现Default/Hover/Active/Focus/Selected/Disabled + 展开收起动画 | [Part C 交互与状态](#part-c交互与状态) | 测试每个状态的视觉效果 |
-| **R-6** | **面板规格合规性** | 间距4px+阴影DROP_SHADOW+圆角4px+菜单项正确高度 | [Part C 下拉面板](#下拉面板) | 对照规格表逐项检查 |
+| **R-6** | **面板规格合规性** | 间距4px+阴影DROP_SHADOW+圆角`var(--o-radius_control-xs)`+菜单项正确高度 | [Part C 下拉面板](#下拉面板) | 对照规格表逐项检查 |
 
 ### 🎯 生成前必读Checklist（Pre-flight Checklist）
 
@@ -545,7 +545,7 @@ ODropdown 组件支持 **5 种交互状态**：**默认(Default)**、**悬浮(Ho
 #### 阶段3：关键规格验证（耗时约5分钟）
 - [ ] 如果是text变体 → 确认：height=28px, padding=5px 0, border-radius=**100px**, hover只改文字色
 - [ ] 如果是small尺寸 → 确认：箭头图标**24×24px**（不是16px！）
-- [ ] 确认面板：top=calc(100%+4px), shadow=x0y6blur24, border-radius=4px
+- [ ] 确认面板：top=calc(100%+4px), shadow=x0y6blur24, border-radius=`var(--o-radius_control-xs)`（值随目标社区 token）
 - [ ] 确认菜单项Hover背景=#F0F5FF
 
 #### 阶段4：生成后自检（耗时约3分钟）
@@ -782,7 +782,7 @@ primary4 (#B3CFFF): 极浅蓝色   - 用于禁用态
 |--------|-----|-------|------|
 | **与触发元素间距** | **4px** (垂直方向) | — | 按钮下方4px |
 | **面板宽度** | 与触发按钮同宽 | — | 自适应 |
-| **面板圆角** | **4px** | `radius_control-xs` | 统一圆角 |
+| **面板圆角** | **`var(--o-radius_control-xs)`** | `radius_control-xs`（openEuler 4px，随目标社区 token） | 统一圆角 |
 | **面板内边距** | **4px** (四周) | — | 统一padding |
 | **面板背景(Light)** | **#FFFFFF** (纯白) | `--o-color-fill2` | 白色背景 |
 | **面板背景(Dark)** | **rgb(36,36,39)** (深灰) | `--o-color-fill2` (Dark) | 深色背景 |
@@ -797,7 +797,7 @@ primary4 (#B3CFFF): 极浅蓝色   - 用于禁用态
     left: 0;
     min-width: 160px;           /* 最小宽度 */
     background: var(--o-color-fill2-light);
-    border-radius: 4px;
+    border-radius: var(--o-radius_control-xs);  /* 档位圆角，值随目标社区 token */
     box-shadow: 0 6px 24px rgba(18, 20, 23, 0.08);
     padding: 4px;
     
